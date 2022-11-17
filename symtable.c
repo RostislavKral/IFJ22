@@ -7,7 +7,7 @@
  */
 
 
-#include "sym_table_htab.h"
+#include "symtable.h"
 
 
 struct htab_item;
