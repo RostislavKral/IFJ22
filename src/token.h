@@ -12,15 +12,17 @@ enum T_TOKEN_TYPE
     LPAR,           //  5
     RPAR,           //  6
     OPERATOR,       //  7
-    ISEOF          //  8
+    ISEOF,          //  8
+    PROG_START,     //  9   <?php
+    SEMICOLON,      //  10
     //TBD
 };
 
 
 enum T_OPERATOR {
-    EQUALS,     // 0
-    PLUS,       // 1
-    MINUS,      //
+    EQUALS,     //  0
+    PLUS,       //  1
+    MINUS,      //  2
 };
 
 

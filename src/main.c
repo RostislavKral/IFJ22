@@ -5,6 +5,7 @@
 #include "dyn_string.h"
 #include "lexer.h"
 #include "token.h"
+#include "syntax_and_semantic_analyzer.h"
 
 
 
