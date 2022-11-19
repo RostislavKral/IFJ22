@@ -3,12 +3,14 @@
 //
 
 #include "lexer.h"
+#include "token.h"
+#include "dyn_string.h"
 
-
-#include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include "utilities/dyn_string.h"
+#include <stdlib.h>
+
+
 
 #define bool int
 #define true 1
@@ -33,10 +35,12 @@ struct T_TOKEN make_token()
 
 
 
-struct T_TOKEN get_next_token(FILE *file)
+TOKEN_T * get_next_token(FILE *file)
 {
-    struct T_TOKEN token;
-    enum T_STATE state = START;
+    TOKEN_T * token;
+    token = malloc(sizeof(TOKEN_T));
+
+    enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof (char));
     char tmp;
@@ -46,26 +50,25 @@ struct T_TOKEN get_next_token(FILE *file)
 
     str.str = malloc (str.max_len * sizeof(char));
 
-
     while(true){
 
         tmp = getc(file);
         *edge = tmp;
         if(*edge == EOF){
-            token.type = ISEOF;
-            token.name = NULL;
+            token->type = ISEOF;
+            token->name = NULL;
             return token;
         }
 
         switch (state)
         {
-            case START:
+            case ST_START:
                 if (*edge == '$') {
-                    state = VAR_PREFIX;
-                    token.type = TOKEN_ID;
+                    state = ST_VAR_PREFIX;
+                    token->type = TOKEN_ID;
                 }
 
-                if(*edge == '=') state = OP_ASSIGN;
+                if(*edge == '=') state = ST_OP_ASSIGN;
                 if(*edge == 'f') {
                     int isFunction = 1;
                     char c;
@@ -76,8 +79,8 @@ struct T_TOKEN get_next_token(FILE *file)
                         if(!isFunction) {
                             exit(1);
                             /*state = ERROR;
-                            token.type = ERROR;
-                            token.name = NULL;
+                            token->type = ERROR;
+                            token->name = NULL;
                             break; */
                         }
 
@@ -85,40 +88,40 @@ struct T_TOKEN get_next_token(FILE *file)
                     }
 
                     if(fgetc(file) != ' '  ) exit(1);
-                    state = FUNC;
+                    state = ST_FUNC;
 
                     printf("\n\nIs function: %d\n\n", isFunction);
                 }
 
 
-            case VAR_PREFIX:
-                if(isalnum(*edge) && state ==  VAR_PREFIX) {
+            case ST_VAR_PREFIX:
+                if(isalnum(*edge) && state ==  ST_VAR_PREFIX) {
                     str_conc(&str, edge);
-                    state = VAR;
+                    state = ST_VAR;
                 }
                 break;
-            case VAR:
+            case ST_VAR:
 
                 if(*edge != ' ' && isalnum(*edge)){
                     str_conc(&str, edge);
                      continue;
                 }
-                token.type = TOKEN_ID;
-                token.name = str.str;
+                token->type = TOKEN_ID;
+                token->name = str.str;
 
                 return token;
-            case OP_ASSIGN:
-                token.type = ASSIGN;
-                token.name = NULL;
+            case ST_OP_ASSIGN:
+                token->type = ASSIGN;
+                token->name = NULL;
                 return token;
-            case FUNC:
-                token.type = FUNC_ID;
-                token.name = NULL;
+            case ST_FUNC:
+                token->type = FUNC_ID;
+                token->name = NULL;
                 return token;
 
-            case ERROR:
+            case ST_ERROR:
                 break;
-            case LITERAL:
+            case ST_LITERAL:
                 break;
         }
 
