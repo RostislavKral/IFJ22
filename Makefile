@@ -1,3 +1,14 @@
+#------------------------------------------
+#@author	: Sniehovskyi Nikita, xsnieh00
+#			: FIT VUTBR.CZ
+#date		: 19.11.2022
+#project	: IFJ project
+#file		: Makefile
+#------------------------------------------
+
+# !!! Everything in src folder will be compiled !!!
+
+
 CC = gcc
 CFLAGS = --std=c11 -Wextra -Wall
 
@@ -23,7 +34,7 @@ rm:
 
 
 
-	
+
 
 
 prep:
