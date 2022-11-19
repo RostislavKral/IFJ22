@@ -93,6 +93,13 @@ TOKEN_T * get_next_token(FILE *file)
                     printf("\n\nIs function: %d\n\n", isFunction);
                 }
 
+                /* This was added by SniehNikita */
+                if(isdigit(*edge)) {
+                    state = ST_INT_LITERAL;
+                    ungetc(*edge, file);
+                }
+                /* ----------------------------- */
+
 
             case ST_VAR_PREFIX:
                 if(isalnum(*edge) && state ==  ST_VAR_PREFIX) {
@@ -121,8 +128,22 @@ TOKEN_T * get_next_token(FILE *file)
 
             case ST_ERROR:
                 break;
-            case ST_LITERAL:
+            
+            /* This was added by SniehNikita */
+            case ST_INT_LITERAL:
+                if (isdigit(*edge)) {
+                    // TODO might be overflow if too big number
+                    token->value.int_val = token->value.int_val * 10 + (*edge - '0');
+                } /* else if (*edge == '.') {
+                    // TODO float state
+                } */ else {
+                    ungetc(*edge, file);
+                    token->type = LITERAL;
+                    token->value.type = 0;
+                    return token;
+                }
                 break;
+            /* ----------------------------- */
         }
 
 

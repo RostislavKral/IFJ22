@@ -17,7 +17,9 @@ enum T_STATE {
     ST_OP_ASSIGN,
     ST_FUNC,
     ST_ERROR,
-    ST_LITERAL,
+    ST_INT_LITERAL,
+    ST_DOUBLE_LITERAL,
+    ST_STRING_LITERAL,
 };
 
 TOKEN_T * get_next_token(FILE* file);

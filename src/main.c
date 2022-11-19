@@ -23,7 +23,7 @@ void WriteToken(TOKEN_T * token);
 
 
 int main() {
-    FILE *file = fopen("php_examples/file.php", "r");
+    FILE *file = fopen("php_examples/var_assign.php", "r");
 
     TOKEN_T * token = NULL;
 
