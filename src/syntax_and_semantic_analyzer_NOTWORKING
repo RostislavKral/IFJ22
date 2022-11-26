@@ -1,0 +1,434 @@
+/**
+ * @file syntax_and_semantic_analyzer.c
+ * @author Nikita Sniehovskyi xsnieh00
+ * @brief syntax and semantiv analyzer implementation
+ * @version 0.1
+ * @date 2022-11-19
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include "lexer.h"
+
+#include "syntax_and_semantic_analyzer.h"
+
+
+#define DEBUG 1
+
+
+
+RULE_LIST_T * rule_list = NULL;
+
+// Data structure destructor
+void SNS_destroy();
+
+int SNS_Create_tree(char *filename);
+
+void WriteToken(TOKEN_T * token);
+
+
+
+
+
+
+int SNS_start(char *filename) {
+    rule_list = malloc(sizeof(RULE_LIST_T));
+    rule_list->length = 0;
+    rule_list->first_element = NULL;
+    rule_list->cur_element = NULL;
+    rule_list->function_declaration = NULL;
+
+    int err = 0;
+    err = SNS_Create_tree(filename);
+
+    if (!err) {
+        //TODO stop program
+    }
+
+    SNS_destroy();
+    return 0;
+}
+
+
+
+int SNS_Create_tree(char *filename) {
+    FILE *file = fopen(filename, "r");
+    TOKEN_T * token = NULL;
+
+    int res = 0;
+    RULE_T * new_rule = NULL;
+    do {
+        // TODO redo
+        if (token != NULL) { free(token); token = NULL; }
+
+        token = get_next_token(file);
+        
+
+        switch (res) {
+        case 0:         // New line
+            new_rule = malloc(sizeof(RULE_T));
+            new_rule->type = T_UNDEFINED;
+            break;
+        
+        case 1:         // Continue previous command
+
+            break;
+
+        case 2:         // Ready
+            if (rule_list->cur_element == NULL) {
+                rule_list->cur_element = malloc(sizeof(RULE_LIST_ELEMENT_T));
+                rule_list->cur_element->rule_pointer = new_rule;
+                rule_list->cur_element->next_rule = NULL;
+
+                rule_list->first_element = rule_list->cur_element;
+            } else {
+                rule_list->cur_element->next_rule = malloc(sizeof(RULE_LIST_ELEMENT_T));
+                rule_list->cur_element->next_rule->rule_pointer = new_rule;
+                rule_list->cur_element->next_rule->next_rule = NULL;
+
+                rule_list->cur_element = rule_list->cur_element->next_rule;
+            }
+
+            new_rule = malloc(sizeof(RULE_T));
+            new_rule->type = T_UNDEFINED;
+            break;
+
+        default:
+            printf("Error in SNS_Create_tree\n");
+            break;
+        }
+
+        res = SNS_Create_rule(token, new_rule);
+
+        if (DEBUG) { WriteToken(token); }
+
+        // TODO remove
+    } while (token->type != ISEOF);
+
+    // TODO remove
+    free(token); token = NULL;
+    fclose(file);
+
+    return 0;
+}
+
+
+
+
+
+int SNS_Create_rule(TOKEN_T * token, RULE_T * rule) {
+    switch (rule->type) {
+        case T_UNDEFINED:
+            switch (token->type) {
+                case SEMICOLON:     // whole line is semicolon
+                    free(rule);
+                    return 0;
+                    break;
+
+                case TOKEN_ID:      // [var] ...
+                    rule->type = T_ASSIGN_VALUE;
+                    rule->rule.rule_av.token_id_token = token;
+                    rule->rule.rule_av.expression = NULL;
+                    rule->rule.rule_av.semicolon = NULL;
+                    rule->rule.rule_av.assign_token = NULL;
+                    return 1;
+
+                case ISEOF:
+                    return -1;
+                default:
+                    break;
+            }
+            break;
+
+        case T_ASSIGN_VALUE:
+            switch (token->type) {
+
+                case ASSIGN:
+                    if (rule->rule.rule_av.assign_token == NULL) {
+                        rule->rule.rule_av.assign_token = token;
+                    } else {
+                        printf("%d: Double assign\n", __LINE__);
+                        return -1;
+                    }
+                    break;
+                /* =><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><= */
+
+                case SEMICOLON:
+                    if (rule->rule.rule_av.assign_token != NULL) {
+                        if (rule->rule.rule_av.expression != NULL) {
+                            // Ready
+                            rule->rule.rule_av.semicolon = token;
+                            SNS_Check_syntaxe(rule);
+                            return 2;
+
+                        } else {
+                            printf("%d: Expression expected\n", __LINE__);
+                            return -1;
+                        }
+                    } else {
+                        printf("%d: Expected assign token\n", __LINE__);
+                        return -1;
+                    }
+
+                    return 2;
+                    break;
+                /* =><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><= */
+
+                case LITERAL:
+                case OPERATOR:
+                case TOKEN_ID:
+                    SNS_Fill_expression(token, rule);
+                    break;
+
+                default:
+                    printf("%d: Unexpected token in assign command (%d)\n", __LINE__, token->type);
+                    return -1;
+                    break;
+            }
+            
+
+            return 1; // take next
+            break;
+        
+        default:
+            break;
+    }
+
+    printf("Undefined outcome in SNS_Create_rule\n");
+    return -1;
+}
+
+
+
+
+
+int SNS_Fill_expression(TOKEN_T * token, RULE_T * rule) {
+    R_EXPRESSION * expr = rule->rule.rule_av.expression;
+    if (expr == NULL) {
+        expr = malloc(sizeof(R_EXPRESSION));
+        expr->expr_left_token = NULL;
+        expr->expr_right_token = NULL;
+        expr->operator_token = NULL;
+        expr->value_left_token = NULL;
+        expr->value_right_token = NULL;
+    }
+
+    switch (token->type) {
+        case LITERAL:
+                if (expr->expr_left_token == NULL) {
+                    if (expr->value_left_token == NULL) {
+                        expr->value_left_token = malloc(sizeof(R_VALUE));
+                        expr->value_left_token->value_token = token;
+                        break;
+                    } 
+                }
+
+                if (expr->operator_token != NULL) {
+                    if (expr->expr_right_token == NULL) {
+                        if (expr->value_right_token == NULL) {
+                            expr->value_right_token = malloc(sizeof(R_VALUE));
+                            expr->value_right_token->value_token = token;
+                        } else {
+                            printf("SNS_Fill_expression: Operator expected (1)\n");
+                        }
+                    }
+                } else {
+                    printf("SNS_Fill_expression: Operator expected (2)\n");
+                }
+            break;
+        /* =><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><==><=><= */
+
+        default:
+            break;
+    }
+
+    return 0;
+}
+
+
+
+int SNS_Check_syntaxe(RULE_T * rule) {
+    switch (rule->type) {
+
+    case T_ASSIGN_VALUE:
+        if (rule->rule.rule_av.token_id_token == NULL) {
+            printf("%d: No token\n", __LINE__);
+            return -1;
+        } 
+
+        if (rule->rule.rule_av.assign_token == NULL) {
+            printf("%d, No assign\n", __LINE__);
+            return -1;
+        }
+
+        if (rule->rule.rule_av.expression == NULL) {
+            printf("%d, No expression\n", __LINE__);
+            return -1;
+        }
+
+        if (rule->rule.rule_av.semicolon == NULL) {
+            printf("%d, No semicolon\n", __LINE__);
+            return -1;
+        }
+
+        return SNS_Check_expression_syntaxe(rule->rule.rule_av.expression);
+        break;
+    
+    default:
+        return -1;
+        printf("%d, Unexpected rule type\n", __LINE__);
+        break;
+    }
+}
+
+
+
+
+
+int SNS_Check_expression_syntaxe(R_EXPRESSION * expr) {
+    int res = 0;
+
+    if (expr == NULL) {
+        printf("%d, Expected something\n", __LINE__);
+        return -1;
+    }
+
+    if ((expr->expr_left_token != NULL && expr->value_left_token != NULL) || (expr->expr_right_token != NULL && expr->value_right_token != NULL)) {
+        res = -1;
+        printf("%d, internal error\n", __LINE__);
+    }
+
+    if (expr->operator_token == NULL) {
+        if (expr->expr_right_token != NULL || expr->value_right_token != NULL) {
+            res = -1;
+            printf("%d: Unneeded operand\n", __LINE__);
+        }
+    }
+
+    switch (expr->operator_token->operator) {
+        case EQUALS:
+        case PLUS:
+        case MINUS:
+            if (expr->value_left_token == NULL) {
+                res = SNS_Check_expression_syntaxe(expr->expr_left_token);
+                if (!res) {
+                    return res;
+                }
+            }
+
+            if (expr->value_right_token == NULL) {
+                res = SNS_Check_expression_syntaxe(expr->expr_right_token);
+                if (!res) {
+                    return res;
+                }
+            }         
+            break;
+        
+        // case /* single operand */:
+        default:
+            break;
+    }
+
+    return res;
+}
+
+
+
+
+
+void SNS_destroy() {
+    // TODO
+    free(rule_list);
+    rule_list = NULL;
+}
+
+
+
+
+
+
+/**
+ * @brief Debug function. Writes token
+ * 
+ * @param token 
+ */
+void WriteToken(TOKEN_T * token) {
+    switch (token->type) {
+        case KEYWORD:
+            printf("KEYWORD: %s\n", token->name);
+            break;
+
+        case TOKEN_ID:
+            printf("TOKEN_ID: name: %s\n", token->name);
+            break;
+
+        case FUNC_ID:
+            printf("FUNC_ID: name: %s\n", token->name);
+            break;
+
+        case LITERAL:
+            switch (token->value.type) {
+                case 0:
+                    printf("LITERAL: INT: value: %d\n", token->value.int_val);
+                    break;
+                
+                case 1:
+                    printf("LITERAL: STRING: value: %s\n", token->value.char_val);
+                    break;
+                
+                case 2:
+                    printf("LITERAL: DOUBLE value: %f\n", token->value.double_val);
+                    break;
+                
+                default:
+                    printf("LITERAL: UNKNOWN TYPE: %d\n", token->value.type);
+                    break;
+            }
+            break;
+
+        case ASSIGN:
+            printf("ASSIGN: =\n");
+            break;
+
+        case LPAR:
+            printf("LPAR: (\n");
+            break;
+
+        case RPAR:
+            printf("RPAR: )\n");
+            break;
+
+        case OPERATOR:
+            switch (token->operator) {
+                case EQUALS:
+                    printf("OPERATOR: ==\n");
+                    break;
+
+                case PLUS:
+                    printf("OPERATOR: +\n");
+                    break;
+
+                case MINUS:
+                    printf("OPERATOR: -\n");
+                    break;
+                
+                default:
+                    printf("OPERATOR: unknown\n");
+                    break;
+            }
+            break;
+
+        case ISEOF:
+            printf("ISEOF\n");
+            break;
+
+        default:
+            printf("UNKNOWN: type: %d, name: %s, value type: %d\n", token->type, token->name, token->value.type);
+            break;
+    }
+}
