@@ -12,7 +12,14 @@
 #ifndef SYNTAX_AND_SEMANTIC_ANALYZER_H
 #define SYNTAX_AND_SEMANTIC_ANALYZER_H
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
+#include "lexer.h"
 #include "token.h"
+#include "codegen.h"
 
 
 /*
@@ -58,6 +65,8 @@ enum RULE_TYPE_T {
     T_ASSIGN_VALUE,         // 2 - TOKEN_ID ASSIGN [expression] SEMICOLON
     T_EXPRESSION,           // 3 - [value] OPERATOR [value]
     T_VALUE,                // 4 - TOKEN_ID or LITERAL
+
+    T_UNDEFINED,
 };
 
 /* ------ Rules description ------ */
@@ -66,10 +75,14 @@ typedef struct {
     TOKEN_T * value_token;
 } R_VALUE;
 
-typedef struct {
+typedef struct EXPRESSION_T {
     R_VALUE * value_left_token;
+    struct EXPRESSION_T * expr_left_token;
+
     TOKEN_T * operator_token;
+
     R_VALUE * value_right_token;
+    struct EXPRESSION_T * expr_right_token;
 } R_EXPRESSION;
 
 typedef struct {
@@ -135,6 +148,8 @@ typedef struct RULE_LIST_ELEMENT{
 typedef struct {
     int length;
     RULE_LIST_ELEMENT_T * first_element;
+    
+    RULE_LIST_ELEMENT_T * cur_element;
 
     // points to the space of function declaration
     RULE_LIST_ELEMENT_T * function_declaration;
@@ -142,5 +157,10 @@ typedef struct {
 
 
 /* --- End of rule list declaration --- */
+
+
+
+int SNS_start(char *filename);
+void SNS_destroy();
 
 #endif
