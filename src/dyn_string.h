@@ -18,7 +18,7 @@
 
 
 struct T_DYN_STRING {
-    int max_len;
+    size_t max_len;
     int inc;
     char *str;
 };
