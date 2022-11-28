@@ -35,7 +35,7 @@ struct T_TOKEN make_token()
 
 
 
-TOKEN_T * get_next_token(FILE *file)
+TOKEN_T * get_next_token()
 {
     TOKEN_T * token;
     token = malloc(sizeof(TOKEN_T));
@@ -52,7 +52,7 @@ TOKEN_T * get_next_token(FILE *file)
 
     while(true){
 
-        tmp = getc(file);
+        tmp = getc(stdin);
         *edge = tmp;
         if(*edge == EOF){
             token->type = ISEOF;
@@ -74,7 +74,7 @@ TOKEN_T * get_next_token(FILE *file)
                     char c;
                     char pref[] = {'u', 'n', 'c', 't', 'i', 'o', 'n'};
                     for (int i = 0; i < 7; i++) {
-                        c = fgetc(file);
+                        c = fgetc(stdin);
                         if(c != pref[i]) isFunction = 0;
                         if(!isFunction) {
                             exit(1);
@@ -87,7 +87,7 @@ TOKEN_T * get_next_token(FILE *file)
 
                     }
 
-                    if(fgetc(file) != ' '  ) exit(1);
+                    if(fgetc(stdin) != ' '  ) exit(1);
                     state = ST_FUNC;
 
                     printf("\n\nIs function: %d\n\n", isFunction);
@@ -96,7 +96,7 @@ TOKEN_T * get_next_token(FILE *file)
                 /* This was added by SniehNikita */
                 if(isdigit(*edge)) {
                     state = ST_INT_LITERAL;
-                    ungetc(*edge, file);
+                    ungetc(*edge, stdin);
                 }
                 /* ----------------------------- */
 
@@ -137,7 +137,7 @@ TOKEN_T * get_next_token(FILE *file)
                 } /* else if (*edge == '.') {
                     // TODO float state
                 } */ else {
-                    ungetc(*edge, file);
+                    ungetc(*edge, stdin);
                     token->type = LITERAL;
                     token->value.type = 0;
                     return token;
