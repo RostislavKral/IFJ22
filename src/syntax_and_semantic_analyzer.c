@@ -1,20 +1,263 @@
 /**
  * @file syntax_and_semantic_analyzer.c
- * @author Nikita Sniehovskyi xsnieh00
- * @brief syntax and semantiv analyzer implementation
- * @version 0.1
+ * @author Nikita Sniehovskyi (xsnieh00)
+ * @brief syntax and semantic analyzer implementation
  * @date 2022-11-19
  * 
  * @copyright Copyright (c) 2022
  * 
  */
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+#include "lexer.h"
+
+#include "syntax_and_semantic_analyzer.h"
+
+
+#define DEBUG 1
 
 
 
 
-int SNS_init() {
+enum SNS_ERROR errno = 0;
 
+
+int SNS_start(char *filename) {
+    TOKEN_T * token = NULL;
+
+    FILE * fp = fopen(filename, "r");
+
+    int state = 0;
+    RULE_T * rule = NULL;
+    enum RULE_TYPE_T type = T_UNDEFINED;
+    do {
+
+        /*
+            Command cycle:
+                - Get first token
+                - Decide which command is currently executed
+                    > Get second token to decide if needed (TODO)
+                - Read untill ; or {
+                    > Fill RULE_T
+                - If new IDs declareted -> add them to the symtable
+                
+                - Send RULE_T to the codegen. Repeat
+        */
+       
+        /* - Get first token */
+        token = get_next_token(fp);
+
+        switch (state) {
+
+            case 0:
+                /* - Decide which command is currently executed */
+                type = SNS_Decide_rule_type(token);
+                state = 1;
+            case 1:
+                switch (type) {
+
+                    case T_ASSIGN_VALUE:
+                        // Filling function for assign command
+                        int out_code = SNS_Assign_value(&rule, token);
+
+                        if (out_code == 0) { // Error
+                            errno = UNEXPECTED_TOKEN;
+                            Error_msg();
+                        } else if (out_code == 4) { // Completed
+                            // TODO Codegen(rule);
+                            // Table connect;
+                            // Destruct_rule(rule);
+                            // rule = NULL;                            
+
+                            type = T_UNDEFINED;
+                            state = 0;
+                        }
+
+                        break;
+                    
+                    default:
+                        errno = UNKNOWN_COMMAND;
+                        Error_msg();
+                        break;
+                }
+                break;
+            
+            default:
+                break;
+        }
+
+    } while (token->type != ISEOF && !errno);
+
+
+    fclose(fp);
 
     return 0;
+}
+
+
+
+
+int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token) {
+
+    if ((*rule) == NULL) {
+        (*rule) = malloc(sizeof(RULE_T));
+        (*rule)->type = T_ASSIGN_VALUE;
+        
+        (*rule)->rule.rule_av.token_id_token = NULL;
+        (*rule)->rule.rule_av.assign_token = NULL;
+        (*rule)->rule.rule_av.expression = NULL;
+        (*rule)->rule.rule_av.semicolon = NULL;
+
+        (*rule)->rule.rule_av.token_id_token = token;
+
+        return 1;
+    } else if ((*rule)->rule.rule_av.assign_token == NULL) {
+
+        if (token->type == ASSIGN) {
+            (*rule)->rule.rule_av.assign_token = token;
+        } else {
+            // Error
+            return 0;
+        }
+
+        return 2;
+    } else if (token->type != SEMICOLON) {
+        // TODO Fill_expression(rule, token);
+        (*rule)->rule.rule_av.expression = malloc(sizeof(R_EXPRESSION));
+        (*rule)->rule.rule_av.expression->value_left_token = malloc(sizeof(R_VALUE));
+        (*rule)->rule.rule_av.expression->value_left_token->value_token = token; // TODO remove
+
+        return 3;
+    } else if (token->type == SEMICOLON) {
+        (*rule)->rule.rule_av.semicolon = token;
+
+        return 4;
+    } else {
+        // Error
+        return 0;
+    }
+}
+
+
+
+
+enum RULE_TYPE_T SNS_Decide_rule_type(TOKEN_T * token) {
+    switch (token->type) {
+
+        case TOKEN_ID:
+            return T_ASSIGN_VALUE;
+            break;
+        
+        default: 
+            return T_UNDEFINED;
+            break;
+    }
+}
+
+
+
+
+
+void Error_msg() {
+    switch (errno) {
+
+        case OK:
+            printf("No errors\n");
+            break;
+
+        case UNKNOWN_COMMAND:
+            printf("Cannot identify command\n");
+            break;
+        
+        default:
+            printf("Unknown error\n");
+            break;
+    }
+}
+
+
+
+
+/**
+ * @brief Debug function. Writes token
+ * 
+ * @param token 
+ */
+void WriteToken(TOKEN_T * token) {
+    switch (token->type) {
+        case KEYWORD:
+            printf("KEYWORD: %s\n", token->name);
+            break;
+
+        case TOKEN_ID:
+            printf("TOKEN_ID: name: %s\n", token->name);
+            break;
+
+        case FUNC_ID:
+            printf("FUNC_ID: name: %s\n", token->name);
+            break;
+
+        case LITERAL:
+            switch (token->value.type) {
+                case 0:
+                    printf("LITERAL: INT: value: %d\n", token->value.int_val);
+                    break;
+                
+                case 1:
+                    printf("LITERAL: STRING: value: %s\n", token->value.char_val);
+                    break;
+                
+                case 2:
+                    printf("LITERAL: DOUBLE value: %f\n", token->value.double_val);
+                    break;
+                
+                default:
+                    printf("LITERAL: UNKNOWN TYPE: %d\n", token->value.type);
+                    break;
+            }
+            break;
+
+        case ASSIGN:
+            printf("ASSIGN: =\n");
+            break;
+
+        case LPAR:
+            printf("LPAR: (\n");
+            break;
+
+        case RPAR:
+            printf("RPAR: )\n");
+            break;
+
+        case OPERATOR:
+            switch (token->operator) {
+                case EQUALS:
+                    printf("OPERATOR: ==\n");
+                    break;
+
+                case PLUS:
+                    printf("OPERATOR: +\n");
+                    break;
+
+                case MINUS:
+                    printf("OPERATOR: -\n");
+                    break;
+                
+                default:
+                    printf("OPERATOR: unknown\n");
+                    break;
+            }
+            break;
+
+        case ISEOF:
+            printf("ISEOF\n");
+            break;
+
+        default:
+            printf("UNKNOWN: type: %d, name: %s, value type: %d\n", token->type, token->name, token->value.type);
+            break;
+    }
 }

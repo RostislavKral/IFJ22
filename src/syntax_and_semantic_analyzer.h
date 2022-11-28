@@ -76,6 +76,8 @@ typedef struct {
 } R_VALUE;
 
 typedef struct EXPRESSION_T {
+    // TODO What if expression contains function return value?
+
     R_VALUE * value_left_token;
     struct EXPRESSION_T * expr_left_token;
 
@@ -129,38 +131,20 @@ typedef struct {
 
 /* - End of single rule structure - */
 
-
-
-/* ------- Rule list declaration ------ */
-
-enum RULE_LIST_SCOPE {
-    MAIN_PROGRAM_SCOPE,     // 0
-    FUNCTION_SCOPE,         // 1
+enum SNS_ERROR {
+    OK,                 // 0
+    UNKNOWN_COMMAND,    // 1
+    UNEXPECTED_TOKEN,   // 2
 };
-
-// typedef RULE_LIST_ELEMENT_T RULE_LIST_ELEMENT;
-typedef struct RULE_LIST_ELEMENT{
-    RULE_T * rule_pointer;
-    struct RULE_LIST_ELEMENT * next_rule;
-} RULE_LIST_ELEMENT_T;
-
-
-typedef struct {
-    int length;
-    RULE_LIST_ELEMENT_T * first_element;
-    
-    RULE_LIST_ELEMENT_T * cur_element;
-
-    // points to the space of function declaration
-    RULE_LIST_ELEMENT_T * function_declaration;
-} RULE_LIST_T;
-
-
-/* --- End of rule list declaration --- */
-
 
 
 int SNS_start(char *filename);
-void SNS_destroy();
+int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token);
+enum RULE_TYPE_T SNS_Decide_rule_type(TOKEN_T * token);
+
+void Error_MSG();
+void WriteToken(TOKEN_T * token);
+void Destruct_rule(RULE_T * rule);
+void Error_msg();
 
 #endif
