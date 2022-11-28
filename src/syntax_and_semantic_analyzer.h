@@ -1,6 +1,7 @@
 /**
  * @file syntax_and_semantic_analyzer.h
  * @author Nikita Sniehovskyi xsnieh00
+ * @author Lukáš Ježek <xjezek19@stud.fit.vutbr.cz>
  * @brief 
  * @version 0.1
  * @date 2022-11-19
@@ -70,7 +71,15 @@ enum RULE_TYPE_T {
 };
 
 /* ------ Rules description ------ */
+typedef struct TOKENS_EXP{
+    int id;
+    struct TOKENS_EXP* left_token;    //left token
+    struct TOKENS_EXP* right_token;   //right token
+    TOKEN_T* token_data;              //this token data
+} T_EXP_DATA;
 
+
+//wtf block
 typedef struct {
     TOKEN_T * value_token;
 } R_VALUE;
@@ -91,7 +100,7 @@ typedef struct {
     R_EXPRESSION * expression;
     TOKEN_T * semicolon;
 } R_ASSIGN_VALUE;
-
+// wtf block end
 typedef struct {
     TOKEN_T * eof_token;
 } R_END_OF_PROGRAM;

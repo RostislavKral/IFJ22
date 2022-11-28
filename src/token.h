@@ -20,19 +20,32 @@ enum T_TOKEN_TYPE
 
 
 enum T_OPERATOR {
-    EQUALS,     //  0
-    PLUS,       //  1
-    MINUS,      //  2
+    MULTIPLY,       //0
+    DIVIDE,         //1
+    PLUS,           //2
+    MINUS,          //3
+    CONCAT,         //4
+    LESSER,         //5
+    GREATER,        //6
+    LESSER_EQUAL,   //7
+    GREATER_EQUAL,  //8
+    EQUALS,         //9
+    NOT_EQUAL       //10
 };
 
 
 
 enum T_KEYWORD {
-    function,
-    while_loop,
-    do_while_loop,
-    predialog, // WTF is this
-
+    KEY_ELSE,       //0
+    KEY_FLOAT,      //1
+    KEY_FUNCTION,   //2
+    KEY_IF,         //3
+    KEY_INT,        //4
+    KEY_NULL,       //5
+    KEY_RETURN,     //6
+    KEY_STRING,     //7
+    KEY_WHILE_LOOP, //8
+    KEY_VOID        //9
 };
 
 
@@ -43,18 +56,6 @@ struct T_VALUE
     int int_val;
     char *char_val;
 };
-
-
- /* Don't use this
-struct T_TOKEN {
-
-    enum T_TOKEN_TYPE type;
-    char* name;
-    struct T_VALUE value;
-
-};
-*/
-
 
 /**
  * @brief Token type
@@ -72,14 +73,13 @@ struct T_TOKEN {
  * OPERATOR     ->
  * ISEOF        ->
  */
-typedef struct {
-
+typedef struct{
     enum T_TOKEN_TYPE type;
     enum T_KEYWORD keyword;
-    enum T_OPERATOR operator;
+    enum T_OPERATOR operators;
     char* name;
     struct T_VALUE value;
-
 } TOKEN_T;
 
+TOKEN_T * init_token(struct T_VALUE,enum T_KEYWORD,enum T_OPERATOR,char* name,struct T_VALUE);
 #endif
