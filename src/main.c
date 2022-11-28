@@ -24,7 +24,7 @@ void WriteToken(TOKEN_T * token);
 
 
 int main() {
-    FILE *file = fopen("php_examples/var_assign.php", "r");
+    //FILE *file = fopen("php_examples/var_assign.php", "r");
 
     TOKEN_T * token = NULL;
 
@@ -32,7 +32,7 @@ int main() {
         // TODO redo
         if (token != NULL) { free(token); token = NULL; }
 
-        token = get_next_token(file);
+        token = get_next_token();
 
         if (DEBUG) { WriteToken(token); }
 
