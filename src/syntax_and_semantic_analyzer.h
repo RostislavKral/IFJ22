@@ -166,8 +166,8 @@ typedef struct {
 
 
 /* --- End of rule list declaration --- */
-
-
+void analyze_token_key(TOKEN_T token);
+//void function_detected(TOKEN_T token);
 
 int SNS_start(char *filename);
 void SNS_destroy();

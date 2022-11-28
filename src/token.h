@@ -81,5 +81,4 @@ typedef struct{
     struct T_VALUE value;
 } TOKEN_T;
 
-TOKEN_T * init_token(struct T_VALUE,enum T_KEYWORD,enum T_OPERATOR,char* name,struct T_VALUE);
 #endif

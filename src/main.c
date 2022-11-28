@@ -33,7 +33,7 @@ int main() {
         if (token != NULL) { free(token); token = NULL; }
 
         token = get_next_token();
-
+        analyze_token_key(*token);
         if (DEBUG) { WriteToken(token); }
 
         // TODO remove
@@ -102,7 +102,7 @@ void WriteToken(TOKEN_T * token) {
             break;
 
         case OPERATOR:
-            switch (token->operator) {
+            switch (token->operators) {
                 case EQUALS:
                     printf("OPERATOR: ==\n");
                     break;
