@@ -22,6 +22,6 @@ enum T_STATE {
     ST_STRING_LITERAL,
 };
 
-TOKEN_T * get_next_token(FILE* file);
+TOKEN_T * get_next_token();
 
 #endif
