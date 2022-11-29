@@ -6,12 +6,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "token.h"
 #include "syntax_and_semantic_analyzer.h"
+#include "token.h"
 
 
 
-int gen_code(RULE_T * rule);
+// int gen_code(RULE_T * rule);
 
 
 #endif
