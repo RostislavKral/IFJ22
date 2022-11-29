@@ -1,3 +1,6 @@
 .idea
 .vscode
 cmake-build-debug
+cmake_install.cmake
+IFJ22_PHP_compiler.out
+objs/
