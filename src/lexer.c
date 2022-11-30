@@ -44,11 +44,9 @@ TOKEN_T * get_next_token()
 
     char *edge = malloc(sizeof (char));
     char tmp;
-    dyn_string str;
-    str.inc = 1;
-    str.max_len = 1;
 
-    str.str = malloc (str.max_len * sizeof(char));
+    DYN_STRING_T str;
+    str_init(&str);
 
     while(true){
 
