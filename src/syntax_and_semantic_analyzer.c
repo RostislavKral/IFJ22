@@ -181,77 +181,77 @@ void analyze_token(){
 enum SNS_ERROR errno = 0;
 
 
-int SNS_start(char *filename) {
-    TOKEN_T * token = NULL;
-
-    FILE * fp = fopen(filename, "r");
-
-    int state = 0;
-    RULE_T * rule = NULL;
-    enum RULE_TYPE_T type = T_UNDEFINED;
-    do {
-
-        /*
-            Command cycle:
-                - Get first token
-                - Decide which command is currently executed
-                    > Get second token to decide if needed (TODO)
-                - Read untill ; or {
-                    > Fill RULE_T
-                - If new IDs declareted -> add them to the symtable
-
-                - Send RULE_T to the codegen. Repeat
-        */
-
-        /* - Get first token */
-        token = get_next_token(fp);
-
-        switch (state) {
-
-            case 0:
-                /* - Decide which command is currently executed */
-                type = SNS_Decide_rule_type(token);
-                state = 1;
-            case 1:
-                switch (type) {
-
-                    case T_ASSIGN_VALUE:
-                        // Filling function for assign command
-                        int out_code = SNS_Assign_value(&rule, token);
-
-                        if (out_code == 0) { // Error
-                            errno = UNEXPECTED_TOKEN;
-                            Error_msg();
-                        } else if (out_code == 4) { // Completed
-                            // TODO Codegen(rule);
-                            // Table connect;
-                            // Destruct_rule(rule);
-                            // rule = NULL;
-
-                            type = T_UNDEFINED;
-                            state = 0;
-                        }
-
-                        break;
-
-                    default:
-                        errno = UNKNOWN_COMMAND;
-                        Error_msg();
-                        break;
-                }
-                break;
-
-            default:
-                break;
-        }
-
-    } while (token->type != ISEOF && !errno);
-
-
-    fclose(fp);
-
-    return 0;
-}
+//int SNS_start(char *filename) {
+//    TOKEN_T * token = NULL;
+//
+//    FILE * fp = fopen(filename, "r");
+//
+//    int state = 0;
+//    RULE_T * rule = NULL;
+//    enum RULE_TYPE_T type = T_UNDEFINED;
+//    do {
+//
+//        /*
+//            Command cycle:
+//                - Get first token
+//                - Decide which command is currently executed
+//                    > Get second token to decide if needed (TODO)
+//                - Read untill ; or {
+//                    > Fill RULE_T
+//                - If new IDs declareted -> add them to the symtable
+//
+//                - Send RULE_T to the codegen. Repeat
+//        */
+//
+//        /* - Get first token */
+//        token = get_next_token(fp);
+//
+//        switch (state) {
+//
+//            case 0:
+//                /* - Decide which command is currently executed */
+//                type = SNS_Decide_rule_type(token);
+//                state = 1;
+//            case 1:
+//                switch (type) {
+//
+//                    case T_ASSIGN_VALUE:
+//                        // Filling function for assign command
+//                        int out_code = SNS_Assign_value(&rule, token);
+//
+//                        if (out_code == 0) { // Error
+//                            errno = UNEXPECTED_TOKEN;
+//                            Error_msg();
+//                        } else if (out_code == 4) { // Completed
+//                            // TODO Codegen(rule);
+//                            // Table connect;
+//                            // Destruct_rule(rule);
+//                            // rule = NULL;
+//
+//                            type = T_UNDEFINED;
+//                            state = 0;
+//                        }
+//
+//                        break;
+//
+//                    default:
+//                        errno = UNKNOWN_COMMAND;
+//                        Error_msg();
+//                        break;
+//                }
+//                break;
+//
+//            default:
+//                break;
+//        }
+//
+//    } while (token->type != ISEOF && !errno);
+//
+//
+//    fclose(fp);
+//
+//    return 0;
+//}
 
 
 
