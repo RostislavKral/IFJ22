@@ -39,15 +39,24 @@ void function_detected(TOKEN_T* initToken){
         return;
     }
     functionHelper.fParsing = true;
-    functionHelper.fHeadParsed = true;
     functionHelper.fParamCount = 0;
     //get f name and params
+    //DEBUG
+    printf("head parsed %d\nTOKEN fdetec: %s\n", functionHelper.fHeadParsed, initToken->name);
+    int whilecount = 0;
     while (functionHelper.fHeadParsed == false){
-        TOKEN_T *token = get_next_token();
+        TOKEN_T *token = initToken;
+        if(whilecount > 0){
+            token = get_next_token();
+        }
+        //DEBUG
+        printf("TOKEN: %s, count %d type: %u\n", token->name,whilecount,token->type);
+        whilecount++;
+
         //check eof and declaration of F inside Fname
-        if(is_token_eof(token) || token->keyword == KEY_FUNCTION){
+        if(is_token_eof(token)){
             //exit msg, found keyword
-            exit_with_message(token->lineNum, token->charNum, "Invalid token EOF or double function declaration", SEM_F_DECLARATION_ERR);
+            exit_with_message(token->lineNum, token->charNum, "Invalid token EOF ", GENERAL_ERR);
         }
         if(functionHelper.fNamePass == false){
             //get f name if not exist, expecting id
@@ -64,6 +73,8 @@ void function_detected(TOKEN_T* initToken){
             //if ( is found, cycle until )
             if(token->type == LPAR){
                 TOKEN_T *paramToken = get_next_token();
+                printf("PARAM TOKEN: %s, count %d type: %u\n", paramToken->name,whilecount,paramToken->type);
+                printf("PARAM TOKEN: %s, count %d type: %u\n", token->name,whilecount,token->type);
                 while (functionHelper.fParamPass == false){
                     if(paramToken->keyword == KEY_INT || paramToken->keyword == KEY_STRING || paramToken->keyword == KEY_FLOAT){
                         TOKEN_T *paramName = get_next_token();
@@ -115,6 +126,7 @@ void function_detected(TOKEN_T* initToken){
 
 void analyze_token(){
     TOKEN_T *token = get_next_token();
+    printf("ANALYZE TOKEN: %s\n", token->name);
     switch (token->type) {
         case KEYWORD:
             switch (token->keyword) {
@@ -123,7 +135,6 @@ void analyze_token(){
                 case KEY_FLOAT:
                     break;
                 case KEY_FUNCTION:
-                    function_detected(token);
                     break;
                 case KEY_IF:
                     break;
@@ -148,6 +159,8 @@ void analyze_token(){
         case TOKEN_ID:
             break;
         case FUNC_ID:
+            printf("case function detected\n");
+            function_detected(token);
             break;
         case LITERAL:
             break;

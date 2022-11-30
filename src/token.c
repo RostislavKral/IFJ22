@@ -5,7 +5,7 @@
 #include "stdio.h"
 #include "token.h"
 void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE errorCode){
-    fprintf(stderr, "ERR: line: %d, col: %d, message: %s", lineNum,charNum,message);
+    fprintf(stderr, "ERR: line: %d, col: %d, message: %s\n\n", lineNum,charNum,message);
     switch (errorCode) {
         case LEXICAL_ERR:
             exit(1);
