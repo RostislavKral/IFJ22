@@ -146,7 +146,20 @@ enum SNS_ERROR {
     UNEXPECTED_TOKEN,   // 2
 };
 
+//jeza
+typedef struct {
+    bool fParsing;
+    bool fHeadParsed;
+    bool fNamePass;
+    bool fParamPass;
+    bool fBodyParsing;
+    bool fReturnTypePass;
+    int fParamCount;
+} parseFunctionHelper;
 
+void analyze_token();
+void function_detected(TOKEN_T* token);
+//nikita
 int SNS_start(char *filename);
 int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token);
 enum RULE_TYPE_T SNS_Decide_rule_type(TOKEN_T * token);

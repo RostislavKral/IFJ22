@@ -5,18 +5,20 @@
 #include "dyn_string.h"
 #include "lexer.h"
 #include "token.h"
-//#include "syntax_and_semantic_analyzer.h"
+#include "syntax_and_semantic_analyzer.h"
 
 
-#define N
 
 void WriteToken(TOKEN_T* token);
 
 int main() {
 
+    analyze_token();
+    //nahrazeno analyze token
+    //SNS_start();
     //FILE *file = fopen("php_examples/var_assign.php", "r");
 
-    TOKEN_T * token = NULL;
+    /*TOKEN_T * token = NULL;
 
     do {
         // TODO redo
@@ -32,7 +34,7 @@ int main() {
 
     // TODO remove
     free(token); token = NULL;
-
+*/
     return 0;
 }
 
