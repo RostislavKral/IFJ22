@@ -22,6 +22,11 @@ bool is_keyword(char* keyword)
     return 0;
 }
 
+bool is_data_type(char* data_type)
+{
+    //if(strcmp())
+}
+
 /*
 struct T_TOKEN make_token()
 {
@@ -51,6 +56,7 @@ TOKEN_T * get_next_token()
     while(true){
 
         tmp = getc(stdin);
+       // printf("%c\n", tmp);
         *edge = tmp;
         if(*edge == EOF){
             token->type = ISEOF;
@@ -61,6 +67,12 @@ TOKEN_T * get_next_token()
         switch (state)
         {
             case ST_START:
+                if(*edge  == '(') state = ST_LEFT_PARENTHESES;
+                if(*edge  == ')') state = ST_RIGHT_PARENTHESES;
+                if(*edge  == '{') state = ST_RIGHT_CURLYBRACKET;
+                if(*edge  == '}') state = ST_LEFT_CURLYBRACKET;
+                if(*edge  == ',') state = ST_COMMA;
+
                 if (*edge == '$') {
                     state = ST_VAR_PREFIX;
                     token->type = TOKEN_ID;
@@ -69,26 +81,70 @@ TOKEN_T * get_next_token()
                 if(*edge == '=') state = ST_OP_ASSIGN;
                 if(*edge == 'f') {
                     int isFunction = 1;
+                    int isFloat = 1;
                     char c;
-                    char pref[] = {'u', 'n', 'c', 't', 'i', 'o', 'n'};
-                    for (int i = 0; i < 7; i++) {
+                    char pref[] = { 'n', 'c', 't', 'i', 'o', 'n'};
+                    char floatType[] = {'o', 'a', 't'};
+                    c = fgetc(stdin);
+                    if (c == 'u') {
+
+                        for (int i = 0; i < 6; i++) {
+                            c = fgetc(stdin);
+                            if (c != pref[i]) isFunction = 0;
+                            if (!isFunction) {
+                                exit(1);
+                                /*state = ERROR;
+                                token->type = ERROR;
+                                token->name = NULL;
+                                break; */
+                            }
+                        }
+
+                        state = ST_FUNC;
+
+                        printf("\n\nIs function: %d\n\n", isFunction);
+                    } else if(c == 'l') {
+                        for (int i = 0; i < 3; i++) {
+                            c = fgetc(stdin);
+                            if (c != floatType[i]) isFloat = 0;
+                            if (!isFloat) {
+                                exit(1);
+                                /*state = ERROR;
+                                token->type = ERROR;
+                                token->name = NULL;
+                                break; */
+                            }
+                        }
+
+                       // state = ST_KEYWORD;
+                        //printf("float je to ");
+                    } else {
+                        exit(1);
+                    }
+
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                }
+
+                if(*edge == 'w') {
+                    char c;
+                    char pref[] = { 'h', 'i', 'l', 'e'};
+                    bool isValid = 1;
+
+                    for (int i = 0; i < 3; i++) {
                         c = fgetc(stdin);
-                        if(c != pref[i]) isFunction = 0;
-                        if(!isFunction) {
+                        if (c != pref[i]) isValid = 0;
+                        if (!isValid) {
                             exit(1);
                             /*state = ERROR;
                             token->type = ERROR;
                             token->name = NULL;
-                            break; */
+                            break;*/
                         }
-
-
                     }
 
                     if(fgetc(stdin) != ' '  ) exit(1);
-                    state = ST_FUNC;
-
-                    printf("\n\nIs function: %d\n\n", isFunction);
+                    //state = ST_KEYWORD;
                 }
 
                 /* This was added by SniehNikita */
@@ -111,17 +167,27 @@ TOKEN_T * get_next_token()
                     str_conc(&str, edge);
                      continue;
                 }
+                ungetc(*edge, stdin);
                 token->type = TOKEN_ID;
                 token->name = str.str;
 
                 return token;
             case ST_OP_ASSIGN:
+                ungetc(*edge, stdin);
+
                 token->type = ASSIGN;
                 token->name = NULL;
                 return token;
             case ST_FUNC:
+
+                if(*edge != ' ' && isalnum(*edge)){
+                    str_conc(&str, edge);
+                    continue;
+                }
+                ungetc(*edge, stdin);
+
                 token->type = FUNC_ID;
-                token->name = NULL;
+                token->name = str.str;
                 return token;
 
             case ST_ERROR:
@@ -142,6 +208,27 @@ TOKEN_T * get_next_token()
                 }
                 break;
             /* ----------------------------- */
+            case ST_LEFT_PARENTHESES:
+                token->type = LPAR;
+                ungetc(*edge, stdin);
+
+                return token;
+            case ST_RIGHT_PARENTHESES:
+                token->type = RPAR;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_LEFT_CURLYBRACKET:
+                token->type = LBRACE;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_RIGHT_CURLYBRACKET:
+                token->type = RBRACE;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_COMMA:
+                token->type = COMMA;
+                ungetc(*edge, stdin);
+                return token;
         }
 
 

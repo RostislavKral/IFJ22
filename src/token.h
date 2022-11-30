@@ -15,6 +15,10 @@ enum T_TOKEN_TYPE
     ISEOF,          //  8
     PROG_START,     //  9   <?php
     SEMICOLON,      //  10
+    DATA_TYPE,      //  11
+    LBRACE,         //  12
+    RBRACE,         //  13
+    COMMA,          //  14
     //TBD
 };
 

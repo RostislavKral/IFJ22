@@ -5,9 +5,9 @@
  * @brief syntax and semantiv analyzer implementation
  * @version 0.1
  * @date 2022-11-19
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #include "syntax_and_semantic_analyzer.h"
@@ -77,10 +77,10 @@ int SNS_start(char *filename) {
                 - Read untill ; or {
                     > Fill RULE_T
                 - If new IDs declareted -> add them to the symtable
-                
+
                 - Send RULE_T to the codegen. Repeat
         */
-       
+
         /* - Get first token */
         token = get_next_token(fp);
 
@@ -104,21 +104,21 @@ int SNS_start(char *filename) {
                             // TODO Codegen(rule);
                             // Table connect;
                             // Destruct_rule(rule);
-                            // rule = NULL;                            
+                            // rule = NULL;
 
                             type = T_UNDEFINED;
                             state = 0;
                         }
 
                         break;
-                    
+
                     default:
                         errno = UNKNOWN_COMMAND;
                         Error_msg();
                         break;
                 }
                 break;
-            
+
             default:
                 break;
         }
@@ -139,7 +139,7 @@ int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token) {
     if ((*rule) == NULL) {
         (*rule) = malloc(sizeof(RULE_T));
         (*rule)->type = T_ASSIGN_VALUE;
-        
+
         (*rule)->rule.rule_av.token_id_token = NULL;
         (*rule)->rule.rule_av.assign_token = NULL;
         (*rule)->rule.rule_av.expression = NULL;
@@ -184,8 +184,8 @@ enum RULE_TYPE_T SNS_Decide_rule_type(TOKEN_T * token) {
         case TOKEN_ID:
             return T_ASSIGN_VALUE;
             break;
-        
-        default: 
+
+        default:
             return T_UNDEFINED;
             break;
     }
@@ -205,7 +205,7 @@ void Error_msg() {
         case UNKNOWN_COMMAND:
             printf("Cannot identify command\n");
             break;
-        
+
         default:
             printf("Unknown error\n");
             break;
@@ -217,8 +217,8 @@ void Error_msg() {
 
 /**
  * @brief Debug function. Writes token
- * 
- * @param token 
+ *
+ * @param token
  */
 void WriteToken(TOKEN_T * token) {
     switch (token->type) {
@@ -239,15 +239,15 @@ void WriteToken(TOKEN_T * token) {
                 case 0:
                     printf("LITERAL: INT: value: %d\n", token->value.int_val);
                     break;
-                
+
                 case 1:
                     printf("LITERAL: STRING: value: %s\n", token->value.char_val);
                     break;
-                
+
                 case 2:
                     printf("LITERAL: DOUBLE value: %f\n", token->value.double_val);
                     break;
-                
+
                 default:
                     printf("LITERAL: UNKNOWN TYPE: %d\n", token->value.type);
                     break;
@@ -279,7 +279,7 @@ void WriteToken(TOKEN_T * token) {
                 case MINUS:
                     printf("OPERATOR: -\n");
                     break;
-                
+
                 default:
                     printf("OPERATOR: unknown\n");
                     break;
