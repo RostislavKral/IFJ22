@@ -12,7 +12,9 @@
 
 int main() {
 
-    SNS_start();
+    analyze_token();
+    //nahrazeno analyze token
+    //SNS_start();
 
     return 0;
 }
