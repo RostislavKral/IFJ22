@@ -72,10 +72,9 @@ enum RULE_TYPE_T {
 
 /* ------ Rules description ------ */
 typedef struct TOKENS_EXP{
-    int id;
     struct TOKENS_EXP* left_token;    //left token
     struct TOKENS_EXP* right_token;   //right token
-    TOKEN_T* token_data;              //this token data
+    TOKEN_T* token_data;             //this token data
 } T_EXP_DATA;
 
 
