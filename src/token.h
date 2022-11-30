@@ -20,32 +20,35 @@ enum T_TOKEN_TYPE
 
 
 enum T_OPERATOR {
-    MULTIPLY,       //0
-    DIVIDE,         //1
-    PLUS,           //2
-    MINUS,          //3
-    CONCAT,         //4
-    LESSER,         //5
-    GREATER,        //6
-    LESSER_EQUAL,   //7
-    GREATER_EQUAL,  //8
-    EQUALS,         //9
-    NOT_EQUAL       //10
+    MULTIPLY,           //0  *
+    DIVIDE,             //1  /
+    PLUS,               //2  +
+    MINUS,              //3  -
+    CONCAT,             //4  .
+    LESS,               //5  <
+    GREATER,            //6  >
+    LESS_EQUAL,         //7  <=
+    GREATER_EQUAL,      //8  >=
+    EQUALS,             //9  ==
+    NOT_EQUAL,          //10 !=
+    TYPE_EQUALS,        //11 ===
+    TYPE_NOT_EQUALS,    //12 !==
 };
 
 
 
 enum T_KEYWORD {
-    KEY_ELSE,       //0
-    KEY_FLOAT,      //1
-    KEY_FUNCTION,   //2
-    KEY_IF,         //3
-    KEY_INT,        //4
-    KEY_NULL,       //5
-    KEY_RETURN,     //6
-    KEY_STRING,     //7
-    KEY_WHILE_LOOP, //8
-    KEY_VOID        //9
+    KEY_ELSE,       //0  
+    KEY_FLOAT,      //1  
+    KEY_FUNCTION,   //2  
+    KEY_IF,         //3  
+    KEY_INT,        //4  
+    KEY_NULL,       //5  
+    KEY_RETURN,     //6  
+    KEY_STRING,     //7  
+    KEY_WHILE_LOOP, //8  
+    KEY_VOID,       //9  
+    KEY_BEGIN,      //10 <?php
 };
 
 
