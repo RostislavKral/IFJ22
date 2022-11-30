@@ -13,8 +13,18 @@
 #include "syntax_and_semantic_analyzer.h"
 #include "lexer.h"
 
-bool verify_eof(TOKEN_T token){
-    if(token.type == ISEOF){
+parseFunctionHelper functionHelper = {
+        .fParsing = false,
+        .fNamePass = false,
+        .fParamPass = false,
+        .fBodyParsing = false,
+        .fHeadParsed = false,
+        .fParamCount = 0,
+        .fReturnTypePass = false
+};
+
+bool is_token_eof(TOKEN_T* token){
+    if(token->type == ISEOF){
         fprintf(stderr, "%s", "EOF");
         return true;
     } else{
@@ -22,35 +32,147 @@ bool verify_eof(TOKEN_T token){
     }
 }
 
-void function_detected(TOKEN_T token){
-    TOKEN_T *nextToken = get_next_token();
-    if(!verify_eof(*nextToken)){
-        if(nextToken->type == LPAR)
+void function_detected(TOKEN_T* initToken){
+    //catch declaration of f in f
+    if(functionHelper.fParsing == true){
+        exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
+        return;
     }
+    functionHelper.fParsing = true;
+    functionHelper.fHeadParsed = true;
+    functionHelper.fParamCount = 0;
+    //get f name and params
+    while (functionHelper.fHeadParsed == false){
+        TOKEN_T *token = get_next_token();
+        //check eof and declaration of F inside Fname
+        if(is_token_eof(token) || token->keyword == KEY_FUNCTION){
+            //exit msg, found keyword
+            exit_with_message(token->lineNum, token->charNum, "Invalid token EOF or double function declaration", SEM_F_DECLARATION_ERR);
+        }
+        if(functionHelper.fNamePass == false){
+            //get f name if not exist, expecting id
+            if(token->type != FUNC_ID){
+                exit_with_message(token->lineNum,token->charNum,"Invalid function name", SEM_F_DECLARATION_ERR);
+            } else {
+                //TODO symtable write
+                functionHelper.fNamePass = true;
+                continue;
+            }
+        }
+        //get f params if not exist, expecting "(param1, param2, ...)"
+        if(functionHelper.fParamPass == false){
+            //if ( is found, cycle until )
+            if(token->type == LPAR){
+                TOKEN_T *paramToken = get_next_token();
+                while (functionHelper.fParamPass == false){
+                    if(paramToken->keyword == KEY_INT || paramToken->keyword == KEY_STRING || paramToken->keyword == KEY_FLOAT){
+                        TOKEN_T *paramName = get_next_token();
+                        if(paramName->keyword){
+                            //Err 2 keyword in row
+                            exit_with_message(paramToken->lineNum, paramToken->charNum, "Invalid token 2 keywords in row", SEM_F_DECLARATION_ERR);
+                        } else {
+                            //TODO to symtable write
+                            functionHelper.fParamCount++;
+                        }
+                    } else if (paramToken->type == COMMA) {
+                        functionHelper.fParamCount++;
+                        //TODO Symtable write
+                    } else {
+                        //ERR invalid token expecting dataType
+                        exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float");
+                        continue;
+                    }
+                    paramToken = get_next_token();
+                    if(paramToken->keyword == RPAR) functionHelper.fParamPass = true;
+                }
+            } else {
+                //INVALID TOKEN expecting (
+                exit_with_message(token->lineNum, token->charNum,"Invalid token expecting ')'",SYNTAX_ERR);
+            }
+        }
+        if(functionHelper.fReturnTypePass == false){
+            if(token->keyword == KEY_COLON){
+                TOKEN_T *returnTypeToken = get_next_token();
+                if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
+                    //TODO sym write
+                    functionHelper.fReturnTypePass = true;
+                    continue;
+                } else {
+                    exit_with_message(returnTypeToken->lineNum, returnTypeToken->charNum, "Invalid function return type", SYNTAX_ERR);
+                }
+            }
+        }
+        if(token->type == LBRACE && functionHelper.fNamePass && functionHelper.fParamPass){
+            functionHelper.fHeadParsed = true;
+            functionHelper.fBodyParsing = true;
+        } else {
+            exit_with_message(token->lineNum, token->charNum, "declaration error", SYNTAX_ERR);
+        }
+    }
+    //TODO: START PARSING Function BODY
+    analyze_token();
 };
 
-void analyze_token_key(TOKEN_T token){
-    switch (token.keyword) {
-        case KEY_ELSE:
+void analyze_token(){
+    TOKEN_T *token = get_next_token();
+    switch (token->type) {
+        case KEYWORD:
+            switch (token->keyword) {
+                case KEY_ELSE:
+                    break;
+                case KEY_FLOAT:
+                    break;
+                case KEY_FUNCTION:
+                    function_detected(token);
+                    break;
+                case KEY_IF:
+                    break;
+                case KEY_INT:
+                    break;
+                case KEY_NULL:
+                    break;
+                case KEY_RETURN:
+                    break;
+                case KEY_STRING:
+                    break;
+                case KEY_WHILE_LOOP:
+                    break;
+                case KEY_VOID:
+                    break;
+                case KEY_BEGIN:
+                    break;
+                case KEY_COLON:
+                    break;
+            }
             break;
-        case KEY_FLOAT:
+        case TOKEN_ID:
             break;
-        case KEY_FUNCTION:
-            function_detected(token);
+        case FUNC_ID:
             break;
-        case KEY_IF:
+        case LITERAL:
             break;
-        case KEY_INT:
+        case ASSIGN:
             break;
-        case KEY_NULL:
+        case LPAR:
             break;
-        case KEY_RETURN:
+        case RPAR:
             break;
-        case KEY_STRING:
+        case OPERATOR:
             break;
-        case KEY_WHILE_LOOP:
+        case ISEOF:
+            //TODO: EOF exit, check opened functions, params, attr, etc.
             break;
-        case KEY_VOID:
+        case PROG_START:
+            break;
+        case SEMICOLON:
+            break;
+        case LBRACE:
+            break;
+        case RBRACE:
+            //this will stop function parsing, hopefully
+            if(functionHelper.fParsing) function_detected(token);
+            break;
+        case COMMA:
             break;
     }
 };
@@ -194,7 +316,7 @@ enum RULE_TYPE_T SNS_Decide_rule_type(TOKEN_T * token) {
 
 
 
-
+//TODO: UNUSED !!!!!!!!!!!!!! REFACTOR TO exit_with_message
 void Error_msg() {
     switch (errno) {
 

@@ -53,6 +53,7 @@ enum T_KEYWORD {
     KEY_WHILE_LOOP, //8  
     KEY_VOID,       //9  
     KEY_BEGIN,      //10 <?php
+    KEY_COLON       //11 :
 };
 
 
@@ -93,11 +94,11 @@ typedef struct{
 //ERR HANDLING
 enum ERROR_CODE{
     LEXICAL_ERR,            //1 - chyba v programu v rámci lexikální analýzy (chybná struktura aktuálního lexému)
-    SYNTAX_ERR,             //2 chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu, chy-bějící hlavička, atp.
-    SEM_DECLARATION_ERR,    //3 - sémantická chyba v programu – nedefinovaná funkce, pokus o redefinice funkce.
-    SEM_F_CALL_PARAM_ERR,   //4 - sémantická/běhová chyba v programu – špatný počet/typ parametrů u volání funk-ce či typ návratové hodnoty z funkce
+    SYNTAX_ERR,             //2 - chyba v programu v rámci syntaktické analýzy (chybná syntaxe programu, chybějící hlavička, atp.
+    SEM_F_DECLARATION_ERR,  //3 - sémantická chyba v programu – nedefinovaná funkce, pokus o redefinice funkce.
+    SEM_F_CALL_PARAM_ERR,   //4 - sémantická/běhová chyba v programu – špatný počet/typ parametrů u volání funkce či typ návratové hodnoty z funkce
     SEM_UNDEF_VAR_ERR,      //5 - sémantická chyba v programu – použití nedefinované proměnné.
-    SEM_F_RETURN_VAL_ERR,   //6 - sémantická/běhová chyba v programu – chybějící/přebývající výraz v příkazu ná-vratu z funkce.
+    SEM_F_RETURN_VAL_ERR,   //6 - sémantická/běhová chyba v programu – chybějící/přebývající výraz v příkazu návratu z funkce.
     SEM_MATH_ERR,           //7 - sémantická/běhová chyba typové kompatibility v aritmetických, řetězcových arelačních výrazech.
     SEM_OTHER,              //8 - ostatní sémantické chyby.
     GENERAL_ERR             //99  interní chyba překladače tj. neovlivněná vstupním programem (např. chyba alo-kace paměti atd.).
@@ -110,7 +111,7 @@ void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE 
             exit(1);
         case SYNTAX_ERR:
             exit(2);
-        case SEM_DECLARATION_ERR:
+        case SEM_F_DECLARATION_ERR:
             exit(3);
         case SEM_F_CALL_PARAM_ERR:
             exit(4);
