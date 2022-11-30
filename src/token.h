@@ -5,16 +5,19 @@
 enum T_TOKEN_TYPE
 {
     KEYWORD,        //  0
-    TOKEN_ID,       //  1
-    FUNC_ID,        //  2
+    TOKEN_ID,       //  1   Variable
+    FUNC_ID,        //  2   function name
     LITERAL,        //  3
     ASSIGN,         //  4
-    LPAR,           //  5
-    RPAR,           //  6
+    LPAR,           //  5 (
+    RPAR,           //  6 )
     OPERATOR,       //  7
     ISEOF,          //  8
     PROG_START,     //  9   <?php
     SEMICOLON,      //  10
+    LBRACE,         //  11  {
+    RBRACE,         //  12  }
+    COMMA           //13    ,
     //TBD
 };
 
@@ -77,6 +80,8 @@ struct T_VALUE
  * ISEOF        ->
  */
 typedef struct{
+    int lineNum;
+    int charNum;
     enum T_TOKEN_TYPE type;
     enum T_KEYWORD keyword;
     enum T_OPERATOR operators;
