@@ -79,7 +79,7 @@ void function_detected(TOKEN_T* initToken){
                         //TODO Symtable write
                     } else {
                         //ERR invalid token expecting dataType
-                        exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float");
+                        exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float", SYNTAX_ERR);
                         continue;
                     }
                     paramToken = get_next_token();
@@ -389,7 +389,7 @@ void WriteToken(TOKEN_T * token) {
             break;
 
         case OPERATOR:
-            switch (token->operator) {
+            switch (token->operators) {
                 case EQUALS:
                     printf("OPERATOR: ==\n");
                     break;
