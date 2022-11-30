@@ -1,6 +1,8 @@
-//
-// Created by rostik on 10/20/22.
-//
+/**
+ * @file dyn_string.h
+ * @author Nikita Sniehovskyi (xsnieh00)
+ * @brief Header file for dynamic string
+ */
 
 #ifndef IFJ2_DYN_STRING_H
 #define IFJ2_DYN_STRING_H
@@ -10,38 +12,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-#endif //IFJ2_DYN_STRING_H
-
-
-
-
-
-struct T_DYN_STRING {
-    size_t max_len;
-    int inc;
+struct DYN_STRING {
+    size_t len;
     char *str;
 };
-typedef struct T_DYN_STRING dyn_string;
+typedef struct DYN_STRING DYN_STRING_T;
 
+int str_conc(DYN_STRING_T *str, char *str_to_add);
+int str_init(DYN_STRING_T *str);
+int str_destroy(DYN_STRING_T *str);
 
-int str_conc(dyn_string *str, char *str_to_add);
-
-/*
-int main() {
-    dyn_string str;
-    str.inc = 10;
-    str.max_len = 10;
-
-    str.str = malloc (str.max_len * sizeof(char));
-
-
-    str_conc(&str, "HELLO");
-    str_conc(&str, "HELLO");
-    str_conc(&str, "HELLO");
-    str_conc(&str, "HELLO");
-    printf("%s\n", str.str);
-
-    free(str.str);
-    return 0;
-}*/
+#endif
