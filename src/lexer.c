@@ -116,7 +116,7 @@ TOKEN_T * get_next_token()
                             }
                         }
 
-                       // state = ST_KEYWORD;
+                        state = ST_KEYWORD_FLOAT;
                         //printf("float je to ");
                     } else {
                         exit(1);
@@ -227,6 +227,11 @@ TOKEN_T * get_next_token()
                 return token;
             case ST_COMMA:
                 token->type = COMMA;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_FLOAT:
+                token->type = KEYWORD;
+                token->keyword = KEY_FLOAT;
                 ungetc(*edge, stdin);
                 return token;
         }

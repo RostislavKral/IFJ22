@@ -13,12 +13,12 @@
 
 int main() {
 
-    analyze_token();
+    //analyze_token();
     //nahrazeno analyze token
     //SNS_start();
     //FILE *file = fopen("php_examples/var_assign.php", "r");
 
-    /*TOKEN_T * token = NULL;
+    TOKEN_T * token = NULL;
 
     do {
         // TODO redo
@@ -34,7 +34,7 @@ int main() {
 
     // TODO remove
     free(token); token = NULL;
-*/
+
     return 0;
 }
 
@@ -48,7 +48,7 @@ int main() {
 // *
 // * @param token
 // */
-//void WriteToken(TOKEN_T * token) {
+/*//void WriteToken(TOKEN_T * token) {
 //    switch (token->type) {
 //        case KEYWORD:
 //            printf("KEYWORD: %s\n", token->name);
@@ -129,4 +129,4 @@ int main() {
 //            printf("UNKNOWN: type: %d, name: %s, value type: %d\n", token->type, token->name, token->value.type);
 //            break;
 //    }
-//}
+//}*/

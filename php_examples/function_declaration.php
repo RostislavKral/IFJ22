@@ -1,4 +1,4 @@
-function aa (int $c)
+function aa (float $c)
 $x = 5
 $abcd
 while

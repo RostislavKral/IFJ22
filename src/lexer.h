@@ -26,7 +26,7 @@ enum T_STATE {
     ST_RIGHT_CURLYBRACKET,
     ST_DATA_TYPE,
     ST_COMMA,
-    ST_KEYWORD,
+    ST_KEYWORD_FLOAT,
 };
 
 TOKEN_T * get_next_token();
