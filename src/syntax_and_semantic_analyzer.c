@@ -141,12 +141,12 @@ void function_detected(TOKEN_T* initToken){
         }
     }
     // START PARSING Function BODY
-    functionHelper.fBraceCountCheck ;
     analyze_token();
 };
 
 void analyze_token(){
-    TOKEN_T *token = get_next_token();
+    TOKEN_T *token;
+    token = get_next_token();
     switch (token->type) {
         case KEYWORD:
             switch (token->keyword) {
@@ -205,6 +205,8 @@ void analyze_token(){
             if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token);
             break;
         case COMMA:
+            break;
+        case DATA_TYPE:
             break;
     }
 };
