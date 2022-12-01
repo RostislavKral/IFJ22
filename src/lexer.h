@@ -27,6 +27,8 @@ enum T_STATE {
     ST_DATA_TYPE,
     ST_COMMA,
     ST_KEYWORD_FLOAT,
+    ST_KEYWORD_STRING,
+    ST_KEYWORD_INT,
 };
 
 TOKEN_T * get_next_token();

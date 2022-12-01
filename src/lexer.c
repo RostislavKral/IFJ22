@@ -126,6 +126,52 @@ TOKEN_T * get_next_token()
 
                 }
 
+                if(*edge == 'i')
+                {
+                    char c;
+                    bool isValid = 1;
+                    char pref[] = { 'n', 't'}; // ADD IF
+
+
+                        for (int i = 0; i < 2; i++) {
+                            c = fgetc(stdin);
+                            if (c != pref[i]) isValid = 0;
+                            if (!isValid) {
+                                exit(1);
+                                /*state = ERROR;
+                                token->type = ERROR;
+                                token->name = NULL;
+                                break; */
+                            }
+                        }
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                        state = ST_KEYWORD_INT;
+                }
+
+                    if(*edge == 's') {
+                        char c;
+                        bool isValid = 1;
+                        char pref[] = {'t', 'r', 'i', 'n', 'g'};
+
+
+
+                        for (int i = 0; i < 5; i++) {
+                            c = fgetc(stdin);
+                            if (c != pref[i]) isValid = 0;
+                            if (!isValid) {
+                                exit(1);
+                                /*state = ERROR;
+                                token->type = ERROR;
+                                token->name = NULL;
+                                break; */
+                            }
+                        }
+                        if(fgetc(stdin) != ' '  ) exit(1);
+
+                        state = ST_KEYWORD_STRING;
+                    }
+
                 if(*edge == 'w') {
                     char c;
                     char pref[] = { 'h', 'i', 'l', 'e'};
@@ -232,6 +278,16 @@ TOKEN_T * get_next_token()
             case ST_KEYWORD_FLOAT:
                 token->type = KEYWORD;
                 token->keyword = KEY_FLOAT;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_INT:
+                token->type = KEYWORD;
+                token->keyword = KEY_INT;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_STRING:
+                token->type = KEYWORD;
+                token->keyword = KEY_STRING;
                 ungetc(*edge, stdin);
                 return token;
         }
