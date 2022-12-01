@@ -20,7 +20,13 @@ parseFunctionHelper functionHelper = {
         .fBodyParsing = false,
         .fHeadParsed = false,
         .fParamCount = 0,
-        .fReturnTypePass = false
+        .fReturnTypePass = false,
+        .fBraceCountCheck = 0
+};
+scopeHelper scope = {
+        .num = 0,
+        .openedBracesCount = 0,
+        .lastScopeOpeningToken = NULL
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -31,11 +37,24 @@ bool is_token_eof(TOKEN_T* token){
         return false;
     }
 }
-
+void function_end_parsing(){
+    functionHelper.fParsing = false;
+    functionHelper.fNamePass = false;
+    functionHelper.fParamPass = false;
+    functionHelper.fBodyParsing = false;
+    functionHelper.fHeadParsed = false;
+    functionHelper.fParamCount = 0;
+    functionHelper.fReturnTypePass = false;
+    functionHelper.fBraceCountCheck = 0;
+};
 void function_detected(TOKEN_T* initToken){
+    //TODO: check scope
     //catch declaration of f in f
-    if(functionHelper.fParsing == true){
+    if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
         exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
+        return;
+    } else if(functionHelper.fParsing == true && initToken->type == RBRACE){
+        function_end_parsing();
         return;
     }
     functionHelper.fParsing = true;
@@ -47,9 +66,8 @@ void function_detected(TOKEN_T* initToken){
         if(whilecount > 0){
             token = get_next_token();
         }
-        //DEBUG
+        //skip firt cycle,
         whilecount++;
-
         //check eof and declaration of F inside Fname
         if(is_token_eof(token)){
             //exit msg, found keyword
@@ -86,10 +104,13 @@ void function_detected(TOKEN_T* initToken){
                     } else {
                         //ERR invalid token expecting dataType
                         exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float", SYNTAX_ERR);
-                        continue;
                     }
                     paramToken = get_next_token();
-                    if(paramToken->keyword == RPAR) functionHelper.fParamPass = true;
+                    if(paramToken->type == RPAR){
+                        functionHelper.fParamPass = true;
+                        token = get_next_token();
+                        break;
+                    }
                 }
             } else {
                 //INVALID TOKEN expecting (
@@ -109,13 +130,18 @@ void function_detected(TOKEN_T* initToken){
             }
         }
         if(token->type == LBRACE && functionHelper.fNamePass && functionHelper.fParamPass){
+            scope.lastScopeOpeningToken = token;
+            scope.num++;
+            scope.openedBracesCount++;
             functionHelper.fHeadParsed = true;
             functionHelper.fBodyParsing = true;
+            functionHelper.fBraceCountCheck = scope.openedBracesCount;
         } else {
             exit_with_message(token->lineNum, token->charNum, "declaration error", SYNTAX_ERR);
         }
     }
-    //TODO: START PARSING Function BODY
+    // START PARSING Function BODY
+    functionHelper.fBraceCountCheck ;
     analyze_token();
 };
 
@@ -176,7 +202,7 @@ void analyze_token(){
             break;
         case RBRACE:
             //this will stop function parsing, hopefully
-            if(functionHelper.fParsing) function_detected(token);
+            if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token);
             break;
         case COMMA:
             break;

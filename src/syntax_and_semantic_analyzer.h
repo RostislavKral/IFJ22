@@ -154,10 +154,17 @@ typedef struct {
     bool fBodyParsing;
     bool fReturnTypePass;
     int fParamCount;
+    int fBraceCountCheck;
 } parseFunctionHelper;
 
+typedef struct {
+    int num;
+    int openedBracesCount;
+    TOKEN_T *lastScopeOpeningToken;
+} scopeHelper;
 void analyze_token();
 void function_detected(TOKEN_T* token);
+void function_init(parseFunctionHelper* functionInit);
 //nikita
 int SNS_start(char *filename);
 int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token);

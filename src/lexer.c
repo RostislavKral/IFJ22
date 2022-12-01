@@ -69,8 +69,8 @@ TOKEN_T * get_next_token()
             case ST_START:
                 if(*edge  == '(') state = ST_LEFT_PARENTHESES;
                 if(*edge  == ')') state = ST_RIGHT_PARENTHESES;
-                if(*edge  == '{') state = ST_RIGHT_CURLYBRACKET;
-                if(*edge  == '}') state = ST_LEFT_CURLYBRACKET;
+                if(*edge  == '{') state = ST_LEFT_CURLYBRACKET;
+                if(*edge  == '}') state = ST_RIGHT_CURLYBRACKET;
                 if(*edge  == ',') state = ST_COMMA;
                 if(*edge  == ':') state = ST_KEYWORD_COLON;
                 //TODO: OPERATORY!!!!!!
