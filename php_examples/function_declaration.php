@@ -1,4 +1,5 @@
-function aa (int $c)
+function aa (int $c) : string {}
 $x = 5
 $abcd
-while
+while if return else null void $b
+

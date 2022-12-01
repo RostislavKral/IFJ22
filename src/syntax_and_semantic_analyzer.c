@@ -351,7 +351,7 @@ void Error_msg() {
 void WriteToken(TOKEN_T * token) {
     switch (token->type) {
         case KEYWORD:
-            printf("KEYWORD: %s\n", token->name);
+            printf("KEYWORD: %u\n", token->keyword);
             break;
 
         case TOKEN_ID:
@@ -392,6 +392,12 @@ void WriteToken(TOKEN_T * token) {
 
         case RPAR:
             printf("RPAR: )\n");
+            break;
+        case RBRACE:
+            printf("RBRACE: {\n");
+            break;
+        case LBRACE:
+            printf("LBRACE: }\n");
             break;
 
         case OPERATOR:

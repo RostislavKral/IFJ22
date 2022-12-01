@@ -72,6 +72,9 @@ TOKEN_T * get_next_token()
                 if(*edge  == '{') state = ST_RIGHT_CURLYBRACKET;
                 if(*edge  == '}') state = ST_LEFT_CURLYBRACKET;
                 if(*edge  == ',') state = ST_COMMA;
+                if(*edge  == ':') state = ST_KEYWORD_COLON;
+                //TODO: OPERATORY!!!!!!
+
 
                 if (*edge == '$') {
                     state = ST_VAR_PREFIX;
@@ -130,12 +133,12 @@ TOKEN_T * get_next_token()
                 {
                     char c;
                     bool isValid = 1;
-                    char pref[] = { 'n', 't'}; // ADD IF
 
+                    c = fgetc(stdin);
+                    if(c == 'n'){
 
-                        for (int i = 0; i < 2; i++) {
                             c = fgetc(stdin);
-                            if (c != pref[i]) isValid = 0;
+                            if (c != 't') isValid = 0;
                             if (!isValid) {
                                 exit(1);
                                 /*state = ERROR;
@@ -143,10 +146,110 @@ TOKEN_T * get_next_token()
                                 token->name = NULL;
                                 break; */
                             }
-                        }
-                    if(fgetc(stdin) != ' '  ) exit(1);
 
                         state = ST_KEYWORD_INT;
+                        } else if(c == 'f') {
+                        state = ST_KEYWORD_IF;
+                    } else exit(1); //error
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+
+                }
+
+                if(*edge == 'e')
+                {
+                    char c;
+                    bool isValid = 1;
+                    char pref[] = {'l', 's', 'e'};
+
+
+
+                    for (int i = 0; i < 3; i++) {
+                        c = fgetc(stdin);
+                        if (c != pref[i]) isValid = 0;
+                        if (!isValid) {
+                            exit(1);
+                            /*state = ERROR;
+                            token->type = ERROR;
+                            token->name = NULL;
+                            break; */
+                        }
+                    }
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                    state = ST_KEYWORD_ELSE;
+                }
+
+                if(*edge == 'r')
+                {
+                    char c;
+                    bool isValid = 1;
+                    char pref[] = {'e', 't', 'u','r','n'};
+
+
+
+                    for (int i = 0; i < 5; i++) {
+                        c = fgetc(stdin);
+                        if (c != pref[i]) isValid = 0;
+                        if (!isValid) {
+                            exit(1);
+                            /*state = ERROR;
+                            token->type = ERROR;
+                            token->name = NULL;
+                            break; */
+                        }
+                    }
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                    state = ST_KEYWORD_RETURN;
+                }
+
+                if(*edge == 'n')
+                {
+                    char c;
+                    bool isValid = 1;
+                    char pref[] = {'u', 'l', 'l'};
+
+
+
+                    for (int i = 0; i < 3; i++) {
+                        c = fgetc(stdin);
+                        if (c != pref[i]) isValid = 0;
+                        if (!isValid) {
+                            exit(1);
+                            /*state = ERROR;
+                            token->type = ERROR;
+                            token->name = NULL;
+                            break; */
+                        }
+                    }
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                    state = ST_KEYWORD_NULL;
+                }
+
+                if(*edge == 'v')
+                {
+                    char c;
+                    bool isValid = 1;
+                    char pref[] = {'o', 'i', 'd'};
+
+
+
+                    for (int i = 0; i < 3; i++) {
+                        c = fgetc(stdin);
+                        if (c != pref[i]) isValid = 0;
+                        if (!isValid) {
+                            exit(1);
+                            /*state = ERROR;
+                            token->type = ERROR;
+                            token->name = NULL;
+                            break; */
+                        }
+                    }
+                    if(fgetc(stdin) != ' '  ) exit(1);
+
+                    state = ST_KEYWORD_VOID;
                 }
 
                     if(*edge == 's') {
@@ -177,8 +280,9 @@ TOKEN_T * get_next_token()
                     char pref[] = { 'h', 'i', 'l', 'e'};
                     bool isValid = 1;
 
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < 4; i++) {
                         c = fgetc(stdin);
+                      //  printf("%c,%c,", c, pref[i]);
                         if (c != pref[i]) isValid = 0;
                         if (!isValid) {
                             exit(1);
@@ -190,7 +294,8 @@ TOKEN_T * get_next_token()
                     }
 
                     if(fgetc(stdin) != ' '  ) exit(1);
-                    //state = ST_KEYWORD;
+                    state = ST_KEYWORD_WHILE;
+
                 }
 
                 /* This was added by SniehNikita */
@@ -288,6 +393,41 @@ TOKEN_T * get_next_token()
             case ST_KEYWORD_STRING:
                 token->type = KEYWORD;
                 token->keyword = KEY_STRING;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_COLON:
+                token->type = KEYWORD;
+                token->keyword = KEY_COLON;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_IF:
+                token->type = KEYWORD;
+                token->keyword = KEY_IF;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_VOID:
+                token->type = KEYWORD;
+                token->keyword = KEY_VOID;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_RETURN:
+                token->type = KEYWORD;
+                token->keyword = KEY_RETURN;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_ELSE:
+                token->type = KEYWORD;
+                token->keyword = KEY_ELSE;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_WHILE:
+                token->type = KEYWORD;
+                token->keyword = KEY_WHILE_LOOP;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_KEYWORD_NULL:
+                token->type = KEYWORD;
+                token->keyword = KEY_NULL;
                 ungetc(*edge, stdin);
                 return token;
         }

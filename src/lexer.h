@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include "token.h"
 
-
+//LEXEMY
 enum T_STATE {
     ST_START,
     ST_VAR_PREFIX,
@@ -29,6 +29,13 @@ enum T_STATE {
     ST_KEYWORD_FLOAT,
     ST_KEYWORD_STRING,
     ST_KEYWORD_INT,
+    ST_KEYWORD_COLON,
+    ST_KEYWORD_ELSE,
+    ST_KEYWORD_IF,
+    ST_KEYWORD_WHILE,
+    ST_KEYWORD_RETURN,
+    ST_KEYWORD_NULL,
+    ST_KEYWORD_VOID,
 };
 
 TOKEN_T * get_next_token();
