@@ -47,8 +47,9 @@ void function_end_parsing(){
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
 };
+
 void function_detected(TOKEN_T* initToken){
-    //TODO: check scope
+    //TODO: check scope, check if function already exists
     //catch declaration of f in f
     if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
         exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
@@ -66,7 +67,7 @@ void function_detected(TOKEN_T* initToken){
         if(whilecount > 0){
             token = get_next_token();
         }
-        //skip firt cycle,
+        //skip first cycle,
         whilecount++;
         //check eof and declaration of F inside Fname
         if(is_token_eof(token)){
@@ -154,8 +155,6 @@ void analyze_token(){
                     break;
                 case KEY_FLOAT:
                     break;
-                case KEY_FUNCTION:
-                    break;
                 case KEY_IF:
                     break;
                 case KEY_INT:
@@ -173,6 +172,8 @@ void analyze_token(){
                 case KEY_BEGIN:
                     break;
                 case KEY_COLON:
+                    break;
+                case KEY_FUNCTION:
                     break;
             }
             break;

@@ -71,13 +71,6 @@ enum RULE_TYPE_T {
 };
 
 /* ------ Rules description ------ */
-typedef struct TOKENS_EXP{
-    struct TOKENS_EXP* left_token;    //left token
-    struct TOKENS_EXP* right_token;   //right token
-    TOKEN_T* token_data;             //this token data
-} T_EXP_DATA;
-
-
 //wtf block
 typedef struct {
     TOKEN_T * value_token;
@@ -146,6 +139,7 @@ enum SNS_ERROR {
 };
 
 //jeza
+
 typedef struct {
     bool fParsing;
     bool fHeadParsed;
@@ -162,9 +156,12 @@ typedef struct {
     int openedBracesCount;
     TOKEN_T *lastScopeOpeningToken;
 } scopeHelper;
+
 void analyze_token();
 void function_detected(TOKEN_T* token);
-void function_init(parseFunctionHelper* functionInit);
+void function_end_parsing();
+
+
 //nikita
 int SNS_start(char *filename);
 int SNS_Assign_value(RULE_T ** rule, TOKEN_T * token);
