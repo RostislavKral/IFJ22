@@ -20,6 +20,7 @@ enum T_TOKEN_TYPE
     RBRACE,         //  12
     COMMA,          //  13
     DATA_TYPE,      //  14
+    FUNC_CALL       //  15  function call
 
     //TBD
 };
@@ -35,7 +36,7 @@ enum T_OPERATOR {
     GREATER,            //6  >
     LESS_EQUAL,         //7  <=
     GREATER_EQUAL,      //8  >=
-    EQUALS,             //9  ==
+    EQUALS,             //9  =
     NOT_EQUAL,          //10 !=
     TYPE_EQUALS,        //11 ===
     TYPE_NOT_EQUALS,    //12 !==

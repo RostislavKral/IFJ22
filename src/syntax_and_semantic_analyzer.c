@@ -27,11 +27,12 @@ scopeHelper scope = {
         .num = 0,
         .openedBracesCount = 0,
         .lastScopeOpeningToken = NULL,
-        //TODO
-
-
+        .isDefined = false
 };
-
+void init_sym_tables(){
+    scope.globalSymTable = htab_init(1);
+    scope.localSymTable = htab_init(1);
+}
 bool is_token_eof(TOKEN_T* token){
     if(token->type == ISEOF){
         fprintf(stderr, "%s", "EOF");
@@ -97,9 +98,57 @@ void function_end_parsing(){
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
 };
-void parse_expression(){
+
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void analyze_and_store_expression(expStack *stack,TOKEN_T token){
+    TOKEN_T *nextToken = get_next_token();
+    if(nextToken->operators == token.operators){
+        //TODO ERR 2 operatory za s sebou
+    }
+    expr_stack_push_to_bottom(stack,token);
 
 }
+void if_condition(){
+    TOKEN_T *firstConditionToken = get_next_token();
+    if (firstConditionToken->type == TOKEN_ID){
+        //TODO CHECK IF VAR EXISTS
+    }
+}
+
+void var_declaration(TOKEN_T token){
+    if (token.keyword == KEY_INT || token.keyword == KEY_FLOAT || token.keyword == KEY_STRING){
+        TOKEN_T *operatorToken = get_next_token();
+        if(operatorToken->type != EQUALS) exit_with_message(operatorToken->lineNum, operatorToken->charNum, "Invalid assing",SYNTAX_ERR);
+        //TODO store to symtable
+    } else {
+        exit_with_message(token.lineNum, token.charNum, "CASE STATEMENT ERR", SEM_OTHER);
+    }
+}
+
+void variable_token(TOKEN_T *variable){
+    TOKEN_T *operator = get_next_token();
+    if (operator->operators == EQUALS){
+        //TODO CHECK symtable IF EXISTS..
+        if(htab_find(scope.localSymTable,operator->name)){
+            //update value
+            TOKEN_T* expression = get_next_token();
+
+        } else {
+            //TODO ADD TO LOCAL SYMTABLE
+            htab_lookup_add(scope.localSymTable,operator->name);
+
+        }
+    } else {
+        exit_with_message(operator->lineNum,operator->charNum,"Invalid operator", SYNTAX_ERR);
+    }
+}
+
+void function_call(TOKEN_T *funcName){
+    //htab_find();
+
+}
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 
 void function_detected(TOKEN_T* initToken){
     //TODO: check scope, check if function already exists, isert frame
@@ -201,6 +250,12 @@ void function_detected(TOKEN_T* initToken){
 void analyze_token(){
     TOKEN_T *token;
     token = get_next_token();
+    //TODO UNCOMMENT WHEN LEXER DONE
+//    if(scope.isDefined == false && token->keyword != KEY_BEGIN){
+//        exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
+//    } else if (scope.isDefined == false && token->keyword == KEY_BEGIN){
+//        scope.isDefined = true;
+//    }
     switch (token->type) {
         case KEYWORD:
             switch (token->keyword) {
@@ -214,7 +269,7 @@ void analyze_token(){
                         exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
                     } else {
                         //expression parse
-                        parse_expression();
+                        if_condition();
                     }
                     break;
                 case KEY_INT:
@@ -238,6 +293,7 @@ void analyze_token(){
             }
             break;
         case TOKEN_ID:
+            variable_token(token);
             break;
         case FUNC_ID:
             function_detected(token);
@@ -269,6 +325,9 @@ void analyze_token(){
         case COMMA:
             break;
         case DATA_TYPE:
+            break;
+        case FUNC_CALL:
+            function_call(token);
             break;
     }
 };

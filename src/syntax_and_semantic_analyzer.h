@@ -20,7 +20,9 @@
 
 #include "symtable.h"
 #include "lexer.h"
+#include "expressions.h"
 #include "token.h"
+#include "expression_stack.h"
 //#include "codegen.h"
 
 
@@ -172,12 +174,18 @@ typedef struct {
     htab_t* globalSymTable;
     //for local vars frames
     htab_t* localSymTable;
+    //Check if already <?php is parsed
+    bool isDefined;
 } scopeHelper;
 
+void init_sym_tables();
 void analyze_token();
 void function_detected(TOKEN_T* token);
 void function_end_parsing();
-void parse_expression();
+void if_condition();
+void variable_token(TOKEN_T *variable);
+void function_call(TOKEN_T *funcName);
+
 
 ////LL functions
 //frameList *create_new_frame();
