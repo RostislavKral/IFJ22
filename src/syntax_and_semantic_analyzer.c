@@ -37,6 +37,53 @@ bool is_token_eof(TOKEN_T* token){
         return false;
     }
 }
+
+frameList* create_new_frame() {
+    frameList *newFrameList = malloc(sizeof (struct List));
+   newFrameList->firstElement = NULL;
+    return newFrameList;
+}
+
+void remove_frame(frameList *frame){
+    //kontrola existence
+    if (frame != NULL || frame->firstElement != NULL) {
+        struct frameElement *delNode = frame->firstElement;
+        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
+        while (delNode != NULL){
+            frame->firstElement = delNode->nextElement;
+            free(delNode);
+            delNode = frame->firstElement;
+        }
+        frame->firstElement = NULL;
+    }
+}
+void frame_error(){
+    printf("*ERROR* The program has performed an illegal operation.\n");
+    exit(8);
+}
+void insert_to_frame(frameList *frame, TOKEN_T token){
+    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
+    if (frame == NULL ||newFrameElement == NULL){
+        frame_error();
+    } else {
+        // set dat a nastavim jako first
+        newFrameElement->localVariableToken = token;
+        newFrameElement->nextElement = frame->firstElement;
+        frame->firstElement = newFrameElement;
+    }
+}
+
+frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
+    frameElementPtr tmp = frame.firstElement;
+    while(tmp != NULL){
+        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
+            return tmp;
+        }
+        tmp = tmp->nextElement;
+    }
+    return NULL;
+}
+
 void function_end_parsing(){
     functionHelper.fParsing = false;
     functionHelper.fNamePass = false;

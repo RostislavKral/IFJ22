@@ -140,6 +140,16 @@ enum SNS_ERROR {
 
 //jeza
 
+//Linked list for local variables
+typedef struct frameElement{
+    TOKEN_T localVariableToken;
+    struct frameElement *nextElement;
+} *frameElementPtr;
+
+typedef struct List{
+    frameElementPtr firstElement;
+} frameList;
+
 typedef struct {
     bool fParsing;
     bool fHeadParsed;
@@ -161,6 +171,13 @@ void analyze_token();
 void function_detected(TOKEN_T* token);
 void function_end_parsing();
 
+//LL functions
+frameList *create_new_frame();
+void remove_frame(frameList *list);
+//insert local var to frame, always to first position
+void insert_to_frame(frameList *frame, TOKEN_T token);
+//search for token if not found return NULL
+frameElementPtr search_in_frame(frameList frame, TOKEN_T token);
 
 //nikita
 int SNS_start(char *filename);
