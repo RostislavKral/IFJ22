@@ -26,7 +26,10 @@ parseFunctionHelper functionHelper = {
 scopeHelper scope = {
         .num = 0,
         .openedBracesCount = 0,
-        .lastScopeOpeningToken = NULL
+        .lastScopeOpeningToken = NULL,
+        //TODO
+
+
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -38,51 +41,51 @@ bool is_token_eof(TOKEN_T* token){
     }
 }
 
-frameList* create_new_frame() {
-    frameList *newFrameList = malloc(sizeof (struct List));
-   newFrameList->firstElement = NULL;
-    return newFrameList;
-}
-
-void remove_frame(frameList *frame){
-    //kontrola existence
-    if (frame != NULL || frame->firstElement != NULL) {
-        struct frameElement *delNode = frame->firstElement;
-        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
-        while (delNode != NULL){
-            frame->firstElement = delNode->nextElement;
-            free(delNode);
-            delNode = frame->firstElement;
-        }
-        frame->firstElement = NULL;
-    }
-}
-void frame_error(){
-    printf("*ERROR* The program has performed an illegal operation.\n");
-    exit(8);
-}
-void insert_to_frame(frameList *frame, TOKEN_T token){
-    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
-    if (frame == NULL ||newFrameElement == NULL){
-        frame_error();
-    } else {
-        // set dat a nastavim jako first
-        newFrameElement->localVariableToken = token;
-        newFrameElement->nextElement = frame->firstElement;
-        frame->firstElement = newFrameElement;
-    }
-}
-
-frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
-    frameElementPtr tmp = frame.firstElement;
-    while(tmp != NULL){
-        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
-            return tmp;
-        }
-        tmp = tmp->nextElement;
-    }
-    return NULL;
-}
+//frameList* create_new_frame() {
+//    frameList *newFrameList = malloc(sizeof (struct List));
+//   newFrameList->firstElement = NULL;
+//    return newFrameList;
+//}
+//
+//void remove_frame(frameList *frame){
+//    //kontrola existence
+//    if (frame != NULL || frame->firstElement != NULL) {
+//        struct frameElement *delNode = frame->firstElement;
+//        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
+//        while (delNode != NULL){
+//            frame->firstElement = delNode->nextElement;
+//            free(delNode);
+//            delNode = frame->firstElement;
+//        }
+//        frame->firstElement = NULL;
+//    }
+//}
+//void frame_error(){
+//    printf("*ERROR* The program has performed an illegal operation.\n");
+//    exit(8);
+//}
+//void insert_to_frame(frameList *frame, TOKEN_T token){
+//    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
+//    if (frame == NULL ||newFrameElement == NULL){
+//        frame_error();
+//    } else {
+//        // set dat a nastavim jako first
+//        newFrameElement->localVariableToken = token;
+//        newFrameElement->nextElement = frame->firstElement;
+//        frame->firstElement = newFrameElement;
+//    }
+//}
+//
+//frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
+//    frameElementPtr tmp = frame.firstElement;
+//    while(tmp != NULL){
+//        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
+//            return tmp;
+//        }
+//        tmp = tmp->nextElement;
+//    }
+//    return NULL;
+//}
 
 void function_end_parsing(){
     functionHelper.fParsing = false;
@@ -94,9 +97,12 @@ void function_end_parsing(){
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
 };
+void parse_expression(){
+
+}
 
 void function_detected(TOKEN_T* initToken){
-    //TODO: check scope, check if function already exists
+    //TODO: check scope, check if function already exists, isert frame
     //catch declaration of f in f
     if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
         exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
@@ -203,6 +209,13 @@ void analyze_token(){
                 case KEY_FLOAT:
                     break;
                 case KEY_IF:
+                    token = get_next_token();
+                    if(token->type != LPAR){
+                        exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
+                    } else {
+                        //expression parse
+                        parse_expression();
+                    }
                     break;
                 case KEY_INT:
                     break;
@@ -243,6 +256,7 @@ void analyze_token(){
             //TODO: EOF exit, check opened functions, params, attr, etc.
             break;
         case PROG_START:
+            //TODO: call generate code
             break;
         case SEMICOLON:
             break;
