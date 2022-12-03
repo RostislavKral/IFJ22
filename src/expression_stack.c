@@ -3,53 +3,42 @@
 //
 
 #include "expression_stack.h"
-void expr_stack_init(expStack* newStack){
-    newStack->topItem = NULL;
-    newStack->itemsCount = 0;
+void DLL_init(DLList* list){
+    list->first = NULL;
+    list->last = NULL;
 }
-void expr_stack_push_to_top(expStack *stack, TOKEN_T token) {
-    struct stackItem *newItem = malloc(sizeof(struct stackItem));
+void DLL_insert_first(DLList *list, TOKEN_T* token) {
+    struct DLLItem *newItem = malloc(sizeof(struct DLLItem));
     newItem->token = token;
-    newItem->tokenOperator = token.operators;
-    newItem->tokenType = token.type;
-    newItem->nextItem = stack->topItem;
-    stack->topItem = newItem;
-    stack->itemsCount++;
+    newItem->nextItem = list->first;
+    newItem->prevItem = NULL;
+    list->first = newItem;
+    list->itemsCount++;
 }
-void expr_stack_push_to_bottom(expStack *stack, TOKEN_T token){
-    struct stackItem *newItem = malloc(sizeof(struct stackItem));
+void DLL_insert_last(DLList *list, TOKEN_T* token){
+    struct DLLItem *newItem = malloc(sizeof(struct DLLItem));
     newItem->token = token;
-    newItem->tokenType = token.type;
-    newItem->tokenOperator = token.operators;
     newItem->nextItem = NULL;
-    expStackItem *tmp = stack->topItem;
-    while (tmp->nextItem != NULL){
-        tmp = tmp->nextItem;
-    }
-    tmp->nextItem = newItem;
-    stack->itemsCount++;
+    newItem->prevItem = list->last;
+    list->last = newItem;
+    list->itemsCount++;
 }
-void expr_stack_pop(expStack* stack){
-    expStackItem *tmp = stack->topItem;
-    stack->topItem = stack->topItem->nextItem;
-    free(tmp);
+DLLItem* DLL_pop_first(DLList* list){
+    DLLItem* result = list->first;
+    list->first = result->nextItem;
+    return result;
 }
 
-expStackItem* exp_stack_get_top(expStack* stack){
-    return stack->topItem;
+DLLItem* DLL_pop_last(DLList* list){
+    DLLItem* result = list->last;
+    list->last = result->prevItem;
+    return result;
 }
 
-expStackItem* exp_stack_get_top_pop(expStack* stack){
-    expStackItem *tmp;
-    tmp = stack->topItem;
-    expr_stack_pop(stack);
-    return tmp;
+DLLItem* DLL_get_first(DLList* list){
+    return list->first;
 }
-expStackItem* exp_stack_get_bottom(expStack* stack){
-    expStackItem *tmp;
-    tmp = stack->topItem;
-    while (tmp->nextItem != NULL){
-        tmp = tmp->nextItem;
-    }
-    return tmp;
+
+DLLItem* stack_get_bottom(DLList* list){
+    return list->last;
 }
