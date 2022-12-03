@@ -24,7 +24,7 @@ typedef struct DLList {
 } DLList;
 
 void DLL_init(DLList* list);
-void LL_insert_first(DLList* list, TOKEN_T* token);
+void DLL_insert_first(DLList* list, TOKEN_T* token);
 void DLL_insert_last(DLList* list, TOKEN_T* token);
 DLLItem* DLL_pop_first(DLList* list);
 DLLItem* DLL_pop_last(DLList* list);

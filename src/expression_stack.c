@@ -26,12 +26,14 @@ void DLL_insert_last(DLList *list, TOKEN_T* token){
 DLLItem* DLL_pop_first(DLList* list){
     DLLItem* result = list->first;
     list->first = result->nextItem;
+    list->itemsCount--;
     return result;
 }
 
 DLLItem* DLL_pop_last(DLList* list){
     DLLItem* result = list->last;
     list->last = result->prevItem;
+    list->itemsCount--;
     return result;
 }
 
@@ -39,6 +41,6 @@ DLLItem* DLL_get_first(DLList* list){
     return list->first;
 }
 
-DLLItem* stack_get_bottom(DLList* list){
+DLLItem* DLL_get_last(DLList* list){
     return list->last;
 }

@@ -12,5 +12,8 @@
 #include "symtable.h"
 #include "lexer.h"
 #include "token.h"
-//TODO precedenc table
+#include "expression_stack.h"
+#include "expression_stack.c"
 #endif //IFJ22_EXPRESSIONS_H
+
+void analyze_precedence(DLList* list);
