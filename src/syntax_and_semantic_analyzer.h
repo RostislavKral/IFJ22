@@ -18,8 +18,11 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "symtable.h"
 #include "lexer.h"
+#include "expressions.h"
 #include "token.h"
+#include "expression_stack.h"
 //#include "codegen.h"
 
 
@@ -140,15 +143,15 @@ enum SNS_ERROR {
 
 //jeza
 
-//Linked list for local variables
-typedef struct frameElement{
-    TOKEN_T localVariableToken;
-    struct frameElement *nextElement;
-} *frameElementPtr;
-
-typedef struct List{
-    frameElementPtr firstElement;
-} frameList;
+////Linked list for local variables
+//typedef struct frameElement{
+//    TOKEN_T localVariableToken;
+//    struct frameElement *nextElement;
+//} *frameElementPtr;
+//
+//typedef struct List{
+//    frameElementPtr firstElement;
+//} frameList;
 
 typedef struct {
     bool fParsing;
@@ -162,22 +165,35 @@ typedef struct {
 } parseFunctionHelper;
 
 typedef struct {
+    //scope number
     int num;
+    //opened braces eg. fun(){ if(){ == 2 opened braces
     int openedBracesCount;
     TOKEN_T *lastScopeOpeningToken;
+    //for function definitions
+    htab_t* globalSymTable;
+    //for local vars frames
+    htab_t* localSymTable;
+    //Check if already <?php is parsed
+    bool isDefined;
 } scopeHelper;
 
+void init_sym_tables();
 void analyze_token();
 void function_detected(TOKEN_T* token);
 void function_end_parsing();
+void if_condition();
+void variable_token(TOKEN_T *variable);
+void function_call(TOKEN_T *funcName);
 
-//LL functions
-frameList *create_new_frame();
-void remove_frame(frameList *list);
-//insert local var to frame, always to first position
-void insert_to_frame(frameList *frame, TOKEN_T token);
-//search for token if not found return NULL
-frameElementPtr search_in_frame(frameList frame, TOKEN_T token);
+
+////LL functions
+//frameList *create_new_frame();
+//void remove_frame(frameList *list);
+////insert local var to frame, always to first position
+//void insert_to_frame(frameList *frame, TOKEN_T token);
+////search for token if not found return NULL
+//frameElementPtr search_in_frame(frameList frame, TOKEN_T token);
 
 //nikita
 int SNS_start(char *filename);

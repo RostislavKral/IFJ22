@@ -26,9 +26,13 @@ parseFunctionHelper functionHelper = {
 scopeHelper scope = {
         .num = 0,
         .openedBracesCount = 0,
-        .lastScopeOpeningToken = NULL
+        .lastScopeOpeningToken = NULL,
+        .isDefined = false
 };
-
+void init_sym_tables(){
+    scope.globalSymTable = htab_init(1);
+    scope.localSymTable = htab_init(1);
+}
 bool is_token_eof(TOKEN_T* token){
     if(token->type == ISEOF){
         fprintf(stderr, "%s", "EOF");
@@ -38,51 +42,51 @@ bool is_token_eof(TOKEN_T* token){
     }
 }
 
-frameList* create_new_frame() {
-    frameList *newFrameList = malloc(sizeof (struct List));
-   newFrameList->firstElement = NULL;
-    return newFrameList;
-}
-
-void remove_frame(frameList *frame){
-    //kontrola existence
-    if (frame != NULL || frame->firstElement != NULL) {
-        struct frameElement *delNode = frame->firstElement;
-        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
-        while (delNode != NULL){
-            frame->firstElement = delNode->nextElement;
-            free(delNode);
-            delNode = frame->firstElement;
-        }
-        frame->firstElement = NULL;
-    }
-}
-void frame_error(){
-    printf("*ERROR* The program has performed an illegal operation.\n");
-    exit(8);
-}
-void insert_to_frame(frameList *frame, TOKEN_T token){
-    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
-    if (frame == NULL ||newFrameElement == NULL){
-        frame_error();
-    } else {
-        // set dat a nastavim jako first
-        newFrameElement->localVariableToken = token;
-        newFrameElement->nextElement = frame->firstElement;
-        frame->firstElement = newFrameElement;
-    }
-}
-
-frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
-    frameElementPtr tmp = frame.firstElement;
-    while(tmp != NULL){
-        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
-            return tmp;
-        }
-        tmp = tmp->nextElement;
-    }
-    return NULL;
-}
+//frameList* create_new_frame() {
+//    frameList *newFrameList = malloc(sizeof (struct List));
+//   newFrameList->firstElement = NULL;
+//    return newFrameList;
+//}
+//
+//void remove_frame(frameList *frame){
+//    //kontrola existence
+//    if (frame != NULL || frame->firstElement != NULL) {
+//        struct frameElement *delNode = frame->firstElement;
+//        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
+//        while (delNode != NULL){
+//            frame->firstElement = delNode->nextElement;
+//            free(delNode);
+//            delNode = frame->firstElement;
+//        }
+//        frame->firstElement = NULL;
+//    }
+//}
+//void frame_error(){
+//    printf("*ERROR* The program has performed an illegal operation.\n");
+//    exit(8);
+//}
+//void insert_to_frame(frameList *frame, TOKEN_T token){
+//    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
+//    if (frame == NULL ||newFrameElement == NULL){
+//        frame_error();
+//    } else {
+//        // set dat a nastavim jako first
+//        newFrameElement->localVariableToken = token;
+//        newFrameElement->nextElement = frame->firstElement;
+//        frame->firstElement = newFrameElement;
+//    }
+//}
+//
+//frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
+//    frameElementPtr tmp = frame.firstElement;
+//    while(tmp != NULL){
+//        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
+//            return tmp;
+//        }
+//        tmp = tmp->nextElement;
+//    }
+//    return NULL;
+//}
 
 void function_end_parsing(){
     functionHelper.fParsing = false;
@@ -95,8 +99,59 @@ void function_end_parsing(){
     functionHelper.fBraceCountCheck = 0;
 };
 
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+void analyze_and_store_expression(DLList *list,TOKEN_T* token){
+    TOKEN_T *nextToken = get_next_token();
+    if(nextToken->operators == token->operators){
+        //TODO ERR 2 operatory za s sebou
+    }
+    DLL_insert_last(list, token);
+
+}
+void if_condition(){
+    TOKEN_T *firstConditionToken = get_next_token();
+    if (firstConditionToken->type == TOKEN_ID){
+        //TODO CHECK IF VAR EXISTS
+    }
+}
+
+void var_declaration(TOKEN_T token){
+    if (token.keyword == KEY_INT || token.keyword == KEY_FLOAT || token.keyword == KEY_STRING){
+        TOKEN_T *operatorToken = get_next_token();
+        if(operatorToken->type != EQUALS) exit_with_message(operatorToken->lineNum, operatorToken->charNum, "Invalid assing",SYNTAX_ERR);
+        //TODO store to symtable
+    } else {
+        exit_with_message(token.lineNum, token.charNum, "CASE STATEMENT ERR", SEM_OTHER);
+    }
+}
+
+void variable_token(TOKEN_T *variable){
+    TOKEN_T *operator = get_next_token();
+    if (operator->operators == EQUALS){
+        //TODO CHECK symtable IF EXISTS..
+        if(htab_find(scope.localSymTable,operator->name)){
+            //update value
+            TOKEN_T* expression = get_next_token();
+
+        } else {
+            //TODO ADD TO LOCAL SYMTABLE
+            htab_lookup_add(scope.localSymTable,operator->name);
+
+        }
+    } else {
+        exit_with_message(operator->lineNum,operator->charNum,"Invalid operator", SYNTAX_ERR);
+    }
+}
+
+void function_call(TOKEN_T *funcName){
+    //htab_find();
+
+}
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 void function_detected(TOKEN_T* initToken){
-    //TODO: check scope, check if function already exists
+    //TODO: check scope, check if function already exists, isert frame
     //catch declaration of f in f
     if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
         exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
@@ -195,6 +250,12 @@ void function_detected(TOKEN_T* initToken){
 void analyze_token(){
     TOKEN_T *token;
     token = get_next_token();
+    //TODO UNCOMMENT WHEN LEXER DONE
+//    if(scope.isDefined == false && token->keyword != KEY_BEGIN){
+//        exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
+//    } else if (scope.isDefined == false && token->keyword == KEY_BEGIN){
+//        scope.isDefined = true;
+//    }
     switch (token->type) {
         case KEYWORD:
             switch (token->keyword) {
@@ -203,6 +264,13 @@ void analyze_token(){
                 case KEY_FLOAT:
                     break;
                 case KEY_IF:
+                    token = get_next_token();
+                    if(token->type != LPAR){
+                        exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
+                    } else {
+                        //expression parse
+                        if_condition();
+                    }
                     break;
                 case KEY_INT:
                     break;
@@ -225,6 +293,7 @@ void analyze_token(){
             }
             break;
         case TOKEN_ID:
+            variable_token(token);
             break;
         case FUNC_ID:
             function_detected(token);
@@ -243,6 +312,7 @@ void analyze_token(){
             //TODO: EOF exit, check opened functions, params, attr, etc.
             break;
         case PROG_START:
+            //TODO: call generate code
             break;
         case SEMICOLON:
             break;
@@ -255,6 +325,9 @@ void analyze_token(){
         case COMMA:
             break;
         case DATA_TYPE:
+            break;
+        case FUNC_CALL:
+            function_call(token);
             break;
     }
 };
