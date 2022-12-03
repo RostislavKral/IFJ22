@@ -100,12 +100,12 @@ void function_end_parsing(){
 };
 
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void analyze_and_store_expression(expStack *stack,TOKEN_T token){
+void analyze_and_store_expression(DLList *list,TOKEN_T* token){
     TOKEN_T *nextToken = get_next_token();
-    if(nextToken->operators == token.operators){
+    if(nextToken->operators == token->operators){
         //TODO ERR 2 operatory za s sebou
     }
-    expr_stack_push_to_bottom(stack,token);
+    DLL_insert_last(list, token);
 
 }
 void if_condition(){
