@@ -500,6 +500,10 @@ void WriteToken(TOKEN_T * token) {
             printf("ISEOF\n");
             break;
 
+        case FUNC_CALL:
+            printf("FUNC CALL name: %s\n", token->name);
+            break;
+
         default:
             printf("UNKNOWN: type: %d, name: %s, value type: %d\n", token->type, token->name, token->value.type);
             break;

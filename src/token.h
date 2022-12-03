@@ -20,7 +20,7 @@ enum T_TOKEN_TYPE
     RBRACE,         //  12
     COMMA,          //  13
     DATA_TYPE,      //  14
-
+    FUNC_CALL,      //  15
     //TBD
 };
 
@@ -54,8 +54,8 @@ enum T_KEYWORD {
     KEY_STRING,     //7  
     KEY_WHILE_LOOP, //8  
     KEY_VOID,       //9  
-    KEY_BEGIN,      //10 <?php
-    KEY_COLON       //11 :
+    KEY_COLON,      //10 :
+    KEY_BEGIN       //11 <?php // prolog asi to tu nebude ale pratele
 };
 
 

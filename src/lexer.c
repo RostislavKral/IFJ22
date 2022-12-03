@@ -11,19 +11,60 @@
 #include <stdlib.h>
 
 
-
 #define bool int
 #define true 1
 #define false 0
 
 
-bool is_keyword(char* keyword)
-{
-    return 0;
+int is_keyword(char *keyword) {
+    char *keywords[] = {"else", "float", "function", "if", "int", "null", "return", "string", "while", "void", "colon"};
+
+    for (int i = 0; i < 11; i++) {
+        if (strcmp(keyword, keywords[i]) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
-bool is_data_type(char* data_type)
-{
+
+enum T_STATE getFunctionCallOrKeywordLexeme(char *keyword) {
+    int lexeme = is_keyword(keyword);
+    if (lexeme >= 0) {
+        switch (lexeme) {
+            case 0:
+                return ST_KEYWORD_ELSE;
+            case 1:
+                return ST_KEYWORD_FLOAT;
+            case 2:
+                return ST_FUNC;
+            case 3:
+                return ST_KEYWORD_IF;
+            case 4:
+                return ST_KEYWORD_INT;
+            case 5:
+                return ST_KEYWORD_NULL;
+            case 6:
+                return ST_KEYWORD_RETURN;
+            case 7:
+                return ST_KEYWORD_STRING;
+            case 8:
+                return ST_KEYWORD_WHILE;
+            case 9:
+                return ST_KEYWORD_VOID;
+            case 10:
+                return ST_KEYWORD_COLON;
+
+
+        }
+    } else {
+        return ST_FUNC_CALL;
+    }
+
+}
+
+bool is_data_type(char *data_type) {
     //if(strcmp())
 }
 
@@ -38,27 +79,37 @@ struct T_TOKEN make_token()
 
 
 
+bool control = 0;
+char *c;
 
-
-TOKEN_T * get_next_token()
-{
-    TOKEN_T * token;
+TOKEN_T *get_next_token() {
+    TOKEN_T *token;
     token = malloc(sizeof(TOKEN_T));
 
     enum T_STATE state = ST_START;
 
-    char *edge = malloc(sizeof (char));
-    char tmp;
+    char *edge = malloc(sizeof(char));
 
-    DYN_STRING_T str;
+
+    DYN_STRING_T str, fun_name;
     str_init(&str);
+    str_init(&fun_name);
 
-    while(true){
 
-        tmp = getc(stdin);
-       // printf("%c\n", tmp);
-        *edge = tmp;
-        if(*edge == EOF){
+    while (true) {
+
+        *edge = fgetc(stdin);
+
+        // str_conc(&str, edge);
+/*
+       if(control == 0 && state == ST_READ)
+       {
+           control = 1;
+           str_conc(&str, edge);
+           printf("%s \n\n\n", str.str);
+       }*/
+
+        if (*edge == EOF) {
             token->type = ISEOF;
             token->name = NULL;
             return token;
@@ -66,234 +117,33 @@ TOKEN_T * get_next_token()
 
         switch (state) {
             case ST_START:
+                //printf("%c", *edge);
+
                 if (*edge == '(') state = ST_LEFT_PARENTHESES;
-                if (*edge == ')') state = ST_RIGHT_PARENTHESES;
-                if (*edge == '{') state = ST_LEFT_CURLYBRACKET;
-                if (*edge == '}') state = ST_RIGHT_CURLYBRACKET;
-                if (*edge == ',') state = ST_COMMA;
-                if (*edge == ':') state = ST_KEYWORD_COLON;
-                if (*edge == '-') state = ST_OP_MINUS;
-                if (*edge == '+') state = ST_OP_PLUS;
-                if (*edge == '/') state = ST_OP_DIVIDE;
-                if (*edge == '*') state = ST_OP_MULTIPLY;
-                if (*edge == '.') state = ST_OP_CONCAT;
-                if (*edge == '<') state = ST_OP_LESSER_THAN;
-                if (*edge == '>') state = ST_OP_GREATER_THAN;
-                if (*edge == '"') state = ST_STRING_LITERAL;
-                //TODO: OPERATORY!!!!!!
+                else if (*edge == ' ') state = ST_START;
+                else if (*edge == ')') state = ST_RIGHT_PARENTHESES;
+                else if (*edge == '{') state = ST_LEFT_CURLYBRACKET;
+                else if (*edge == '}') state = ST_RIGHT_CURLYBRACKET;
+                else if (*edge == ',') state = ST_COMMA;
+                else if (*edge == ':') state = ST_KEYWORD_COLON;
+                else if (*edge == '-') state = ST_OP_MINUS;
+                else if (*edge == '+') state = ST_OP_PLUS;
+                else if (*edge == '/') state = ST_OP_DIVIDE;
+                else if (*edge == '*') state = ST_OP_MULTIPLY;
+                else if (*edge == '.') state = ST_OP_CONCAT;
+                else if (*edge == '<') state = ST_OP_LESSER_THAN;
+                else if (*edge == '>') state = ST_OP_GREATER_THAN;
+                else if (*edge == '"') state = ST_STRING_LITERAL;
+                else if (*edge == ';') state = ST_SEMICOLON;
+                    //TODO: OPERATORY!!!!!!
 
 
-                if (*edge == '$') {
+                else if (*edge == '$') {
                     state = ST_VAR_PREFIX;
                     token->type = TOKEN_ID;
-                }
+                } else if (*edge == '=') state = ST_OP_ASSIGN;
+                else state = ST_READ;
 
-                if (*edge == '=') state = ST_OP_ASSIGN;
-                if (*edge == 'f') {
-                    int isFunction = 1;
-                    int isFloat = 1;
-                    char c;
-                    char pref[] = {'n', 'c', 't', 'i', 'o', 'n'};
-                    char floatType[] = {'o', 'a', 't'};
-                    c = fgetc(stdin);
-                    if (c == 'u') {
-
-                        for (int i = 0; i < 6; i++) {
-                            c = fgetc(stdin);
-                            if (c != pref[i]) isFunction = 0;
-                            if (!isFunction) {
-                                exit(1);
-                                /*state = ERROR;
-                                token->type = ERROR;
-                                token->name = NULL;
-                                break; */
-                            }
-                        }
-
-                        state = ST_FUNC;
-
-                        printf("\n\nIs function: %d\n\n", isFunction);
-                    } else if (c == 'l') {
-                        for (int i = 0; i < 3; i++) {
-                            c = fgetc(stdin);
-                            if (c != floatType[i]) isFloat = 0;
-                            if (!isFloat) {
-                                exit(1);
-                                /*state = ERROR;
-                                token->type = ERROR;
-                                token->name = NULL;
-                                break; */
-                            }
-                        }
-
-                        state = ST_KEYWORD_FLOAT;
-                        //printf("float je to ");
-                    } else {
-                        exit(1);
-                    }
-
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                }
-
-                if (*edge == 'i') {
-                    char c;
-                    bool isValid = 1;
-
-                    c = fgetc(stdin);
-                    if (c == 'n') {
-
-                        c = fgetc(stdin);
-                        if (c != 't') isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-
-                        state = ST_KEYWORD_INT;
-                    } else if (c == 'f') {
-                        state = ST_KEYWORD_IF;
-                    } else exit(1); //error
-                    if (fgetc(stdin) != ' ') exit(1);
-
-
-                }
-
-                if (*edge == 'e') {
-                    char c;
-                    bool isValid = 1;
-                    char pref[] = {'l', 's', 'e'};
-
-
-                    for (int i = 0; i < 3; i++) {
-                        c = fgetc(stdin);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-                    }
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                    state = ST_KEYWORD_ELSE;
-                }
-
-                if (*edge == 'r') {
-                    char c;
-                    bool isValid = 1;
-                    char pref[] = {'e', 't', 'u', 'r', 'n'};
-
-
-                    for (int i = 0; i < 5; i++) {
-                        c = fgetc(stdin);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-                    }
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                    state = ST_KEYWORD_RETURN;
-                }
-
-                if (*edge == 'n') {
-                    char c;
-                    bool isValid = 1;
-                    char pref[] = {'u', 'l', 'l'};
-
-
-                    for (int i = 0; i < 3; i++) {
-                        c = fgetc(stdin);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-                    }
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                    state = ST_KEYWORD_NULL;
-                }
-
-                if (*edge == 'v') {
-                    char c;
-                    bool isValid = 1;
-                    char pref[] = {'o', 'i', 'd'};
-
-
-                    for (int i = 0; i < 3; i++) {
-                        c = fgetc(stdin);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-                    }
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                    state = ST_KEYWORD_VOID;
-                }
-
-                if (*edge == 's') {
-                    char c;
-                    bool isValid = 1;
-                    char pref[] = {'t', 'r', 'i', 'n', 'g'};
-
-
-                    for (int i = 0; i < 5; i++) {
-                        c = fgetc(stdin);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break; */
-                        }
-                    }
-                    if (fgetc(stdin) != ' ') exit(1);
-
-                    state = ST_KEYWORD_STRING;
-                }
-
-                if (*edge == 'w') {
-                    char c;
-                    char pref[] = {'h', 'i', 'l', 'e'};
-                    bool isValid = 1;
-
-                    for (int i = 0; i < 4; i++) {
-                        c = fgetc(stdin);
-                        //  printf("%c,%c,", c, pref[i]);
-                        if (c != pref[i]) isValid = 0;
-                        if (!isValid) {
-                            exit(1);
-                            /*state = ERROR;
-                            token->type = ERROR;
-                            token->name = NULL;
-                            break;*/
-                        }
-                    }
-
-                    if (fgetc(stdin) != ' ') exit(1);
-                    state = ST_KEYWORD_WHILE;
-
-                }
 
                 /* This was added by SniehNikita */
                 if (isdigit(*edge)) {
@@ -308,6 +158,7 @@ TOKEN_T * get_next_token()
                     str_conc(&str, edge);
                     state = ST_VAR;
                 }
+
                 break;
             case ST_VAR:
 
@@ -376,15 +227,15 @@ TOKEN_T * get_next_token()
                 token->operators = GREATER;
                 return token;
             case ST_FUNC:
-
-                if (*edge != ' ' && isalnum(*edge)) {
-                    str_conc(&str, edge);
+                //printf("%c", *edge);
+                /*if (*//**edge != ' ' &&*//* isalnum(*edge)) {
+                    str_conc(&fun_name, edge);
                     continue;
-                }
+                }*
                 ungetc(*edge, stdin);
-
+*/
                 token->type = FUNC_ID;
-                token->name = str.str;
+                //token->name = fun_name.str;
                 return token;
 
             case ST_ERROR:
@@ -423,7 +274,7 @@ TOKEN_T * get_next_token()
                     token->value.int_val = 0;
                     return token;
                 } else {
-                    printf("%d", isValid);
+                    //printf("%d", isValid);
 
                     ungetc(*edge, stdin);
                     token->type = LITERAL;
@@ -444,19 +295,18 @@ TOKEN_T * get_next_token()
 
             case ST_STRING_LITERAL:
 
-                while (*edge != '"')
-                {
+                if(*edge != '"') {
 
                     str_conc(&str, edge);
-                    *edge = fgetc(stdin);
-                    if(*edge == '"') break;
-                }
+                   // *edge = fgetc(stdin);
+                   // if (*edge == '"') break;
+                }else {
 
                 ungetc(*edge, stdin);
                 token->type = LITERAL;
                 token->value.char_val = str.str;
                 token->value.type = 1;
-                return token;
+                return token;}
                 break;
             case ST_LEFT_PARENTHESES:
                 token->type = LPAR;
@@ -529,17 +379,44 @@ TOKEN_T * get_next_token()
                 token->keyword = KEY_NULL;
                 ungetc(*edge, stdin);
                 return token;
-        }
+            case ST_SEMICOLON:
+                token->type = SEMICOLON;
+                ungetc(*edge, stdin);
+                return token;
+            case ST_FUNC_CALL:
+                token->type = FUNC_CALL;
+                token->name = str.str;
+            //    str_destroy(&str);
+              //  ungetc(*edge, stdin);
+                return token;
+            case ST_READ:
+//                printf(" ");
+                //printf("%c", *edge);
 
+                if (*edge == ' ' || *edge == '(' || *edge == '\n') {
+
+                    //  exit(1);
+                    //ungetc(*edge, stdin);
+
+                    state = getFunctionCallOrKeywordLexeme(str.str);
+                   // str_destroy(&str);
+                    // printf("%s", str.str);
+                    // printf("%d",state);
+                    break;
+                }
+                    // printf("%c", *edge);
+                else {
+                    state = ST_READ;
+                    str_conc(&str, edge);
+
+                }
+
+                //   break;
+                //   exit(1);
+
+        }
 
 
     }
 
 }
-/*
-switch (state) {
-    case ID: str += a;
-    iskeyword(str);
-
-}
-*/

@@ -44,6 +44,10 @@ enum T_STATE {
     ST_KEYWORD_RETURN,
     ST_KEYWORD_NULL,
     ST_KEYWORD_VOID,
+    ST_FUNC_CALL,
+    ST_SEMICOLON,
+    ST_READ,
+
 };
 
 TOKEN_T * get_next_token();
