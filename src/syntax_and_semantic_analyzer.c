@@ -316,7 +316,7 @@ void analyze_token(htab_t* symtable){
             break;
         case FUNC_ID:
             function_detected(token, symtable);
-            analyze_token(symtable);.
+            analyze_token(symtable);
             break;
         case LITERAL:
             break;
@@ -582,9 +582,11 @@ void WriteToken(TOKEN_T * token) {
                 case MINUS:
                     printf("OPERATOR: -\n");
                     break;
-
+                case TYPE_EQUALS:
+                    printf("OPERATOR: === \n");
+                    break;
                 default:
-                    printf("OPERATOR: unknown\n");
+                    printf("OPERATOR: unknown, %u\n", token->operators);
                     break;
             }
             break;
