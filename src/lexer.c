@@ -97,8 +97,9 @@ TOKEN_T *get_next_token() {
 
 
     while (true) {
-
         *edge = fgetc(stdin);
+//        printf("__________%c", *edge);
+//        printf("%d", state);
 
         // str_conc(&str, edge);
 /*
@@ -117,10 +118,10 @@ TOKEN_T *get_next_token() {
 
         switch (state) {
             case ST_START:
-                //printf("%c", *edge);
 
                 if (*edge == '(') state = ST_LEFT_PARENTHESES;
                 else if (*edge == ' ') state = ST_START;
+                else if (*edge == '\n') state = ST_START;
                 else if (*edge == ')') state = ST_RIGHT_PARENTHESES;
                 else if (*edge == '{') state = ST_LEFT_CURLYBRACKET;
                 else if (*edge == '}') state = ST_RIGHT_CURLYBRACKET;
@@ -143,7 +144,12 @@ TOKEN_T *get_next_token() {
                     state = ST_VAR_PREFIX;
                     token->type = TOKEN_ID;
                 } else if (*edge == '=') state = ST_OP_ASSIGN;
-                else state = ST_READ;
+                else
+                {
+                    //printf("____%s", edge);
+                    state = ST_READ;
+                    ungetc(*edge, stdin);
+                }
 
 
                 /* This was added by SniehNikita */
@@ -387,21 +393,25 @@ TOKEN_T *get_next_token() {
             case ST_FUNC_CALL:
                 token->type = FUNC_CALL;
                 token->name = str.str;
+                // printf("__________%s", str.str);
                 //str_destroy(&str);
-              //  ungetc(*edge, stdin);
+                ungetc(*edge, stdin);
                 return token;
             case ST_READ:
 //                printf(" ");
-                //printf("%c", *edge);
+                // printf("______%c", *edge);
 
                 if (*edge == ' ' || *edge == '(' || *edge == '\n') {
 
                     //  exit(1);
-                    //ungetc(*edge, stdin);
+                    if (*edge == '(')
+                    {
+                        ungetc(*edge, stdin);
+                    }
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
                     //str_destroy(&str);
-                    // printf("%s", str.str);
+                    // printf("________%s", str.str);
                     // printf("%d",state);
                     break;
                 }
@@ -411,7 +421,7 @@ TOKEN_T *get_next_token() {
                     str_conc(&str, edge);
 
                 }
-
+                // printf("____string: %s\n", str.str);
                 //   break;
                 //   exit(1);
            /* default:

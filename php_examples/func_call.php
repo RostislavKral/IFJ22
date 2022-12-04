@@ -1,4 +1,4 @@
  ))
-ifa(); ifo();
-if() ifon()ifo()
+ifa();ifo();
+if();ifon();ifo()
 return "wqe"
