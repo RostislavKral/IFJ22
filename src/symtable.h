@@ -27,19 +27,14 @@
 #define MAX_SPACE_TAKEN 0.75
 
 
-// Key type
-typedef const char * htab_key_t;
-
 
 typedef enum {
-    NO_VALUE_TYPE,
     FUNC,
     VAR,
-    LIT
 } htab_value_type;
 
 typedef enum {
-    NO_DATA_TYPE,
+    VOID_T,
     INT_T,
     FLOAT_T,
     STRING_T
@@ -52,48 +47,59 @@ typedef union {
 } htab_value;
 
 
-
 /**
  * @brief Data container of the element
  * 
  * Fields are filled based on the value type:
- *  - FUNC:
- *      key             -- name of the function
- *      data_type       -- type of return value
+ *  - FUNC: 
+ *      data_type       -- return value + type of return value
  *      params_count    -- number function params
  * 
- *  - VAR:
- *      key             -- name of the variable
+ *  - VAR: 
  *      data_type       -- type of the variable
  *      value           -- value of the variable
- * 
- *  - LIT:
- *      key             -- TODO
- *      data_type       -- type of the literal
- *      value           -- value of the literal
  * 
  */
 typedef struct htab_data {
     htab_value_type type;
-    htab_data_type data_type;
+
+    htab_data_type * data_type;
     int params_count;
     htab_value value;
 } htab_data_t;
 
 
-typedef struct htab_pair {
+typedef const char * htab_key_t;
+typedef struct htab_item htab_item_t;
+
+typedef struct htab_item {
     htab_key_t    key;
-    htab_data_t  value;
-} htab_pair_t; 
+    int scope;
 
+    htab_data_t data;
 
-struct htab;
+    htab_item_t * next;
+} htab_item_t; 
+
+typedef struct htab_link {
+    htab_item_t * item;
+} htab_link_t;
+
+struct htab {
+    size_t size;
+    size_t arr_size;
+    htab_link_t ** arr_ptr;
+};
 typedef struct htab htab_t;
 
 
+
+
+
+
+
 /**
- * @brief Hashes keys of the table
- * 
+ * @brief 
  * @param str 
  * @return size_t 
  */
@@ -114,14 +120,25 @@ htab_t * htab_init(size_t n);
  */
 void htab_free(htab_t * t);
 
+
+bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, htab_value value);
+
+htab_item_t * htab_find_var(htab_t * t, char * key, int scope);
+
+bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int params_count, htab_data_type * type);
+
+htab_item_t * htab_find_func(htab_t * t, char * key);
+
+bool htab_remove_scope(htab_t * t, int scope);
+
 /**
  * @brief Returns pointer to the key-value pair in t, NULL if not found
  * 
  * @param t hash table 
  * @param key key of item 
- * @return htab_pair_t* 
+ * @return htab_item_t* 
  */
-htab_pair_t * htab_find(htab_t * t, htab_key_t key);
+htab_item_t * htab_find(htab_t * t, htab_key_t key);
 
 /**
  * @brief Returns total number of items
@@ -151,9 +168,9 @@ void htab_print(htab_t * t);
  * 
  * @param t hash table 
  * @param key key of item 
- * @return htab_pair_t* 
+ * @return htab_item_t* 
  */
-htab_pair_t * htab_lookup_add(htab_t * t, htab_key_t key);
+htab_item_t * htab_lookup_add(htab_t * t, htab_key_t key);
 
 /**
  * @brief Increases / decreases size of t
@@ -189,6 +206,7 @@ void htab_clear(htab_t * t);
  */
 htab_t * htab_copy(htab_t t);
 
+void htab_debug_print(htab_t *t);
 
 
 #endif
