@@ -104,6 +104,7 @@ void analyze_and_store_expression(DLList *list,TOKEN_T* token){
     TOKEN_T *nextToken = get_next_token();
     if(nextToken->operators == token->operators){
         //TODO ERR 2 operatory za s sebou
+        // TODO: poslat cely expression v DLL listu, pouzivej insert last (abych to necetl odzadu)
     }
     DLL_insert_last(list, token);
 
@@ -250,6 +251,7 @@ void function_detected(TOKEN_T* initToken){
 void analyze_token(){
     TOKEN_T *token;
     token = get_next_token();
+    WriteToken(token);
     //TODO UNCOMMENT WHEN LEXER DONE
 //    if(scope.isDefined == false && token->keyword != KEY_BEGIN){
 //        exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
