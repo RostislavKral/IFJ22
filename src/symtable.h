@@ -141,12 +141,6 @@ struct htab {
 };
 typedef struct htab htab_t;
 
-
-
-
-
-
-
 /**
  * @brief 
  * @param str 
@@ -181,15 +175,6 @@ htab_item_t * htab_find_func(htab_t * t, char * key);
 bool htab_remove_scope(htab_t * t, int scope);
 
 /**
- * @brief Returns pointer to the key-value pair in t, NULL if not found
- * 
- * @param t hash table 
- * @param key key of item 
- * @return htab_item_t* 
- */
-htab_item_t * htab_find(htab_t * t, htab_key_t key);
-
-/**
  * @brief Returns total number of items
  * 
  * @param t hash table 
@@ -206,13 +191,6 @@ size_t htab_items_count(const htab_t * t);
 size_t htab_size(const htab_t * t);
 
 /**
- * @brief Prints table
- * 
- * @param t hash table 
- */
-void htab_print(htab_t * t);
-
-/**
  * @brief Increases / decreases size of t
  * 
  * @param t hash table 
@@ -220,31 +198,6 @@ void htab_print(htab_t * t);
  * @return void* 
  */
 void htab_resize(htab_t *t, size_t n);
-
-/**
- * @brief Destructs key-value pair. Returns false if not found
- * 
- * @param t hash table 
- * @param key key of item 
- * @return true 
- * @return false 
- */
-bool htab_erase(htab_t * t, htab_key_t key);
-
-/**
- * @brief Deletes all elements
- * 
- * @param t hash table 
- */
-void htab_clear(htab_t * t);
-
-/**
- * @brief Returns new instance of the table
- * 
- * @param t hash table 
- * @return htab_t* 
- */
-htab_t * htab_copy(htab_t t);
 
 void htab_debug_print(htab_t *t);
 
