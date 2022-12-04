@@ -11,16 +11,16 @@
 
 //LEXEMY
 enum T_STATE {
-    ST_START,
-    ST_VAR_PREFIX,
-    ST_VAR,
+    ST_START,               // 1
+    ST_VAR_PREFIX,          // 2
+    ST_VAR,                 // 3
     ST_OP_ASSIGN,
     ST_OP_PLUS,
     ST_OP_MINUS,
     ST_OP_DIVIDE,
     ST_OP_MULTIPLY,
     ST_OP_CONCAT,
-    ST_OP_LESSER_THAN,
+    ST_OP_LESSER_THAN,      // 10
     ST_OP_GREATER_THAN,
     //TBD
     ST_FUNC,
