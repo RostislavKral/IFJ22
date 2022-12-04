@@ -21,7 +21,8 @@ parseFunctionHelper functionHelper = {
         .fHeadParsed = false,
         .fParamCount = 0,
         .fReturnTypePass = false,
-        .fBraceCountCheck = 0
+        .fBraceCountCheck = 0,
+        .paramsList = NULL
 };
 scopeHelper scope = {
         .num = 0,
@@ -29,10 +30,7 @@ scopeHelper scope = {
         .lastScopeOpeningToken = NULL,
         .isDefined = false
 };
-void init_sym_tables(){
-    scope.globalSymTable = htab_init(1);
-    scope.localSymTable = htab_init(1);
-}
+
 bool is_token_eof(TOKEN_T* token){
     if(token->type == ISEOF){
         fprintf(stderr, "%s", "EOF");
@@ -125,17 +123,17 @@ void var_declaration(TOKEN_T token){
     }
 }
 
-void variable_token(TOKEN_T *variable){
+void variable_token(TOKEN_T *variable,htab_t* symtable){
     TOKEN_T *operator = get_next_token();
     if (operator->operators == EQUALS){
         //TODO CHECK symtable IF EXISTS..
-        if(htab_find(scope.localSymTable,operator->name)){
+        if(true){
             //update value
             TOKEN_T* expression = get_next_token();
 
         } else {
             //TODO ADD TO LOCAL SYMTABLE
-            htab_lookup_add(scope.localSymTable,operator->name);
+            //htab_lookup_add(scope.localSymTable,operator->name);
 
         }
     } else {
@@ -143,20 +141,24 @@ void variable_token(TOKEN_T *variable){
     }
 }
 
-void function_call(TOKEN_T *funcName){
+void function_call(TOKEN_T *funcName,htab_t* symtable){
     //htab_find();
 
 }
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-void function_detected(TOKEN_T* initToken){
-    //TODO: check scope, check if function already exists, isert frame
+void function_detected(TOKEN_T* initToken, htab_t* symtable){
+    //TODO: check scope, isert frame
+    //F already declared
+    if(htab_find_func(symtable,initToken->name) != NULL){
+        exit_with_message(initToken->lineNum,initToken->charNum, "Function is already declared", SEM_F_DECLARATION_ERR);
+    }
     //catch declaration of f in f
     if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
         exit_with_message(initToken->lineNum, initToken->charNum, "already parsing another function", SEM_F_DECLARATION_ERR);
         return;
-    } else if(functionHelper.fParsing == true && initToken->type == RBRACE){
+    } else if(functionHelper.fParsing == true && initToken->type == RBRACE) {
         function_end_parsing();
         return;
     }
@@ -181,7 +183,7 @@ void function_detected(TOKEN_T* initToken){
             if(token->type != FUNC_ID){
                 exit_with_message(token->lineNum,token->charNum,"Invalid function name", SEM_F_DECLARATION_ERR);
             } else {
-                //TODO symtable write
+                functionHelper.name = token->name;
                 functionHelper.fNamePass = true;
                 continue;
             }
@@ -198,12 +200,11 @@ void function_detected(TOKEN_T* initToken){
                             //Err 2 keyword in row
                             exit_with_message(paramToken->lineNum, paramToken->charNum, "Invalid token 2 keywords in row", SEM_F_DECLARATION_ERR);
                         } else {
-                            //TODO to symtable write
-                            functionHelper.fParamCount++;
+                            if (functionHelper.paramsList == NULL) DLL_init(functionHelper.paramsList);
+                            DLL_insert_first(functionHelper.paramsList, paramToken);
                         }
                     } else if (paramToken->type == COMMA) {
                         functionHelper.fParamCount++;
-                        //TODO Symtable write
                     } else {
                         //ERR invalid token expecting dataType
                         exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float", SYNTAX_ERR);
@@ -225,6 +226,10 @@ void function_detected(TOKEN_T* initToken){
                 TOKEN_T *returnTypeToken = get_next_token();
                 if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
                     //TODO sym write
+                    if(returnTypeToken->keyword == KEY_STRING) functionHelper.returnType = STRING_T;
+                    else if(returnTypeToken->keyword == KEY_INT) functionHelper.returnType = INT_T;
+                    else functionHelper.returnType = FLOAT_T;
+
                     functionHelper.fReturnTypePass = true;
                     continue;
                 } else {
@@ -243,11 +248,17 @@ void function_detected(TOKEN_T* initToken){
             exit_with_message(token->lineNum, token->charNum, "declaration error", SYNTAX_ERR);
         }
     }
+    //htab_insert_func(symtable,)
     // START PARSING Function BODY
-    analyze_token();
+    htab_data_type paramArr[functionHelper.fParamCount+1];
+    DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
+    for (int i = 0; i < functionHelper.fParamCount; ++i) {
+        paramArr[i] = tmp->token->type;
+    }
+    analyze_token(symtable);
 };
 
-void analyze_token(){
+void analyze_token(htab_t* symtable){
     TOKEN_T *token;
     token = get_next_token();
     //TODO UNCOMMENT WHEN LEXER DONE
@@ -293,10 +304,10 @@ void analyze_token(){
             }
             break;
         case TOKEN_ID:
-            variable_token(token);
+            variable_token(token,symtable);
             break;
         case FUNC_ID:
-            function_detected(token);
+            function_detected(token, symtable);
             break;
         case LITERAL:
             break;
@@ -320,14 +331,14 @@ void analyze_token(){
             break;
         case RBRACE:
             //this will stop function parsing, hopefully
-            if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token);
+            if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
             break;
         case COMMA:
             break;
         case DATA_TYPE:
             break;
         case FUNC_CALL:
-            function_call(token);
+            function_call(token, symtable);
             break;
     }
 };
