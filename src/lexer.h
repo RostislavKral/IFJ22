@@ -11,17 +11,23 @@
 
 //LEXEMY
 enum T_STATE {
-    ST_START,
-    ST_VAR_PREFIX,
-    ST_VAR,
+    ST_START,               // 1
+    ST_VAR_PREFIX,          // 2
+    ST_VAR,                 // 3
     ST_OP_ASSIGN,
     ST_OP_PLUS,
     ST_OP_MINUS,
     ST_OP_DIVIDE,
     ST_OP_MULTIPLY,
     ST_OP_CONCAT,
-    ST_OP_LESSER_THAN,
+    ST_OP_LESSER_THAN,      // 10
     ST_OP_GREATER_THAN,
+    ST_OP_LESS_EQUAL,         //7  <=
+    ST_OP_GREATER_EQUAL,      //8  >=
+    ST_OP_EQUALS,             //9  ==
+    ST_OP_NOT_EQUAL,          //10 !=
+    ST_OP_TYPE_EQUALS,        //11 ===
+    ST_OP_TYPE_NOT_EQUALS,    //12 !==
     //TBD
     ST_FUNC,
     ST_ERROR,
@@ -47,7 +53,8 @@ enum T_STATE {
     ST_FUNC_CALL,
     ST_SEMICOLON,
     ST_READ,
-
+    ST_SLINE_COMMENT,
+    ST_MLINE_COMMENT,
 };
 
 TOKEN_T * get_next_token();

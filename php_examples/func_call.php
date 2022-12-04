@@ -1,6 +1,7 @@
- ))
-ifa()
-while ;;ifo()
-if()
-return "wqe"
-function adqw()
+/* $a function aa(){}
+$pepa*/
+$b; if($b === $a);
+<= >=
+!=
+ !==
+

@@ -45,14 +45,13 @@ DLLItem* DLL_insert_last(DLList *list, TOKEN_T* token){
     newItem->nextItem = NULL;
     newItem->prevItem = list->last;
 
-    if (newItem->prevItem)
-    {
-        newItem->prevItem->nextItem = newItem;
-    }
-
     if (list->itemsCount == 0)
     {
         list->first = newItem;
+    }
+    else
+    {
+        newItem->prevItem->nextItem = newItem;
     }
 
     list->last = newItem;
@@ -72,6 +71,10 @@ DLLItem* DLL_insert_after(DLList *list, DLLItem *item, TOKEN_T* token){
     {
         newItem->nextItem->prevItem = newItem;
     }
+    else
+    {
+        list->last = newItem;
+    }
 
     if (list->itemsCount == 1)
     {
@@ -82,7 +85,7 @@ DLLItem* DLL_insert_after(DLList *list, DLLItem *item, TOKEN_T* token){
     return newItem;
 }
 
-DLLItem* DLL_pop_after(DLList *list, DLLItem *item){
+DLLItem* DLL_pop(DLList *list, DLLItem *item){
     if (item->nextItem)
     {
         item->nextItem->prevItem = item->prevItem;
@@ -160,6 +163,14 @@ void DLL_item_print(DLLItem* item)
     else if (item->token->type == DOLLAR)
     {
         printf("$");
+    }
+    else if (item->token->type == LPAR)
+    {
+        printf("(");
+    }
+    else if (item->token->type == RPAR)
+    {
+        printf(")");
     }
     else if (item->token->operators == MULTIPLY)
     {

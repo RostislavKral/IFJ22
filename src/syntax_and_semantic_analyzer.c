@@ -614,9 +614,11 @@ void WriteToken(TOKEN_T * token) {
                 case MINUS:
                     printf("OPERATOR: -\n");
                     break;
-
+                case TYPE_EQUALS:
+                    printf("OPERATOR: === \n");
+                    break;
                 default:
-                    printf("OPERATOR: unknown\n");
+                    printf("OPERATOR: unknown, %u\n", token->operators);
                     break;
             }
             break;
