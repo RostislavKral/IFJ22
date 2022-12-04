@@ -62,11 +62,12 @@ void reduce(DLList* stack, Stack* stop_stack)
 {
     StackItem* tmp = Stack_pop(stop_stack);
 
-    int reduced = 0;
 
     while(tmp)
     {
         DLLItem* stop = tmp->item;
+        int reduced = 0;
+
         if (stop->nextItem && stop->nextItem->nextItem && stop->nextItem->nextItem->nextItem)
         {
             // assert that expression is (E)
@@ -76,9 +77,9 @@ void reduce(DLList* stack, Stack* stop_stack)
                     stop->nextItem->nextItem->nextItem->token->type == RPAR
                     )
             {
-                DLLItem* lpar = DLL_pop_after(stack, stop);
-                DLLItem* id = DLL_pop_after(stack, stop);
-                DLLItem* rpar = DLL_pop_after(stack, stop);
+                DLLItem* lpar = DLL_pop(stack, stop->nextItem);
+                DLLItem* id = DLL_pop(stack, stop->nextItem);
+                DLLItem* rpar = DLL_pop(stack, stop->nextItem);
 
                 DLL_insert_after(stack, stop, id->token);
 
@@ -91,13 +92,13 @@ void reduce(DLList* stack, Stack* stop_stack)
                 // Rule E -> E + E  (OR ANY BINARY OPERATION)
             else if (
                     stop->nextItem                    ->token->type == TOKEN_ID &&
-                    stop->nextItem->nextItem          ->token->operators &&
+                    stop->nextItem->nextItem          ->token->type == OPERATOR &&
                     stop->nextItem->nextItem->nextItem->token->type == TOKEN_ID
                     )
             {
-                DLLItem* id = DLL_pop_after(stack, stop->nextItem);
-                DLLItem* operator = DLL_pop_after(stack, stop->nextItem);
-                DLLItem* id2 = DLL_pop_after(stack, stop->nextItem);
+                DLLItem* id = DLL_pop(stack, stop->nextItem);
+                DLLItem* operator = DLL_pop(stack, stop->nextItem);
+                DLLItem* id2 = DLL_pop(stack, stop->nextItem);
 
                 DLL_insert_after(stack, stop, id->token);
 
@@ -169,7 +170,7 @@ int analyze_precedence(DLList* list)
         iterator = iterator->nextItem;
     }
     reduce(stack, stop_stack);
-//    printf("end:");
+//    printf("end:\n");
 //    printf("expression: "); DLL_print(list);
 //    printf("stack: "); DLL_print(stack);
 //    printf("stop stack: "); Stack_print(stop_stack);
@@ -181,9 +182,13 @@ int analyze_precedence(DLList* list)
             dollar->token->type == DOLLAR &&
             stack->first == NULL)
     {
+        free(item);
+        free(dollar);
         return 0;
     }
 
+//    free(item);
+//    free(dollar);
     return 1;
 }
 

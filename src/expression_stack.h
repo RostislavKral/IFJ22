@@ -30,7 +30,7 @@ DLLItem* DLL_insert_last(DLList* list, TOKEN_T* token);
 DLLItem* DLL_insert_after(DLList *list, DLLItem *item, TOKEN_T* token);
 DLLItem* DLL_pop_first(DLList* list);
 DLLItem* DLL_pop_last(DLList* list);
-DLLItem* DLL_pop_after(DLList *list, DLLItem *item);
+DLLItem* DLL_pop(DLList *list, DLLItem *item);
 DLLItem* DLL_get_first(DLList* list);
 DLLItem* DLL_get_last(DLList* list);
 DLList* DLL_copy(DLList* list);
