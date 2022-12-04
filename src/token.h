@@ -20,7 +20,9 @@ enum T_TOKEN_TYPE
     RBRACE,         //  12
     COMMA,          //  13
     DATA_TYPE,      //  14
-    FUNC_CALL       //  15  function call
+    FUNC_CALL,      //  15  function call
+
+    DOLLAR          //  16  end of expression
 
     //TBD
 };
