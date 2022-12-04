@@ -16,6 +16,55 @@
 #include <string.h> 
 
 
+/*
+    HOW TO USE THIS?
+
+    Add a variable:
+
+        tab_value value;        // This should be here, so there
+        value.int_value = 10;   // won't be wasted space in the table
+        htab_insert_var(htab, "var1", 0,    INT_T, value);
+                        table  key    scope type   value
+
+        if returned false -> val with this name has already been declarated
+
+
+
+    Add a function:
+
+        // params types
+        htab_data_type tarr[3] = { INT_T, INT_T, STRING_T };
+        htab_insert_func(htab, "func1", INT_T,         3,             tarr);
+                         table  key     return type    num of params  list of types of params 
+
+        if returned false -> func with this name has already been declarated
+
+
+    Find a var/func:
+        htab_find_var
+        htab_find_func
+
+        returns htab_item_t * or NULL if no such var
+
+    htab_remove_sope(htab, scope)
+        removes variables with current scope
+
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * If less than MIN_SPACE_TAKEN * 100% of table is filled, it will be automaticaly resized 
  */
