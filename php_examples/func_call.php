@@ -1,6 +1,4 @@
  ))
-ifa()
-while ;;ifo()
-if()
+ifa();ifo();
+if();ifon();ifo()
 return "wqe"
-function adqw()

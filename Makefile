@@ -10,7 +10,7 @@
 
 
 CC = gcc
-CFLAGS = --std=c11 -Wextra -Wall -ggdb -DNONDEBUG
+CFLAGS = --std=c11
 
 
 EXEC = IFJ22_PHP_compiler.out

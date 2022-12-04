@@ -8,7 +8,7 @@
 
 
 int str_destroy(DYN_STRING_T *str) {
-    free(str->str);
+    free(str);
 }
 
 
