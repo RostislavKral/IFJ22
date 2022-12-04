@@ -15,6 +15,8 @@
 #include <stdbool.h>
 #include <string.h> 
 
+#include "token.h"
+
 
 /*
     HOW TO USE THIS?
@@ -112,7 +114,7 @@ typedef union {
 typedef struct htab_data {
     htab_value_type type;
 
-    htab_data_type * data_type;
+    enum T_KEYWORD * data_type;
     int params_count;
     htab_value value;
 } htab_data_t;
@@ -164,11 +166,11 @@ htab_t * htab_init(size_t n);
 void htab_free(htab_t * t);
 
 
-bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, htab_value value);
+bool htab_insert_var(htab_t * t, char * name, int scope, enum T_KEYWORD type, htab_value value);
 
 htab_item_t * htab_find_var(htab_t * t, char * key, int scope);
 
-bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int params_count, htab_data_type * type);
+bool htab_insert_func(htab_t * t, char * name, enum T_KEYWORD ret_val_type, int params_count, enum T_KEYWORD * type);
 
 htab_item_t * htab_find_func(htab_t * t, char * key);
 

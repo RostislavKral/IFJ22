@@ -41,10 +41,9 @@ htab_t * htab_init(size_t n) {
     return ht;
 }
 
-// TODO same key same scope
 
 
-// TODO free data_type
+
 void htab_free(htab_t * t) {
     htab_item_t *item = NULL;
     htab_item_t *item_erase = NULL;
@@ -77,7 +76,7 @@ void htab_free(htab_t * t) {
 }
 
 
-bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, htab_value value) {
+bool htab_insert_var(htab_t * t, char * name, int scope, enum T_KEYWORD type, htab_value value) {
     htab_item_t * new_item = malloc(sizeof(htab_item_t));
 
     int index = htab_hash_function(name) % t->arr_size;
@@ -86,7 +85,7 @@ bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, ht
     new_item->scope = scope;
 
     new_item->data.type      = VAR;
-    new_item->data.data_type = malloc(sizeof(htab_data_type));
+    new_item->data.data_type = malloc(sizeof(enum T_KEYWORD));
     (new_item->data.data_type)[0] = type;
     new_item->data.value     = value;
 
@@ -117,7 +116,7 @@ htab_item_t * htab_find_var(htab_t * t, char * key, int scope) {
 
 
 
-bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int params_count, htab_data_type * params_type) {
+bool htab_insert_func(htab_t * t, char * name, enum T_KEYWORD ret_val_type, int params_count, enum T_KEYWORD * params_type) {
     htab_item_t * new_item = malloc(sizeof(htab_item_t));
 
     int index = htab_hash_function(name) % t->arr_size;
@@ -127,7 +126,7 @@ bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int 
     new_item->data.type         = FUNC;
     new_item->data.params_count = params_count;
     
-    new_item->data.data_type      = malloc((params_count + 1) * sizeof(htab_data_type));
+    new_item->data.data_type      = malloc((params_count + 1) * sizeof(enum T_KEYWORD));
     (new_item->data.data_type)[0] = ret_val_type;
 
     for (int i = 1; i < params_count + 1; i++) {
@@ -210,7 +209,6 @@ size_t htab_size(const htab_t * t) {
 
 
 void htab_resize(htab_t *t, size_t n) {
-printf("\n\n0\n\n");
      if (n < 10) {
         n = 10;
     }
@@ -225,7 +223,7 @@ printf("\n\n0\n\n");
         new_arr[i] = malloc(sizeof(htab_link_t));
         (new_arr[i])->item = NULL;
     }
-printf("\n\n1\n\n");
+    
     htab_item_t * item;
     htab_item_t * place;
     for (size_t i = 0; i < t->arr_size; i++) {
@@ -247,10 +245,8 @@ printf("\n\n1\n\n");
                 item = item->next;
                 place->next->next = NULL;
             }
-printf("\n\n12\n\n");
         }
     }
-printf("\n\n10\n\n");
     // Free array
     for (int i = 0; i < t->arr_size; i++) {
         free(t->arr_ptr[i]);
