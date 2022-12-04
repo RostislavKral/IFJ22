@@ -316,7 +316,7 @@ void analyze_token(htab_t* symtable){
             break;
         case FUNC_ID:
             function_detected(token, symtable);
-            analyze_token(symtable);.
+            analyze_token(symtable);
             break;
         case LITERAL:
             break;

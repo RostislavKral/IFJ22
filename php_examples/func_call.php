@@ -1,4 +1,3 @@
- ))
-ifa();ifo();
-if();ifon();ifo()
-return "wqe"
+/* $a function aa(){}
+$pepa*/
+$b;

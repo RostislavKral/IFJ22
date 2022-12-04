@@ -47,7 +47,9 @@ enum T_STATE {
     ST_FUNC_CALL,
     ST_SEMICOLON,
     ST_READ,
-
+    ST_SLINE_COMMENT,
+    ST_MLINE_COMMENT,
+    ST_MLINE_COMMENT_END,
 };
 
 TOKEN_T * get_next_token();

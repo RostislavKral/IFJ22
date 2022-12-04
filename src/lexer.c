@@ -167,6 +167,16 @@ TOKEN_T *get_next_token() {
                 }
 
                 break;
+            case ST_SLINE_COMMENT:
+                if(*edge == '\n') state = ST_START;
+                break;
+            case ST_MLINE_COMMENT:
+
+                if(*edge == '/') state = ST_START;
+                break;
+            /*case ST_MLINE_COMMENT_END:
+                if(*edge == '/') state = ST_START;
+                break;*/
             case ST_VAR:
 
                 if (*edge != ' ' && isalnum(*edge)) {
@@ -206,12 +216,22 @@ TOKEN_T *get_next_token() {
                 token->operators = MULTIPLY;
                 return token;
             case ST_OP_DIVIDE:
-                ungetc(*edge, stdin);
 
-                token->type = OPERATOR;
-                token->name = NULL;
-                token->operators = DIVIDE;
-                return token;
+                if(*edge != '/' && *edge != '*') {
+                    ungetc(*edge, stdin);
+
+                    token->type = OPERATOR;
+                    token->name = NULL;
+                    token->operators = DIVIDE;
+                    return token;
+                } else if (*edge == '*') {
+                    state = ST_MLINE_COMMENT;
+                    break;
+                }
+                else if (*edge == '/'){
+                    state = ST_SLINE_COMMENT;
+                    break;
+                }
             case ST_OP_CONCAT:
                 ungetc(*edge, stdin);
 
@@ -240,10 +260,32 @@ TOKEN_T *get_next_token() {
                     continue;
                 }*
                 ungetc(*edge, stdin);
+
+
 */
-                token->type = FUNC_ID;
-                //token->name = fun_name.str;
-                return token;
+                if (*edge == ' ' || *edge == '(' || *edge == '\n') {
+
+                    //  exit(1);
+                    if (*edge == '(')
+                    {
+                        ungetc(*edge, stdin);
+                    }
+
+                    token->type = FUNC_ID;
+                    token->name = fun_name.str;
+                    return token;
+
+                    //str_destroy(&str);
+                    // printf("________%s", str.str);
+                    // printf("%d",state);
+
+                }
+                    // printf("%c", *edge);
+                else {
+                    state = ST_FUNC;
+                    str_conc(&fun_name, edge);
+
+                }
 
             case ST_ERROR:
                 break;
@@ -410,6 +452,7 @@ TOKEN_T *get_next_token() {
                     }
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
+
                     //str_destroy(&str);
                     // printf("________%s", str.str);
                     // printf("%d",state);
