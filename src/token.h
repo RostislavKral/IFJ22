@@ -38,7 +38,7 @@ enum T_OPERATOR {
     GREATER,            //6  >
     LESS_EQUAL,         //7  <=
     GREATER_EQUAL,      //8  >=
-    EQUALS,             //9  =
+    EQUALS,             //9  ==
     NOT_EQUAL,          //10 !=
     TYPE_EQUALS,        //11 ===
     TYPE_NOT_EQUALS,    //12 !==
@@ -57,8 +57,8 @@ enum T_KEYWORD {
     KEY_STRING,     //7  
     KEY_WHILE_LOOP, //8  
     KEY_VOID,       //9  
-    KEY_BEGIN,      //10 <?php
-    KEY_COLON       //11 :
+    KEY_COLON,      //10 :
+    KEY_BEGIN       //11 <?php // prolog asi to tu nebude ale pratele
 };
 
 

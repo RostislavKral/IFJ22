@@ -13,7 +13,7 @@
 
 int main() {
 
-    analyze_token();
+   // analyze_token();
     //nahrazeno analyze token
     //SNS_start();
     //FILE *file = fopen("php_examples/var_assign.php", "r");
