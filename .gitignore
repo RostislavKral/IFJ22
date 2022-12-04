@@ -5,3 +5,4 @@ cmake_install.cmake
 IFJ22_PHP_compiler.out
 objs/
 a.out
+predecence
