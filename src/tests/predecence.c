@@ -41,5 +41,17 @@ int main()
     token->name = "c";
     DLL_insert_last(stack, token);
 
-    analyze_precedence(stack);
+    int result = analyze_precedence(stack);
+    if (result == 0)
+    {
+        printf("Success\n");
+    }
+    else if(result == 1)
+    {
+        printf("Syntax error, expression in not ended\n");
+    }
+    else if(result == -1)
+    {
+        printf("Syntax error, inside expression\n");
+    }
 }

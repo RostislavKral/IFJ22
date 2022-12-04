@@ -123,7 +123,7 @@ void reduce(DLList* stack, Stack* stop_stack)
     }
 }
 
-void analyze_precedence(DLList* list)
+int analyze_precedence(DLList* list)
 {
     DLLItem* iterator = list->first;
     DLLItem* stop = NULL;
@@ -137,14 +137,14 @@ void analyze_precedence(DLList* list)
 
     while (iterator)
     {
-        printf("expression: "); DLL_print(list);
-        printf("stack: "); DLL_print(stack);
-        printf("stop stack: "); Stack_print(stop_stack);
-        //printf("stack_size: %d", stack->itemsCount);
-        printf("token_type: %d, token: %d\n", iterator->token->type,  iterator->token->operators);
-        printf("row: %d, column: %d\n", get_row(stack), get_column(iterator->token));
-        printf("operation: %c\n", table[get_row(stack)][get_column(iterator->token)]);
-        printf("=========================================\n");
+//        printf("expression: "); DLL_print(list);
+//        printf("stack: "); DLL_print(stack);
+//        printf("stop stack: "); Stack_print(stop_stack);
+//        //printf("stack_size: %d", stack->itemsCount);
+//        printf("token_type: %d, token: %d\n", iterator->token->type,  iterator->token->operators);
+//        printf("row: %d, column: %d\n", get_row(stack), get_column(iterator->token));
+//        printf("operation: %c\n", table[get_row(stack)][get_column(iterator->token)]);
+//        printf("=========================================\n");
 
         if (table[get_row(stack)][get_column(iterator->token)] == '=')
         {
@@ -161,14 +161,30 @@ void analyze_precedence(DLList* list)
             stop = DLL_insert_last(stack, iterator->token)->prevItem->prevItem;
             Stack_push(stop_stack, stop);
         }
+        else if (table[get_row(stack)][get_column(iterator->token)] == ' ')
+        {
+            return -1;
+        }
 
         iterator = iterator->nextItem;
     }
     reduce(stack, stop_stack);
-    printf("end:");
-    printf("expression: "); DLL_print(list);
-    printf("stack: "); DLL_print(stack);
-    printf("stop stack: "); Stack_print(stop_stack);
+//    printf("end:");
+//    printf("expression: "); DLL_print(list);
+//    printf("stack: "); DLL_print(stack);
+//    printf("stop stack: "); Stack_print(stop_stack);
+
+    DLLItem* item = DLL_pop_last(stack);
+    DLLItem* dollar = DLL_pop_last(stack);
+    if (
+            item->token->type == TOKEN_ID &&
+            dollar->token->type == DOLLAR &&
+            stack->first == NULL)
+    {
+        return 0;
+    }
+
+    return 1;
 }
 
 TOKEN_T* create_dollar_token()
