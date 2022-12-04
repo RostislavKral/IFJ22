@@ -95,6 +95,7 @@ void function_end_parsing(){
     functionHelper.fParamCount = 0;
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
+    functionHelper.paramsList = NULL;
     scope.num--;
     scope.openedBracesCount--;
 };
@@ -143,12 +144,38 @@ void variable_token(TOKEN_T *variable,htab_t* symtable){
         exit_with_message(operator->lineNum,operator->charNum,"Invalid operator", SYNTAX_ERR);
     }
 }
-
-void function_call(TOKEN_T *funcName,htab_t* symtable){
-    //htab_find();
-
-}
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+void function_call(TOKEN_T *functionToken,htab_t* symtable){
+    htab_item_t* stFunction = htab_find_func(symtable, functionToken->name);
+
+    if (stFunction == NULL) exit_with_message(functionToken->lineNum, functionToken->charNum,"Function doesnt exist", SEM_F_DECLARATION_ERR);
+    TOKEN_T *pars = get_next_token();
+
+    if (pars->type != LPAR) exit_with_message(pars->lineNum, pars->charNum, "Expected '('", SYNTAX_ERR);
+    TOKEN_T *paramArr[stFunction->data.params_count];
+
+    for (int i = 1; i < stFunction->data.params_count+1; ++i) {
+        TOKEN_T *tmp = get_next_token();
+        if (tmp->type != TOKEN_ID && tmp->type != LITERAL) exit_with_message(tmp->lineNum, tmp->charNum, "invalid token", SEM_F_DECLARATION_ERR);
+
+        if (tmp->type == TOKEN_ID){
+            htab_item_t *param = htab_find_var(symtable,tmp->name, scope.num);
+            if(stFunction->data.data_type[i] == 0 && param->data.data_type == KEY_INT &&
+               stFunction->data.data_type[i] == 1 && param->data.data_type == KEY_STRING &&
+               stFunction->data.data_type[i] == 2 && param->data.data_type == KEY_FLOAT
+                    ) paramArr[i] = tmp;
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_DECLARATION_ERR);
+        } else {
+            if(tmp->type == 0 && stFunction->data.data_type[i] == KEY_INT &&
+               tmp->type == 1 && stFunction->data.data_type[i] == KEY_STRING &&
+               tmp->type == 2 && stFunction->data.data_type[i] == KEY_FLOAT
+                    ) paramArr[i] = tmp;
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_DECLARATION_ERR);
+        }
+    }
+    //TODO code gen
+}
 
 
 void function_detected(TOKEN_T* initToken, htab_t* symtable){
@@ -206,7 +233,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
                                 DLL_init(functionHelper.paramsList);
                             }
-                            DLL_insert_first(functionHelper.paramsList, paramToken);
+                            DLL_insert_last(functionHelper.paramsList, paramToken);
                         }
                     } else if (paramToken->type == COMMA) {
                         functionHelper.fParamCount++;
@@ -230,7 +257,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             if(token->keyword == KEY_COLON){
                 TOKEN_T *returnTypeToken = get_next_token();
                 if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
-                    functionHelper.returnType = returnTypeToken->type;
+                    functionHelper.returnType = returnTypeToken->keyword;
                     functionHelper.fReturnTypePass = true;
                     continue;
                 } else {
@@ -252,15 +279,20 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //htab_insert_func(symtable,)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
     DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
-    for (int i = 0; i < functionHelper.fParamCount; ++i) {
+    for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
         paramArr[i] = tmp->token->keyword;
-        tmp->nextItem;
+        tmp = tmp->nextItem;
     }
-    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount, paramArr)){
+    enum T_KEYWORD test = functionHelper.returnType;
+    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
     DLL_dispose_list(functionHelper.paramsList);
-
+    htab_item_t* stFunction = htab_find_func(symtable, functionHelper.name);
+    enum T_KEYWORD arr = (stFunction->data.data_type[1]);
+    enum T_KEYWORD arr1 = (stFunction->data.data_type[2]);
+    enum T_KEYWORD arr2 = (stFunction->data.data_type[3]);
+    //enum T_KEYWORD arr[stFunction->data.params_count] = stFunction->data.data_type;
     // START PARSING Function BODY
     analyze_token(symtable);
 };
@@ -316,7 +348,7 @@ void analyze_token(htab_t* symtable){
             break;
         case FUNC_ID:
             function_detected(token, symtable);
-            analyze_token(symtable);.
+            analyze_token(symtable);
             break;
         case LITERAL:
             break;
