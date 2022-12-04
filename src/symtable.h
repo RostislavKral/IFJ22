@@ -15,53 +15,7 @@
 #include <stdbool.h>
 #include <string.h> 
 
-
-/*
-    HOW TO USE THIS?
-
-    Add a variable:
-
-        tab_value value;        // This should be here, so there
-        value.int_value = 10;   // won't be wasted space in the table
-        htab_insert_var(htab, "var1", 0,    INT_T, value);
-                        table  key    scope type   value
-
-        if returned false -> val with this name has already been declarated
-
-
-
-    Add a function:
-
-        // params types
-        htab_data_type tarr[3] = { INT_T, INT_T, STRING_T };
-        htab_insert_func(htab, "func1", INT_T,         3,             tarr);
-                         table  key     return type    num of params  list of types of params 
-
-        if returned false -> func with this name has already been declarated
-
-
-    Find a var/func:
-        htab_find_var
-        htab_find_func
-
-        returns htab_item_t * or NULL if no such var
-
-    htab_remove_sсope(htab, scope)
-        removes variables with current scope
-
-
-
-*/
-
-
-
-
-
-
-
-
-
-
+#include "token.h"
 
 
 
@@ -76,19 +30,19 @@
 #define MAX_SPACE_TAKEN 0.75
 
 
-
+/**
+ * @brief Describes type of an item
+ * 
+ */
 typedef enum {
     FUNC,
     VAR,
 } htab_value_type;
 
-typedef enum {
-    VOID_T,
-    INT_T,
-    FLOAT_T,
-    STRING_T
-} htab_data_type;
-
+/**
+ * @brief Container for variable's value
+ * 
+ */
 typedef union {
     int int_value;
     char *str_value;
@@ -101,18 +55,19 @@ typedef union {
  * 
  * Fields are filled based on the value type:
  *  - FUNC: 
- *      data_type       -- return value + type of return value
+ *      data_type       -- [0]: return value, [1+] type of return value
  *      params_count    -- number function params
+ *      value           -- useless
  * 
  *  - VAR: 
  *      data_type       -- type of the variable
  *      value           -- value of the variable
- * 
+ *      params_count    -- useless
  */
 typedef struct htab_data {
     htab_value_type type;
 
-    htab_data_type * data_type;
+    enum T_KEYWORD * data_type;
     int params_count;
     htab_value value;
 } htab_data_t;
@@ -130,6 +85,10 @@ typedef struct htab_item {
     htab_item_t * next;
 } htab_item_t; 
 
+/**
+ * @brief Pointer to the first element in the line
+ * 
+ */
 typedef struct htab_link {
     htab_item_t * item;
 } htab_link_t;
@@ -140,12 +99,6 @@ struct htab {
     htab_link_t ** arr_ptr;
 };
 typedef struct htab htab_t;
-
-
-
-
-
-
 
 /**
  * @brief 
@@ -158,7 +111,7 @@ size_t htab_hash_function(htab_key_t str);
  * @brief Inicialization of a table
  * 
  * @param n Starting number of elememnts
- * @return htab_t* 
+ * @return htab_t * 
  */
 htab_t * htab_init(size_t n);
 
@@ -169,25 +122,69 @@ htab_t * htab_init(size_t n);
  */
 void htab_free(htab_t * t);
 
-
-bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, htab_value value);
-
-htab_item_t * htab_find_var(htab_t * t, char * key, int scope);
-
-bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int params_count, htab_data_type * type);
-
-htab_item_t * htab_find_func(htab_t * t, char * key);
-
-bool htab_remove_scope(htab_t * t, int scope);
+/**
+ * @brief Inserts variable into table
+ * 
+ * @param t hash table
+ * @param name name of the variable
+ * @param scope level of scope of the variable
+ * @param type type of the variable
+ * @param value value of the var
+ * @return true if value was added
+ * @return false --
+ * 
+ * As a value you need to send a structure. Example:
+ * 
+ * htab_value value;
+ * value.int_value = 10;
+ * 
+ * ... and send it into a function
+ */
+bool htab_insert_var(htab_t * t, char * name, int scope, enum T_KEYWORD type, htab_value value);
 
 /**
- * @brief Returns pointer to the key-value pair in t, NULL if not found
+ * @brief Searches for a variable in htab
  * 
- * @param t hash table 
- * @param key key of item 
- * @return htab_item_t* 
+ * @param t hash table
+ * @param key name of the variable
+ * @param scope level of scope of the variable
+ * @return htab_item_t* pointer to the variable
  */
-htab_item_t * htab_find(htab_t * t, htab_key_t key);
+htab_item_t * htab_find_var(htab_t * t, char * key, int scope);
+
+/**
+ * @brief 
+ * 
+ * @param t hash table
+ * @param name name of the function
+ * @param ret_val_type type of return value
+ * @param params_count number of parameters
+ * @param type array of parameters types
+ * @return true function was added
+ * @return false function already exists
+ * 
+ * enum T_KEYWORD tarr[3] = { KEY_FLOAT, KEY_FLOAT, KEY_FLOAT };
+ */
+bool htab_insert_func(htab_t * t, char * name, enum T_KEYWORD ret_val_type, int params_count, enum T_KEYWORD * type);
+
+/**
+ * @brief Searches for a function in htab
+ * 
+ * @param t hash table
+ * @param key name of the function
+ * @return htab_item_t* pointer to the function
+ */
+htab_item_t * htab_find_func(htab_t * t, char * key);
+
+/**
+ * @brief Revomes all variables from a certain scope
+ * 
+ * @param t hash table
+ * @param scope scope level
+ * @return true 
+ * @return false 
+ */
+bool htab_remove_scope(htab_t * t, int scope);
 
 /**
  * @brief Returns total number of items
@@ -206,45 +203,13 @@ size_t htab_items_count(const htab_t * t);
 size_t htab_size(const htab_t * t);
 
 /**
- * @brief Prints table
- * 
- * @param t hash table 
- */
-void htab_print(htab_t * t);
-
-/**
  * @brief Increases / decreases size of t
  * 
  * @param t hash table 
  * @param n 
  * @return void* 
  */
-void * htab_resize(htab_t *t, size_t n);
-
-/**
- * @brief Destructs key-value pair. Returns false if not found
- * 
- * @param t hash table 
- * @param key key of item 
- * @return true 
- * @return false 
- */
-bool htab_erase(htab_t * t, htab_key_t key);
-
-/**
- * @brief Deletes all elements
- * 
- * @param t hash table 
- */
-void htab_clear(htab_t * t);
-
-/**
- * @brief Returns new instance of the table
- * 
- * @param t hash table 
- * @return htab_t* 
- */
-htab_t * htab_copy(htab_t t);
+void htab_resize(htab_t *t, size_t n);
 
 void htab_debug_print(htab_t *t);
 

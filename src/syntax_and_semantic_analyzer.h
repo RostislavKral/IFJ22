@@ -162,6 +162,9 @@ typedef struct {
     bool fReturnTypePass;
     int fParamCount;
     int fBraceCountCheck;
+    char * name;
+    DLList* paramsList;
+    enum T_KEYWORD returnType;
 } parseFunctionHelper;
 
 typedef struct {
@@ -179,12 +182,12 @@ typedef struct {
 } scopeHelper;
 
 void init_sym_tables();
-void analyze_token();
-void function_detected(TOKEN_T* token);
+void analyze_token(htab_t* symtable);
+void function_detected(TOKEN_T* token,htab_t* symtable);
 void function_end_parsing();
 void if_condition();
-void variable_token(TOKEN_T *variable);
-void function_call(TOKEN_T *funcName);
+void variable_token(TOKEN_T *variable,htab_t* symtable);
+void function_call(TOKEN_T *funcName,htab_t* symtable);
 
 
 ////LL functions

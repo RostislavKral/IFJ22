@@ -5,6 +5,7 @@
 
 enum T_TOKEN_TYPE
 {
+    NULL_TYPE,
     KEYWORD,        //  0
     TOKEN_ID,       //  1   Variable
     FUNC_ID,        //  2   function name
@@ -20,13 +21,16 @@ enum T_TOKEN_TYPE
     RBRACE,         //  12
     COMMA,          //  13
     DATA_TYPE,      //  14
-    FUNC_CALL       //  15  function call
+    FUNC_CALL,      //  15  function call
+
+    DOLLAR          //  16  end of expression
 
     //TBD
 };
 
 
 enum T_OPERATOR {
+    NULL_OPERATOR,
     MULTIPLY,           //0  *
     DIVIDE,             //1  /
     PLUS,               //2  +
@@ -45,6 +49,7 @@ enum T_OPERATOR {
 
 
 enum T_KEYWORD {
+    NULL_KEYWORD,
     KEY_ELSE,       //0  
     KEY_FLOAT,      //1  
     KEY_FUNCTION,   //2  
