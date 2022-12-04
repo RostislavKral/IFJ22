@@ -129,13 +129,13 @@ void variable_token(TOKEN_T *variable){
     TOKEN_T *operator = get_next_token();
     if (operator->operators == EQUALS){
         //TODO CHECK symtable IF EXISTS..
-        if(htab_find(scope.localSymTable,operator->name)){
+        if(1/*htab_find(scope.localSymTable,operator->name)*/){
             //update value
             TOKEN_T* expression = get_next_token();
 
         } else {
             //TODO ADD TO LOCAL SYMTABLE
-            htab_lookup_add(scope.localSymTable,operator->name);
+           // htab_lookup_add(scope.localSymTable,operator->name);
 
         }
     } else {

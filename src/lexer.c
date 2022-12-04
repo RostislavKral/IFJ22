@@ -135,6 +135,7 @@ TOKEN_T *get_next_token() {
                 else if (*edge == '>') state = ST_OP_GREATER_THAN;
                 else if (*edge == '"') state = ST_STRING_LITERAL;
                 else if (*edge == ';') state = ST_SEMICOLON;
+                //else if (*edge == ' ' || *edge == '\n') state = ST_START;
                     //TODO: OPERATORY!!!!!!
 
 
@@ -386,7 +387,7 @@ TOKEN_T *get_next_token() {
             case ST_FUNC_CALL:
                 token->type = FUNC_CALL;
                 token->name = str.str;
-            //    str_destroy(&str);
+                //str_destroy(&str);
               //  ungetc(*edge, stdin);
                 return token;
             case ST_READ:
@@ -399,7 +400,7 @@ TOKEN_T *get_next_token() {
                     //ungetc(*edge, stdin);
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
-                   // str_destroy(&str);
+                    //str_destroy(&str);
                     // printf("%s", str.str);
                     // printf("%d",state);
                     break;
@@ -413,7 +414,9 @@ TOKEN_T *get_next_token() {
 
                 //   break;
                 //   exit(1);
-
+           /* default:
+                printf(" ");
+                //state = ST_READ;*/
         }
 
 
