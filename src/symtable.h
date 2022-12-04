@@ -219,7 +219,7 @@ void htab_print(htab_t * t);
  * @param n 
  * @return void* 
  */
-void * htab_resize(htab_t *t, size_t n);
+void htab_resize(htab_t *t, size_t n);
 
 /**
  * @brief Destructs key-value pair. Returns false if not found

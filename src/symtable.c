@@ -13,9 +13,8 @@
 
 
 htab_t * htab_init(size_t n) {
-    if (n < 1) {
-        exit(99);
-        return NULL;
+    if (n < 10) {
+        n = 10;
     }
 
     htab_t * ht;
@@ -55,7 +54,7 @@ void htab_free(htab_t * t) {
         while (item != NULL) {
             item_erase = item;
             item = item->next;
-            // TODO clear data
+            free(item_erase->data.data_type);
             free(item_erase);
             item_erase = NULL;
         }
@@ -88,13 +87,17 @@ bool htab_insert_var(htab_t * t, char * name, int scope, htab_data_type type, ht
 
     new_item->data.type      = VAR;
     new_item->data.data_type = malloc(sizeof(htab_data_type));
-    *(new_item->data.data_type) = type;
+    (new_item->data.data_type)[0] = type;
     new_item->data.value     = value;
 
     new_item->next = (t->arr_ptr[index])->item; 
     (t->arr_ptr[index])->item = new_item;
 
     t->size += 1;
+
+    if ((double)t->size / (double)t->arr_size > MAX_SPACE_TAKEN) {
+        htab_resize(t, t->arr_size * 2);
+    }
 
     return true;
 }
@@ -149,6 +152,10 @@ bool htab_insert_func(htab_t * t, char * name, htab_data_type ret_val_type, int 
 
     t->size += 1;
 
+    if ((double)t->size / (double)t->arr_size > MAX_SPACE_TAKEN) {
+        htab_resize(t, t->arr_size * 2);
+    }
+
     return true;
 }
 
@@ -174,16 +181,30 @@ bool htab_remove_scope(htab_t * t, int scope) {
         
         while ((t->arr_ptr[i])->item != NULL && (t->arr_ptr[i])->item->scope >= scope) {
             htab_item_t * item = (t->arr_ptr[i])->item->next;
+            free((t->arr_ptr[i])->item->data.data_type);
             free((t->arr_ptr[i])->item);
             (t->arr_ptr[i])->item = item;
             t->size -= 1;
         }
     }
 
+    if ((double)t->size / (double)t->arr_size < MIN_SPACE_TAKEN) {
+        int new_n = (t->arr_size / 2 < 10) ? 10 : t->arr_size / 2;
+        htab_resize(t, new_n);
+    }
+
     return true;
 }
 
 
+
+size_t htab_items_count(const htab_t * t) {
+    return t->size;
+}
+
+size_t htab_size(const htab_t * t) {
+    return t->arr_size;
+}
 
 
 /*
@@ -229,17 +250,7 @@ htab_pair_t * htab_find(htab_t * t, htab_key_t key) {
 
 
 
-size_t htab_items_count(const htab_t * t) {
-    return t->size;
-}
 
-
-
-
-
-size_t htab_size(const htab_t * t) {
-    return t->arr_size;
-}
 
 
 
@@ -295,49 +306,63 @@ htab_pair_t * htab_lookup_add(htab_t * t, htab_key_t key) {
 
     return &item->pair;
 }
+*/
 
 
 
 
-
-void * htab_resize(htab_t *t, size_t n) {
-     if (n < 1) {
-        // TODO Bad size of array error
-        return NULL;
+void htab_resize(htab_t *t, size_t n) {
+printf("\n\n0\n\n");
+     if (n < 10) {
+        n = 10;
+    }
+    
+    htab_link_t ** new_arr;
+    if ((new_arr = malloc(n * sizeof(htab_link_t *))) == NULL) {
+        exit(99);
     }
 
-    htab_item_t **new_arr_ptr;
-    if ((new_arr_ptr = (htab_item_t **) malloc(n * sizeof(htab_item_t *))) == NULL) {
-        // TODO Memory alloc error
-        return NULL;
-    }
-
+    // NULLs every pointer in elements
     for (size_t i = 0; i < n; i++) {
-        new_arr_ptr[i] = NULL;
+        new_arr[i] = malloc(sizeof(htab_link_t));
+        (new_arr[i])->item = NULL;
     }
-
-    htab_item_t *item;
+printf("\n\n1\n\n");
+    htab_item_t * item;
+    htab_item_t * place;
     for (size_t i = 0; i < t->arr_size; i++) {
-        item = t->arr_ptr[i];
-        while(item != NULL) {
-            htab_item_t *tmp;
-            tmp = item->next;
-            item->next = new_arr_ptr[htab_hash_function(item->pair.key) % n];
-            new_arr_ptr[htab_hash_function(item->pair.key) % n] = item;
-            item = tmp;
+        item = (t->arr_ptr)[i]->item;
+        while (item != NULL) {
+            int index = htab_hash_function(item->key) % n;
+
+            place = (new_arr[index])->item;
+            if (place == NULL) {
+                (new_arr[index])->item = item;
+                item = item->next;
+                (new_arr[index])->item->next = NULL;
+            } else {
+                while (place->next != NULL) {
+                    place = place->next;
+                }
+
+                place->next = item;
+                item = item->next;
+                place->next->next = NULL;
+            }
+printf("\n\n12\n\n");
         }
     }
-
+printf("\n\n10\n\n");
     // Free array
+    for (int i = 0; i < t->arr_size; i++) {
+        free(t->arr_ptr[i]);
+    }
     free(t->arr_ptr);
-    t->arr_ptr = new_arr_ptr;
-
+    t->arr_ptr = new_arr;
     t->arr_size = n;
-
-    return (void *)0;
 }
 
-
+/*
 
 
 
