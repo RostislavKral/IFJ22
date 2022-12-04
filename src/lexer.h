@@ -22,6 +22,12 @@ enum T_STATE {
     ST_OP_CONCAT,
     ST_OP_LESSER_THAN,      // 10
     ST_OP_GREATER_THAN,
+    ST_OP_LESS_EQUAL,         //7  <=
+    ST_OP_GREATER_EQUAL,      //8  >=
+    ST_OP_EQUALS,             //9  ==
+    ST_OP_NOT_EQUAL,          //10 !=
+    ST_OP_TYPE_EQUALS,        //11 ===
+    ST_OP_TYPE_NOT_EQUALS,    //12 !==
     //TBD
     ST_FUNC,
     ST_ERROR,
@@ -49,7 +55,6 @@ enum T_STATE {
     ST_READ,
     ST_SLINE_COMMENT,
     ST_MLINE_COMMENT,
-    ST_MLINE_COMMENT_END,
 };
 
 TOKEN_T * get_next_token();

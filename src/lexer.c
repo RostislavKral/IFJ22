@@ -136,7 +136,8 @@ TOKEN_T *get_next_token() {
                 else if (*edge == '>') state = ST_OP_GREATER_THAN;
                 else if (*edge == '"') state = ST_STRING_LITERAL;
                 else if (*edge == ';') state = ST_SEMICOLON;
-                //else if (*edge == ' ' || *edge == '\n') state = ST_START;
+                else if (*edge == '!') state = ST_OP_NOT_EQUAL;
+                    //else if (*edge == ' ' || *edge == '\n') state = ST_START;
                     //TODO: OPERATORY!!!!!!
 
 
@@ -144,8 +145,7 @@ TOKEN_T *get_next_token() {
                     state = ST_VAR_PREFIX;
                     token->type = TOKEN_ID;
                 } else if (*edge == '=') state = ST_OP_ASSIGN;
-                else
-                {
+                else {
                     //printf("____%s", edge);
                     state = ST_READ;
                     ungetc(*edge, stdin);
@@ -168,15 +168,36 @@ TOKEN_T *get_next_token() {
 
                 break;
             case ST_SLINE_COMMENT:
-                if(*edge == '\n') state = ST_START;
+                if (*edge == '\n') state = ST_START;
                 break;
+
+            case ST_OP_TYPE_NOT_EQUALS:
+                token->type = OPERATOR;
+                token->operators = TYPE_NOT_EQUALS;
+                token->name = NULL;
+                return token;
+            case ST_OP_NOT_EQUAL:
+                if (*edge != '=') exit(1);
+                char tmp = *edge;
+                *edge = fgetc(stdin);
+                if (tmp == '=' && *edge == '=') {
+                    state = ST_OP_TYPE_NOT_EQUALS;
+                    break;
+
+                }
+                if (tmp == '=' && (*edge == ' ' || *edge == '\n')) {
+                    token->type = OPERATOR;
+                    token->operators = NOT_EQUAL;
+                    token->name = NULL;
+                    return token;
+                }
+                exit(1);
+
+
             case ST_MLINE_COMMENT:
 
-                if(*edge == '/') state = ST_START;
+                if (*edge == '/') state = ST_START;
                 break;
-            /*case ST_MLINE_COMMENT_END:
-                if(*edge == '/') state = ST_START;
-                break;*/
             case ST_VAR:
 
                 if (*edge != ' ' && isalnum(*edge)) {
@@ -188,7 +209,26 @@ TOKEN_T *get_next_token() {
                 token->name = str.str;
 
                 return token;
+
+            case ST_OP_TYPE_EQUALS:
+                token->type = OPERATOR;
+                token->operators = TYPE_EQUALS;
+                token->name = NULL;
+                return token;
+            case ST_OP_EQUALS:
+                if (*edge == '=') {
+                    state = ST_OP_TYPE_EQUALS;
+                    break;
+                }
+                token->type = OPERATOR;
+                token->operators = EQUALS;
+                token->name = NULL;
+                return token;
             case ST_OP_ASSIGN:
+                if (*edge == '=') {
+                    state = ST_OP_EQUALS;
+                    break;
+                }
                 ungetc(*edge, stdin);
 
                 token->type = ASSIGN;
@@ -217,7 +257,7 @@ TOKEN_T *get_next_token() {
                 return token;
             case ST_OP_DIVIDE:
 
-                if(*edge != '/' && *edge != '*') {
+                if (*edge != '/' && *edge != '*') {
                     ungetc(*edge, stdin);
 
                     token->type = OPERATOR;
@@ -227,8 +267,7 @@ TOKEN_T *get_next_token() {
                 } else if (*edge == '*') {
                     state = ST_MLINE_COMMENT;
                     break;
-                }
-                else if (*edge == '/'){
+                } else if (*edge == '/') {
                     state = ST_SLINE_COMMENT;
                     break;
                 }
@@ -240,13 +279,35 @@ TOKEN_T *get_next_token() {
                 token->operators = CONCAT;
                 return token;
             case ST_OP_LESSER_THAN:
+                if (*edge == '=') {
+                    state = ST_OP_LESS_EQUAL;
+                    break;
+                }
                 ungetc(*edge, stdin);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = LESS;
                 return token;
+            case ST_OP_LESS_EQUAL:
+                ungetc(*edge, stdin);
+
+                token->type = OPERATOR;
+                token->name = NULL;
+                token->operators = LESS_EQUAL;
+                return token;
+            case ST_OP_GREATER_EQUAL:
+                ungetc(*edge, stdin);
+
+                token->type = OPERATOR;
+                token->name = NULL;
+                token->operators = GREATER_EQUAL;
+                return token;
             case ST_OP_GREATER_THAN:
+                if (*edge == '=') {
+                    state = ST_OP_GREATER_EQUAL;
+                    break;
+                }
                 ungetc(*edge, stdin);
 
                 token->type = OPERATOR;
@@ -266,8 +327,7 @@ TOKEN_T *get_next_token() {
                 if (*edge == ' ' || *edge == '(' || *edge == '\n') {
 
                     //  exit(1);
-                    if (*edge == '(')
-                    {
+                    if (*edge == '(') {
                         ungetc(*edge, stdin);
                     }
 
@@ -344,18 +404,19 @@ TOKEN_T *get_next_token() {
 
             case ST_STRING_LITERAL:
 
-                if(*edge != '"') {
+                if (*edge != '"') {
 
                     str_conc(&str, edge);
-                   // *edge = fgetc(stdin);
-                   // if (*edge == '"') break;
-                }else {
+                    // *edge = fgetc(stdin);
+                    // if (*edge == '"') break;
+                } else {
 
-                ungetc(*edge, stdin);
-                token->type = LITERAL;
-                token->value.char_val = str.str;
-                token->value.type = 1;
-                return token;}
+                    ungetc(*edge, stdin);
+                    token->type = LITERAL;
+                    token->value.char_val = str.str;
+                    token->value.type = 1;
+                    return token;
+                }
                 break;
             case ST_LEFT_PARENTHESES:
                 token->type = LPAR;
@@ -446,8 +507,7 @@ TOKEN_T *get_next_token() {
                 if (*edge == ' ' || *edge == '(' || *edge == '\n') {
 
                     //  exit(1);
-                    if (*edge == '(')
-                    {
+                    if (*edge == '(') {
                         ungetc(*edge, stdin);
                     }
 
@@ -467,9 +527,9 @@ TOKEN_T *get_next_token() {
                 // printf("____string: %s\n", str.str);
                 //   break;
                 //   exit(1);
-           /* default:
-                printf(" ");
-                //state = ST_READ;*/
+                /* default:
+                     printf(" ");
+                     //state = ST_READ;*/
         }
 
 
