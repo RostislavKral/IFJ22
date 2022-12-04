@@ -7,6 +7,14 @@ void DLL_init(DLList* list){
     list->first = NULL;
     list->last = NULL;
 }
+void DLL_dispose_list(DLList* list){
+    DLLItem *tmp;
+    while (list->first != NULL){
+        tmp = list->first;
+        list->first = list->first->nextItem;
+        free(tmp);
+    }
+}
 void DLL_insert_first(DLList *list, TOKEN_T* token) {
     struct DLLItem *newItem = malloc(sizeof(struct DLLItem));
     newItem->token = token;
