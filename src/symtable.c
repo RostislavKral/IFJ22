@@ -105,7 +105,7 @@ htab_item_t * htab_find_var(htab_t * t, char * key, int scope) {
     int index = htab_hash_function(key) % t->arr_size;
     htab_item_t * item = t->arr_ptr[index]->item;
 
-    while (item != NULL && strcmp(key, item->key) != 0 && item->data.type != VAR) {
+    while (item != NULL && !(strcmp(key, item->key) == 0 && item->data.type == VAR)) {
         item = item->next;
     }
 
@@ -158,7 +158,7 @@ htab_item_t * htab_find_func(htab_t * t, char * key) {
     int index = htab_hash_function(key) % t->arr_size;
     htab_item_t * item = t->arr_ptr[index]->item;
 
-    while (item != NULL && strcmp(key, item->key) != 0 && item->data.type != FUNC) {
+    while (item != NULL && !(strcmp(key, item->key) == 0 && item->data.type == FUNC)) {
         item = item->next;
     }
 

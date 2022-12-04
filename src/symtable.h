@@ -46,7 +46,7 @@
 
         returns htab_item_t * or NULL if no such var
 
-    htab_remove_sope(htab, scope)
+    htab_remove_sсope(htab, scope)
         removes variables with current scope
 
 
@@ -211,15 +211,6 @@ size_t htab_size(const htab_t * t);
  * @param t hash table 
  */
 void htab_print(htab_t * t);
-
-/**
- * @brief Returns pointer to the key-value pair in t, adds new key-value pair if not found
- * 
- * @param t hash table 
- * @param key key of item 
- * @return htab_item_t* 
- */
-htab_item_t * htab_lookup_add(htab_t * t, htab_key_t key);
 
 /**
  * @brief Increases / decreases size of t
