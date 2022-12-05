@@ -3,13 +3,13 @@
 
 
 int gen_declare_var(TOKEN_T* token, int scope) {
-    
+
 }
 
 
 
 // token = expression
-int gen_expression(TOKEN_T* token, BSTnode* node)
+int gen_expression(TOKEN_T* token, BSTnode* node, int scope)
 {
     // printf(">%d\n", node->type);
     printf(">>>>>>CODEGEN>>>>>> DEFVAR LF@%s\n", token->name);
