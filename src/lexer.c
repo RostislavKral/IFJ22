@@ -653,7 +653,10 @@ TOKEN_T *get_next_token() {
                 if (*edge == ' ' || *edge == '(' || *edge == '\n') {
 
                     //  exit(1);
-                    lexer_unget(*edge);
+                    if (*edge != ' ')
+                    {
+                        lexer_unget(*edge);
+                    }
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
 
