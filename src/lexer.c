@@ -149,6 +149,13 @@ TOKEN_T *get_next_token() {
     while (true) {
 //        *edge = fgetc(stdin);
         *edge = lexer_fget();
+        if (*edge == EOF) {
+            token->type = ISEOF;
+            token->name = NULL;
+
+            set_line_num(token);
+            return token;
+        }
 //        printf("__________%c", *edge);
 //        printf("%d", state);
 
@@ -535,9 +542,10 @@ TOKEN_T *get_next_token() {
                     str_conc(&str, edge);
                     // *edge = lexer_fget();
                     // if (*edge == '"') break;
+
                 } else {
 
-                    lexer_unget(*edge);
+                   // lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;
