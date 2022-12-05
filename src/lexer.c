@@ -135,7 +135,7 @@ void set_line_num(TOKEN_T* token)
 TOKEN_T *get_next_token() {
     TOKEN_T *token;
     token = malloc(sizeof(TOKEN_T));
-
+    token->value.int_val = 0;
     enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof(char));
@@ -162,18 +162,29 @@ TOKEN_T *get_next_token() {
            printf("%s \n\n\n", str.str);
        }*/
 
-        if (*edge == EOF) {
+
+
+   /*     char eof_tmp = lexer_fget();
+        printf("%c", eof_tmp);
+        if(eof_tmp==EOF){
             token->type = ISEOF;
             token->name = NULL;
 
             set_line_num(token);
             return token;
-        }
-
+        } else {
+            lexer_unget(eof_tmp);
+        }*/
         switch (state) {
             case ST_START:
+                if (*edge == EOF) {
+                    token->type = ISEOF;
+                    token->name = NULL;
 
-                if (*edge == '(') state = ST_LEFT_PARENTHESES;
+                    set_line_num(token);
+                    return token;
+                }
+                else if (*edge == '(') state = ST_LEFT_PARENTHESES;
                 else if (*edge == ' ') state = ST_START;
                 else if (*edge == '\n') state = ST_START;
                 else if (*edge == ')') state = ST_RIGHT_PARENTHESES;
@@ -460,7 +471,7 @@ TOKEN_T *get_next_token() {
 
                 /* This was added by SniehNikita */
             case ST_INT_LITERAL:
-                //token->value.int_val = 1;
+                //token->value.int_val = 0;
                 token->value.double_val = 0;
                 int isValid = 0;
 
