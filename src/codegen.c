@@ -15,3 +15,7 @@ int gen_expression(TOKEN_T* token, BSTnode* node)
 {
     return 0;
 }
+
+void gen_if(BSTnode* conditionTree){
+
+}

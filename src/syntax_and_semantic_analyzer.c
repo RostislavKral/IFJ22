@@ -29,7 +29,8 @@ scopeHelper scope = {
         .num = 0,
         .openedBracesCount = 0,
         .lastScopeOpeningToken = NULL,
-        .isDefined = false
+        .isDefined = false,
+        .openedIfCount = 0
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -52,7 +53,7 @@ void function_end_parsing(){
     functionHelper.fBraceCountCheck = 0;
     functionHelper.paramsList = NULL;
     scope.num--;
-    scope.openedBracesCount--;
+    //scope.openedBracesCount--;
 };
 
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -66,21 +67,24 @@ void analyze_and_store_expression(DLList *list,TOKEN_T* token){
     DLL_insert_last(list, token);
 
 }
-void if_condition(){
-    TOKEN_T *firstConditionToken = get_next_token();
-    if (firstConditionToken->type == TOKEN_ID){
-        //TODO CHECK IF VAR EXISTS
-    }
+
+//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+void if_condition(TOKEN_T* token, htab_t* symtable){
+    DLList* condExpList = expression_list(symtable, RPAR);
+    if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
+    BSTnode* condExprBST = analyze_precedence(condExpList);
+    if (condExprBST == NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    scope.openedIfCount++;
+    gen_if(condExprBST);
 }
 
-void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
-    TOKEN_T *equalToken = get_next_token();
-    if (equalToken->type != ASSIGN) exit_with_message(equalToken->lineNum, equalToken->charNum, "Invalid operator to assing", SYNTAX_ERR);
-
+DLList *expression_list(htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     DLList *precedenceList = malloc(sizeof (struct DLList));
     TOKEN_T *tmpToken = get_next_token();
-    while (tmpToken->type != SEMICOLON){
-        if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR){
+    while (tmpToken->type != closingToken){
+        if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD)){
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
@@ -90,6 +94,14 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
         }
         else exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Invalid token in assign or EOF", SYNTAX_ERR);
     }
+    return precedenceList;
+}
+
+void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
+    TOKEN_T *equalToken = get_next_token();
+    if (equalToken->type != ASSIGN) exit_with_message(equalToken->lineNum, equalToken->charNum, "Invalid operator to assing", SYNTAX_ERR);
+
+    DLList* precedenceList = expression_list(symtable, SEMICOLON);
     BSTnode *expressionTree = analyze_precedence(precedenceList);
     if (expressionTree != NULL){
         if (expressionTree->token->type == LITERAL){
@@ -110,9 +122,6 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
         gen_expression(varNameToken, expressionTree);
     }
 }
-
-
-//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 void function_call(TOKEN_T *functionToken,htab_t* symtable){
     htab_item_t* stFunction = htab_find_func(symtable, functionToken->name);
@@ -237,7 +246,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         if(token->type == LBRACE && functionHelper.fNamePass && functionHelper.fParamPass){
             scope.lastScopeOpeningToken = token;
             scope.num++;
-            scope.openedBracesCount++;
+            //scope.openedBracesCount++;
             functionHelper.fHeadParsed = true;
             functionHelper.fBodyParsing = true;
             functionHelper.fBraceCountCheck = scope.openedBracesCount;
@@ -291,7 +300,7 @@ void analyze_token(htab_t* symtable){
                             exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
                         } else {
                             //expression parse
-                            if_condition();
+                            if_condition(token,symtable);
                         }
                         break;
                     case KEY_INT:
@@ -340,10 +349,12 @@ void analyze_token(htab_t* symtable){
             case SEMICOLON:
                 break;
             case LBRACE:
+                scope.openedBracesCount++;
                 break;
             case RBRACE:
                 //this will stop function parsing, hopefully
                 if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
+                scope.openedBracesCount--;
                 break;
             case COMMA:
                 break;

@@ -538,7 +538,7 @@ TOKEN_T *get_next_token() {
                     // if (*edge == '"') break;
                 } else {
 
-                    lexer_unget(*edge);
+                   // lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;

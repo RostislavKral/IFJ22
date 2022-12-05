@@ -179,15 +179,18 @@ typedef struct {
     htab_t* localSymTable;
     //Check if already <?php is parsed
     bool isDefined;
+    //num of opened ifs
+    int openedIfCount;
 } scopeHelper;
 
 void init_sym_tables();
 void analyze_token(htab_t* symtable);
 void function_detected(TOKEN_T* token,htab_t* symtable);
 void function_end_parsing();
-void if_condition();
+void if_condition(TOKEN_T* token, htab_t* symtable);
 void var_declaration(htab_t* symtable,TOKEN_T *variable);
 void function_call(TOKEN_T *funcName,htab_t* symtable);
+DLList* expression_list(htab_t* symtable, enum  T_TOKEN_TYPE closingToken);
 
 
 ////LL functions
