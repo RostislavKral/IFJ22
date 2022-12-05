@@ -58,5 +58,8 @@ enum T_STATE {
 };
 
 TOKEN_T * get_next_token();
+void lexer_unget(char *edge);
+char lexer_fget();
+void set_line_num(TOKEN_T* token);
 
 #endif
