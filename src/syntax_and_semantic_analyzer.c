@@ -2,7 +2,7 @@
  * @file syntax_and_semantic_analyzer.c
  * @author Nikita Sniehovskyi xsnieh00
  * @author Lukáš Ježek <xjezek19@stud.fit.vutbr.cz>
- * @brief syntax and semantiv analyzer implementation
+ * @brief syntax and semantic analyzer implementation
  * @version 0.1
  * @date 2022-11-19
  *
@@ -58,8 +58,9 @@ void function_end_parsing(){
 void analyze_and_store_expression(DLList *list,TOKEN_T* token){
     TOKEN_T *nextToken = get_next_token();
     if(nextToken->operators == token->operators){
-        //TODO ERR 2 operatory za s sebou
+        // TODO: ERR 2 operatory za s sebou -> tohle se nemusi resit, resi to uz precedencni
         // TODO: poslat cely expression v DLL listu, pouzivej insert last (abych to necetl odzadu)
+        // TODO: poslat jakykoliv vyraz, za "=". Kdyby v tom vyrazu bylo, hodim automaticky error.y
     }
     DLL_insert_last(list, token);
 
