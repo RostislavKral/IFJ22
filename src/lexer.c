@@ -168,7 +168,16 @@ TOKEN_T *get_next_token() {
             set_line_num(token);
             return token;
         }
+        char eof_tmp = lexer_fget();
+        if(eof_tmp==EOF){
+            token->type = ISEOF;
+            token->name = NULL;
 
+            set_line_num(token);
+            return token;
+        } else {
+            lexer_unget(eof_tmp);
+        }
         switch (state) {
             case ST_START:
 
