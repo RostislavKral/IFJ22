@@ -149,6 +149,7 @@ TOKEN_T *get_next_token() {
     while (true) {
 //        *edge = fgetc(stdin);
         *edge = lexer_fget();
+        edge[1] = '\0';
 //        printf("__________%c", *edge);
 //        printf("%d", state);
 
@@ -672,6 +673,8 @@ TOKEN_T *get_next_token() {
                     // printf("%c", *edge);
                 else {
                     state = ST_READ;
+                    //printf("%c-%d-%d ", *edge, line_number, char_number);
+//                    printf("%s", str.str);
                     str_conc(&str, edge);
 
                 }
