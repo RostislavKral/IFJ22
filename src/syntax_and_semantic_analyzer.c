@@ -512,87 +512,90 @@ void Error_msg() {
 void WriteToken(TOKEN_T * token) {
     switch (token->type) {
         case KEYWORD:
-            printf("KEYWORD: %u\n", token->keyword);
+            printf("KEYWORD: %u", token->keyword);
             break;
 
         case TOKEN_ID:
-            printf("TOKEN_ID: name: %s\n", token->name);
+            printf("TOKEN_ID: name: %s", token->name);
             break;
 
         case FUNC_ID:
-            printf("FUNC_ID: name: %s\n", token->name);
+            printf("FUNC_ID: name: %s", token->name);
             break;
 
         case LITERAL:
             switch (token->value.type) {
                 case 0:
-                    printf("LITERAL: INT: value: %d\n", token->value.int_val);
+                    printf("LITERAL: INT: value: %d", token->value.int_val);
                     break;
 
                 case 1:
-                    printf("LITERAL: STRING: value: %s\n", token->value.char_val);
+                    printf("LITERAL: STRING: value: %s", token->value.char_val);
                     break;
 
                 case 2:
-                    printf("LITERAL: DOUBLE value: %f\n", token->value.double_val);
+                    printf("LITERAL: DOUBLE value: %f", token->value.double_val);
                     break;
 
                 default:
-                    printf("LITERAL: UNKNOWN TYPE: %d\n", token->value.type);
+                    printf("LITERAL: UNKNOWN TYPE: %d", token->value.type);
                     break;
             }
             break;
 
         case ASSIGN:
-            printf("ASSIGN: =\n");
+            printf("ASSIGN: =");
             break;
 
         case LPAR:
-            printf("LPAR: (\n");
+            printf("LPAR: (");
             break;
 
         case RPAR:
-            printf("RPAR: )\n");
+            printf("RPAR: )");
             break;
         case RBRACE:
-            printf("RBRACE: {\n");
+            printf("RBRACE: {");
             break;
         case LBRACE:
-            printf("LBRACE: }\n");
+            printf("LBRACE: }");
             break;
 
         case OPERATOR:
             switch (token->operators) {
                 case EQUALS:
-                    printf("OPERATOR: ==\n");
+                    printf("OPERATOR: ==");
                     break;
 
                 case PLUS:
-                    printf("OPERATOR: +\n");
+                    printf("OPERATOR: +");
                     break;
 
                 case MINUS:
-                    printf("OPERATOR: -\n");
+                    printf("OPERATOR: -");
                     break;
                 case TYPE_EQUALS:
-                    printf("OPERATOR: === \n");
+                    printf("OPERATOR: === ");
                     break;
                 default:
-                    printf("OPERATOR: unknown, %u\n", token->operators);
+                    printf("OPERATOR: unknown, %u", token->operators);
                     break;
             }
             break;
 
         case ISEOF:
-            printf("ISEOF\n");
+            printf("ISEOF");
             break;
 
         case FUNC_CALL:
-            printf("FUNC CALL name: %s\n", token->name);
+            printf("FUNC CALL name: %s", token->name);
             break;
 
         default:
-            printf("UNKNOWN: type: %d, name: %s, value type: %d\n", token->type, token->name, token->value.type);
+            printf("UNKNOWN: type: %d, name: %s, value type: %d", token->type, token->name, token->value.type);
             break;
     }
+
+    // printf("\n");
+    printf(", %d:%d\n", token->lineNum, token->charNum);
 }

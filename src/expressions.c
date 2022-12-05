@@ -15,6 +15,10 @@
 #include "expressions.h"
 #include "expression_stack.h"
 
+#define bool int
+#define true 1
+#define false 0
+
 int table [17][17] = {
 //                  NULL  *    /    +    -    .    <    >   <=   >=    =   ===  !==   (    )   ID    $
 /*   NULL  */     { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
@@ -65,7 +69,7 @@ int get_operator(DLList* stack, TOKEN_T* token)
 
 
 
-int reduce(DLList* stack, Stack* stop_stack)
+bool reduce(DLList* stack, Stack* stop_stack)
 {
     StackItem* tmp = Stack_pop(stop_stack);
 
@@ -115,7 +119,7 @@ int reduce(DLList* stack, Stack* stop_stack)
                     free(id);
                     free(operator);
                     free(id2);
-                    return 0;
+                    return false;
                 }
 
                 DLLItem* item = DLL_insert_after(stack, stop, id->token);
@@ -141,7 +145,7 @@ int reduce(DLList* stack, Stack* stop_stack)
         free(tmp);
         tmp = Stack_pop(stop_stack);
     }
-    return 1;
+    return true;
 }
 
 BSTnode* analyze_precedence(DLList* list)
@@ -232,15 +236,15 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
 {
     if (operator->token->type != OPERATOR)
     {
-        return 0;
+        return false;
     }
     if (a->token->type != TOKEN_ID && a->token->type != LITERAL)
     {
-        return 0;
+        return false;
     }
     if (b->token->type != TOKEN_ID && b->token->type != LITERAL)
     {
-        return 0;
+        return false;
     }
 //    printf("AHOOOOOOOJ %d %d %d", a->token->value.type, operator->token->operators, b->token->value.type);
     if (
@@ -258,14 +262,14 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
             if (a->token->value.type == 0 && b->token->value.type == 0)
             {
                 // TODO: is int
-                return 1;
+                return true;
             }
             // TODO: is double
-            return 1;
+            return true;
         }
         else
         {
-            return 0;
+            return false;
         }
     }
     else if (operator->token->operators == LESS ||
@@ -282,7 +286,7 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 )
         {
             // TODO: is boolean
-            return 1;
+            return true;
         }
     }
     else if (operator->token->operators == CONCAT)
@@ -293,15 +297,13 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 )
         {
             // TODO: is string
-            return 1;
+            return true;
         }
         else
         {
-            return 0;
+            return false;
         }
     }
-    else
-    {
-        return 0;
-    }
+
+    return false;
 }

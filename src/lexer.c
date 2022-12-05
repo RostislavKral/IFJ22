@@ -78,9 +78,40 @@ struct T_TOKEN make_token()
 
 
 
-
 bool control = 0;
 char *c;
+int line_number = 1;
+int char_number = 0;
+
+void lexer_unget(char *edge)
+{
+    char_number--;
+    if (*edge == '\n')
+    {
+        line_number--;
+    }
+
+    ungetc(*edge, stdin);
+}
+
+char lexer_fget()
+{
+    char edge = fgetc(stdin);
+    char_number++;
+    if (edge == '\n')
+    {
+        line_number++;
+        char_number = 0;
+    }
+
+    return edge;
+}
+
+void set_line_num(TOKEN_T* token)
+{
+    token->lineNum = line_number;
+    token->charNum = char_number;
+}
 
 TOKEN_T *get_next_token() {
     TOKEN_T *token;
@@ -97,7 +128,8 @@ TOKEN_T *get_next_token() {
 
 
     while (true) {
-        *edge = fgetc(stdin);
+//        *edge = fgetc(stdin);
+        *edge = lexer_fget();
 //        printf("__________%c", *edge);
 //        printf("%d", state);
 
@@ -113,6 +145,8 @@ TOKEN_T *get_next_token() {
         if (*edge == EOF) {
             token->type = ISEOF;
             token->name = NULL;
+
+            set_line_num(token);
             return token;
         }
 
@@ -148,14 +182,14 @@ TOKEN_T *get_next_token() {
                 else {
                     //printf("____%s", edge);
                     state = ST_READ;
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
                 }
 
 
                 /* This was added by SniehNikita */
                 if (isdigit(*edge)) {
                     state = ST_INT_LITERAL;
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
                 }
                 /* ----------------------------- */
 
@@ -175,11 +209,13 @@ TOKEN_T *get_next_token() {
                 token->type = OPERATOR;
                 token->operators = TYPE_NOT_EQUALS;
                 token->name = NULL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_NOT_EQUAL:
                 if (*edge != '=') exit(1);
                 char tmp = *edge;
-                *edge = fgetc(stdin);
+                *edge = lexer_fget();
                 if (tmp == '=' && *edge == '=') {
                     state = ST_OP_TYPE_NOT_EQUALS;
                     break;
@@ -189,6 +225,8 @@ TOKEN_T *get_next_token() {
                     token->type = OPERATOR;
                     token->operators = NOT_EQUAL;
                     token->name = NULL;
+
+                    set_line_num(token);
                     return token;
                 }
                 exit(1);
@@ -204,16 +242,19 @@ TOKEN_T *get_next_token() {
                     str_conc(&str, edge);
                     continue;
                 }
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
                 token->type = TOKEN_ID;
                 token->name = str.str;
 
+                set_line_num(token);
                 return token;
 
             case ST_OP_TYPE_EQUALS:
                 token->type = OPERATOR;
                 token->operators = TYPE_EQUALS;
                 token->name = NULL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_EQUALS:
                 if (*edge == '=') {
@@ -223,46 +264,58 @@ TOKEN_T *get_next_token() {
                 token->type = OPERATOR;
                 token->operators = EQUALS;
                 token->name = NULL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_ASSIGN:
                 if (*edge == '=') {
                     state = ST_OP_EQUALS;
                     break;
                 }
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = ASSIGN;
                 token->name = NULL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_PLUS:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = PLUS;
+
+                set_line_num(token);
                 return token;
             case ST_OP_MINUS:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = MINUS;
+
+                set_line_num(token);
                 return token;
             case ST_OP_MULTIPLY:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = MULTIPLY;
+
+                set_line_num(token);
                 return token;
             case ST_OP_DIVIDE:
 
                 if (*edge != '/' && *edge != '*') {
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
 
                     token->type = OPERATOR;
                     token->name = NULL;
                     token->operators = DIVIDE;
+
+                    set_line_num(token);
                     return token;
                 } else if (*edge == '*') {
                     state = ST_MLINE_COMMENT;
@@ -272,47 +325,57 @@ TOKEN_T *get_next_token() {
                     break;
                 }
             case ST_OP_CONCAT:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = CONCAT;
+
+                set_line_num(token);
                 return token;
             case ST_OP_LESSER_THAN:
                 if (*edge == '=') {
                     state = ST_OP_LESS_EQUAL;
                     break;
                 }
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = LESS;
+
+                set_line_num(token);
                 return token;
             case ST_OP_LESS_EQUAL:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = LESS_EQUAL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_GREATER_EQUAL:
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = GREATER_EQUAL;
+
+                set_line_num(token);
                 return token;
             case ST_OP_GREATER_THAN:
                 if (*edge == '=') {
                     state = ST_OP_GREATER_EQUAL;
                     break;
                 }
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
                 token->operators = GREATER;
+
+                set_line_num(token);
                 return token;
             case ST_FUNC:
                 //printf("%c", *edge);
@@ -320,7 +383,7 @@ TOKEN_T *get_next_token() {
                     str_conc(&fun_name, edge);
                     continue;
                 }*
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
 
 */
@@ -328,11 +391,13 @@ TOKEN_T *get_next_token() {
 
                     //  exit(1);
                     if (*edge == '(') {
-                        ungetc(*edge, stdin);
+                        lexer_unget(edge);
                     }
 
                     token->type = FUNC_ID;
                     token->name = fun_name.str;
+
+                    set_line_num(token);
                     return token;
 
                     //str_destroy(&str);
@@ -364,28 +429,30 @@ TOKEN_T *get_next_token() {
                     // char c;
                     double test, tmp;
                     int offset = 10;
-                    *edge = fgetc(stdin);
+                    *edge = lexer_fget();
 
                     while (isdigit(*edge)) {
                         tmp = (double) *edge - '0';
                         test += tmp / offset;
-                        *edge = fgetc(stdin);
+                        *edge = lexer_fget();
 
                         offset *= 10;
                     }
 
                     token->value.double_val = test;
                     isValid = 1;
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
                     token->type = LITERAL;
                     token->value.type = 2;
                     token->value.double_val += token->value.int_val;
                     token->value.int_val = 0;
+
+                    set_line_num(token);
                     return token;
                 } else {
                     //printf("%d", isValid);
 
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
                     token->type = LITERAL;
                     if (isValid == 1) {
                         token->value.type = 2;
@@ -394,6 +461,8 @@ TOKEN_T *get_next_token() {
                     } else {
                         token->value.type = 0;
                     }
+
+                    set_line_num(token);
                     return token;
                 }
 
@@ -407,98 +476,133 @@ TOKEN_T *get_next_token() {
                 if (*edge != '"') {
 
                     str_conc(&str, edge);
-                    // *edge = fgetc(stdin);
+                    // *edge = lexer_fget();
                     // if (*edge == '"') break;
                 } else {
 
-                    ungetc(*edge, stdin);
+                    lexer_unget(edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;
+
+                    set_line_num(token);
                     return token;
                 }
                 break;
             case ST_LEFT_PARENTHESES:
                 token->type = LPAR;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
 
+                set_line_num(token);
                 return token;
             case ST_RIGHT_PARENTHESES:
                 token->type = RPAR;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_LEFT_CURLYBRACKET:
                 token->type = LBRACE;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_RIGHT_CURLYBRACKET:
                 token->type = RBRACE;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_COMMA:
                 token->type = COMMA;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_FLOAT:
                 token->type = KEYWORD;
                 token->keyword = KEY_FLOAT;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_INT:
                 token->type = KEYWORD;
                 token->keyword = KEY_INT;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_STRING:
                 token->type = KEYWORD;
                 token->keyword = KEY_STRING;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_COLON:
                 token->type = KEYWORD;
                 token->keyword = KEY_COLON;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_IF:
                 token->type = KEYWORD;
                 token->keyword = KEY_IF;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_VOID:
                 token->type = KEYWORD;
                 token->keyword = KEY_VOID;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_RETURN:
                 token->type = KEYWORD;
                 token->keyword = KEY_RETURN;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_ELSE:
                 token->type = KEYWORD;
                 token->keyword = KEY_ELSE;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_WHILE:
                 token->type = KEYWORD;
                 token->keyword = KEY_WHILE_LOOP;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_KEYWORD_NULL:
                 token->type = KEYWORD;
                 token->keyword = KEY_NULL;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_SEMICOLON:
                 token->type = SEMICOLON;
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_FUNC_CALL:
                 token->type = FUNC_CALL;
                 token->name = str.str;
                 // printf("__________%s", str.str);
                 //str_destroy(&str);
-                ungetc(*edge, stdin);
+                lexer_unget(edge);
+
+                set_line_num(token);
                 return token;
             case ST_READ:
 //                printf(" ");
@@ -508,7 +612,7 @@ TOKEN_T *get_next_token() {
 
                     //  exit(1);
                     if (*edge == '(') {
-                        ungetc(*edge, stdin);
+                        lexer_unget(edge);
                     }
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
