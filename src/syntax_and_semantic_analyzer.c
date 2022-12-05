@@ -238,6 +238,10 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             //if ( is found, cycle until )
             if(token->type == LPAR){
                 TOKEN_T *paramToken = get_next_token();
+                if(paramToken->type == RPAR) {
+                    functionHelper.fParamPass = true;
+                    continue;
+                }
                 while (functionHelper.fParamPass == false){
                     if(paramToken->keyword == KEY_INT || paramToken->keyword == KEY_STRING || paramToken->keyword == KEY_FLOAT){
                         TOKEN_T *paramName = get_next_token();
@@ -293,16 +297,18 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     }
     //htab_insert_func(symtable)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
-    DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
-    for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
-        paramArr[i] = tmp->token->keyword;
-        tmp = tmp->nextItem;
+    if (functionHelper.fParamCount != 0) {
+        DLLItem *tmp;
+        tmp = DLL_get_first(functionHelper.paramsList);
+        for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
+            paramArr[i] = tmp->token->keyword;
+            tmp = tmp->nextItem;
+        }
     }
-
     if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
-    DLL_dispose_list(functionHelper.paramsList);
+    if(functionHelper.fParamCount != 0)DLL_dispose_list(functionHelper.paramsList);
 
     // START PARSING Function BODY
     //analyze_token(symtable);
