@@ -143,6 +143,19 @@ void htab_free(htab_t * t);
 bool htab_insert_var(htab_t * t, char * name, int scope, enum T_KEYWORD type, htab_value value);
 
 /**
+ * @brief TODO
+ * 
+ * @param t 
+ * @param name 
+ * @param scope 
+ * @param type 
+ * @param value 
+ * @return true 
+ * @return false 
+ */
+bool htab_update_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab_value value);
+
+/**
  * @brief Searches for a variable in htab
  * 
  * @param t hash table

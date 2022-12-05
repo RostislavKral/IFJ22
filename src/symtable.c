@@ -81,7 +81,7 @@ bool htab_insert_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab
     if (htab_find_var(t, name, scope) != NULL){
         return false;
     }
-    
+
     htab_item_t *new_item = malloc(sizeof(htab_item_t));
     if (new_item == NULL) {
         exit(99);
@@ -110,6 +110,22 @@ bool htab_insert_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab
     {
         htab_resize(t, t->arr_size * 2);
     }
+
+    return true;
+}
+
+bool htab_update_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab_value value)
+{
+    htab_item_t * update_item = htab_find_var(t, name, scope); 
+    if (update_item == NULL){
+        return false;
+    }    
+
+    update_item->key = name;
+    update_item->scope = scope;
+
+    (update_item->data.data_type)[0] = type;
+    update_item->data.value = value;
 
     return true;
 }
