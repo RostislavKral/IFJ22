@@ -27,3 +27,90 @@ void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE 
             exit(99);
     }
 }
+
+void token_print(TOKEN_T* token)
+{
+    if (token->type == TOKEN_ID)
+    {
+        printf("%s", token->name);
+    }
+    else if (token->type == LITERAL)
+    {
+        if (token->value.type == 0)
+        {
+            printf("%d", token->value.int_val);
+        }
+        else if (token->value.type == 1)
+        {
+            printf("%s", token->value.char_val);
+        }
+        else if (token->value.type == 2)
+        {
+            printf("%f", token->value.double_val);
+        }
+    }
+    else if (token->type == DOLLAR)
+    {
+        printf("$");
+    }
+    else if (token->type == LPAR)
+    {
+        printf("(");
+    }
+    else if (token->type == RPAR)
+    {
+        printf(")");
+    }
+    else if (token->operators == MULTIPLY)
+    {
+        printf("*");
+    }
+    else if (token->operators == DIVIDE)
+    {
+        printf("/");
+    }
+    else if (token->operators == PLUS)
+    {
+        printf("+");
+    }
+    else if (token->operators == MINUS)
+    {
+        printf("-");
+    }
+    else if (token->operators == CONCAT)
+    {
+        printf(".");
+    }
+    else if (token->operators == LESS)
+    {
+        printf("<");
+    }
+    else if (token->operators == GREATER)
+    {
+        printf(">");
+    }
+    else if (token->operators == LESS_EQUAL)
+    {
+        printf("<=");
+    }
+    else if (token->operators == GREATER_EQUAL)
+    {
+        printf(">=");
+    }
+    else if (token->operators == EQUALS)
+    {
+        printf("=");
+    }
+    else if (token->operators == NOT_EQUAL)
+    {
+        printf("!=");
+    }
+    else if (token->operators == TYPE_EQUALS)
+    {
+        printf("===");
+    }
+    else if (token->operators == TYPE_NOT_EQUALS)
+    {
+        printf("!==");
+    }
+}

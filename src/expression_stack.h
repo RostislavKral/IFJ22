@@ -1,6 +1,8 @@
-//
-// Created by jeza on 2.12.22.
-//
+/**
+ * @file expressions_stack.h
+ * @author Hoang Nam Nguyen (xnguye22)
+ * @brief Expressions structures
+ */
 
 #ifndef IFJ22_EXPRESSION_STACK_H
 #define IFJ22_EXPRESSION_STACK_H
@@ -8,6 +10,12 @@
 #include "stdio.h"
 #include "token.h"
 
+typedef struct BSTnode{
+    TOKEN_T* token;
+    // TODO: type
+    struct BSTnode* left;
+    struct BSTnode* right;
+} BSTnode;
 
 typedef struct DLLItem{
     enum T_OPERATOR tokenOperator;
@@ -15,6 +23,8 @@ typedef struct DLLItem{
     TOKEN_T *token;
     struct DLLItem *prevItem;
     struct DLLItem *nextItem;
+
+    BSTnode *bst;
 } DLLItem;
 
 typedef struct DLList {
@@ -38,7 +48,6 @@ void DLL_print(DLList* list);
 void DLL_item_print(DLLItem* item);
 
 
-//typedef struct StackItem StackItem;
 typedef struct StackItem{
     DLLItem* item;
     struct StackItem* next;
@@ -54,5 +63,12 @@ void Stack_init(Stack* stack);
 StackItem* Stack_push(Stack* stack, DLLItem* item);
 StackItem* Stack_pop(Stack* stack);
 void Stack_print(Stack* stack);
+
+BSTnode* BST_init();
+void BST_dispose(BSTnode* root);
+BSTnode* BST_init_token(DLLItem* item);
+BSTnode* BST_make_tree_from_expression(DLLItem* a, DLLItem* operator, DLLItem* b);
+BSTnode* BST_make_tree_from_parentheses(DLLItem* parentheses, DLLItem* id);
+void BST_print(BSTnode* root, int level);
 
 #endif //IFJ22_EXPRESSION_STACK_H
