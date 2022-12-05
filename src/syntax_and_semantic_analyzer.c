@@ -98,22 +98,30 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
 
     if (expressionTree != NULL){
         //one element
-        int a = scope.num;
         if (expressionTree->token->type == LITERAL){
             if (expressionTree->token->value.type == 0){
                 htab_value val =  {.int_value = expressionTree->token->value.int_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
                     htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
                 }
             } else if (expressionTree->token->value.type == 1){
                 htab_value val =  {.str_value = expressionTree->token->value.char_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
                     htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
                 }
             } else if (expressionTree->token->value.type == 2){
                 htab_value val =  {.float_value = expressionTree->token->value.double_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) {
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
                     htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
                 }
             }
         } else {
@@ -121,11 +129,11 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
             htab_value zero = {.str_value = NULL};
             if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
         }
-        gen_expression(varNameToken, expressionTree);
     }
 }
 
 void function_call(TOKEN_T *functionToken,htab_t* symtable){
+
     htab_item_t* stFunction = htab_find_func(symtable, functionToken->name);
 
     if (stFunction == NULL) exit_with_message(functionToken->lineNum, functionToken->charNum,"Function doesnt exist", SEM_F_DECLARATION_ERR);
@@ -272,8 +280,11 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //analyze_token(symtable);
 };
 
+
+
 void analyze_token(htab_t* symtable){
-    //TODO SCOPE CHECK
+    //TODO ELSE
+    TOKEN_T *previousToken;
     while (true){
         TOKEN_T *token;
         token = get_next_token();
