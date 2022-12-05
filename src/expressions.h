@@ -22,6 +22,6 @@ int get_row(DLList* list);
 BSTnode* analyze_precedence(DLList* list);
 int get_operator(DLList* stack, TOKEN_T* token);
 TOKEN_T* create_dollar_token();
-int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b);
+enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b);
 
 #endif //IFJ22_EXPRESSIONS_H

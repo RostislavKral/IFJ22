@@ -299,6 +299,7 @@ BSTnode* BST_init()
     root->left = NULL;
     root->right = NULL;
     root->token = NULL;
+    root->type = NULL_KEYWORD;
 
     return root;
 }
@@ -310,6 +311,7 @@ BSTnode* BST_init_token(DLLItem* item)
     root->left = NULL;
     root->right = NULL;
     root->token = item->token;
+    root->type = NULL_KEYWORD;
 
     return root;
 }

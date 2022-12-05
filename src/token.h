@@ -55,7 +55,8 @@ enum T_KEYWORD {
     KEY_FLOAT,      //1  
     KEY_FUNCTION,   //2  
     KEY_IF,         //3  
-    KEY_INT,        //4  
+    KEY_INT,        //4
+    KEY_BOOLEAN,
     KEY_NULL,       //5  
     KEY_RETURN,     //6  
     KEY_STRING,     //7  

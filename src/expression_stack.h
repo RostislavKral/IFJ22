@@ -12,7 +12,7 @@
 
 typedef struct BSTnode{
     TOKEN_T* token;
-    // TODO: type
+    enum T_KEYWORD type;
     struct BSTnode* left;
     struct BSTnode* right;
 } BSTnode;

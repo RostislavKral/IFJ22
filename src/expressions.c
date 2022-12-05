@@ -115,8 +115,8 @@ bool reduce(DLList* stack, Stack* stop_stack)
                 DLLItem* operator = DLL_pop(stack, stop->nextItem);
                 DLLItem* id2 = DLL_pop(stack, stop->nextItem);
 
-                int type = validate_expression(id, operator, id2);
-                if(type == 0)
+                enum T_KEYWORD type = validate_expression(id, operator, id2);
+                if(type == NULL_KEYWORD)
                 {
                     // expression is not valid
                     free(id);
@@ -127,6 +127,7 @@ bool reduce(DLList* stack, Stack* stop_stack)
 
                 DLLItem* item = DLL_insert_after(stack, stop, id->token);
                 item->bst = BST_make_tree_from_expression(id, operator, id2);
+                item->bst->type = type;
 
                 free(id);
                 free(operator);
@@ -235,24 +236,24 @@ TOKEN_T* create_dollar_token()
 
     return token;
 }
-int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
+
+enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
 {
     if (operator->token->type != OPERATOR)
     {
-        return false;
+        return NULL_KEYWORD;
     }
     if (a->token->type != TOKEN_ID && a->token->type != LITERAL)
     {
-        return false;
+        return NULL_KEYWORD;
     }
     if (b->token->type != TOKEN_ID && b->token->type != LITERAL)
     {
-        return false;
+        return NULL_KEYWORD;
     }
 //    printf("AHOOOOOOOJ %d %d %d", a->token->value.type, operator->token->operators, b->token->value.type);
     if (
             operator->token->operators == MULTIPLY ||
-            operator->token->operators == DIVIDE ||
             operator->token->operators == PLUS ||
             operator->token->operators == MINUS
             )
@@ -265,14 +266,28 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
             if (a->token->value.type == 0 && b->token->value.type == 0)
             {
                 // TODO: is int
-                return true;
+                return KEY_INT;
             }
             // TODO: is double
-            return true;
+            return KEY_FLOAT;
         }
         else
         {
-            return false;
+            return NULL_KEYWORD;
+        }
+    }
+    else if(operator->token->operators == DIVIDE)
+    {
+        if (
+                (a->token->value.type == 0 || a->token->value.type == 2) &&
+                (b->token->value.type == 0 || b->token->value.type == 2)
+                )
+        {
+            return KEY_FLOAT;
+        }
+        else
+        {
+            return NULL_KEYWORD;
         }
     }
     else if (operator->token->operators == LESS ||
@@ -289,7 +304,7 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 )
         {
             // TODO: is boolean
-            return true;
+            return KEY_BOOLEAN;
         }
     }
     else if (operator->token->operators == CONCAT)
@@ -300,13 +315,13 @@ int validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 )
         {
             // TODO: is string
-            return true;
+            return KEY_STRING;
         }
         else
         {
-            return false;
+            return NULL_KEYWORD;
         }
     }
 
-    return false;
+    return NULL_KEYWORD;
 }

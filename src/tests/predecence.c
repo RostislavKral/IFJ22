@@ -10,6 +10,35 @@
 #include "../expressions.c"
 #include "../token.c"
 
+void print_return_type(BSTnode* node)
+{
+    if (node == NULL)
+    {
+        printf("NULL");
+        return;
+    }
+
+    if (node->type == KEY_FLOAT)
+    {
+        printf("DOUBLE");
+    }
+    if (node->type == KEY_INT)
+    {
+        printf("INT");
+    }
+    if (node->type == KEY_BOOLEAN)
+    {
+        printf("BOOL");
+    }
+    if (node->type == KEY_STRING)
+    {
+        printf("STRING");
+    }
+    if (node->type == NULL_KEYWORD)
+    {
+        printf("NULL_KEYWORD");
+    }
+}
 
 void add_var(DLList* stack, char* name)
 {
@@ -64,7 +93,8 @@ void add_type(DLList* stack, int type)
 int get_result(DLList* stack)
 {
     BSTnode* result = analyze_precedence(stack);
-//    printf("tree: \n");BST_print(result, 0);
+    printf("\ntree: \n");BST_print(result, 0);
+    printf("\nreturn type: "); print_return_type(result);
     if (result != NULL)
     {
         printf("\nSuccess");
@@ -171,7 +201,7 @@ int test_expr3()
 int test_expr4()
 {
     printf("\n___________________________\n");
-    printf("Test expression a + (b * (c * d))");
+    printf("Test expression a + (b * (c + d))");
     DLList* stack = malloc(sizeof (DLList*));
     DLL_init(stack);
 
