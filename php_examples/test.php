@@ -1,2 +1,3 @@
 <?php
-reads()();
+declare(strict_types=1);
+reads($a);
