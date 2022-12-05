@@ -41,7 +41,7 @@ enum T_OPERATOR {
     GREATER,            //6  >
     LESS_EQUAL,         //7  <=
     GREATER_EQUAL,      //8  >=
-    EQUALS,             //9  ==
+    EQUALS,             //9  =
     NOT_EQUAL,          //10 !=
     TYPE_EQUALS,        //11 ===
     TYPE_NOT_EQUALS,    //12 !==
@@ -115,4 +115,5 @@ enum ERROR_CODE{
 };
 void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE errorCode);
 void token_print(TOKEN_T* token);
+enum T_KEYWORD get_keyword_from_token(TOKEN_T* token);
 #endif

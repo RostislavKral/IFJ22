@@ -136,6 +136,8 @@ bool reduce(DLList* stack, Stack* stop_stack)
         }
         else if (stop->nextItem->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL)
         {
+            DLLItem* item = stop->nextItem;
+            item->bst = BST_init_token(item);
             reduced = 1;
         }
 
@@ -199,7 +201,7 @@ BSTnode* analyze_precedence(DLList* list)
 
         iterator = iterator->nextItem;
     }
-    if(reduce(stack, stop_stack) == 0)
+    if(reduce(stack, stop_stack) == false)
     {
         return NULL;
     }

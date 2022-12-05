@@ -432,6 +432,18 @@ int test_expr17()
     return get_result(stack);
 }
 
+int test_expr18()
+{
+    printf("\n___________________________\n");
+    printf("Test expression a");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_var(stack, "a");
+
+    return get_result(stack);
+}
+
 int main()
 {
     int a = 0;
@@ -457,5 +469,6 @@ int main()
     test_expr15();
     test_expr16();
     test_expr17();
+    test_expr18();
 //    printf("%d%d%d%d%d", a,b,c,d,e);
 }
