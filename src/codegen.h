@@ -12,6 +12,7 @@
 
 
 // int gen_code(RULE_T * rule);
+int gen_expression(TOKEN_T* token, BSTnode* node);
 
 
 #endif

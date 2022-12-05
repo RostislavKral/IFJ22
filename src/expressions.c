@@ -14,6 +14,7 @@
 #include "token.h"
 #include "expressions.h"
 #include "expression_stack.h"
+#include "codegen.h"
 
 
 int table [18][18] = {
@@ -215,6 +216,9 @@ BSTnode* analyze_precedence(DLList* list)
             stack->first == NULL)
     {
         BSTnode* node = item->bst;
+
+        gen_expression(item->token, node);
+
         free(item);
         free(dollar);
         return node;
@@ -262,10 +266,10 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
         {
             if (a->token->value.type == 0 && b->token->value.type == 0)
             {
-                // TODO: is int
+                // is int
                 return KEY_INT;
             }
-            // TODO: is double
+            // is double
             return KEY_FLOAT;
         }
         else
@@ -300,7 +304,7 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 (b->token->value.type == 0 || b->token->value.type == 2)
                 )
         {
-            // TODO: is boolean
+            // is boolean
             return KEY_BOOLEAN;
         }
     }
@@ -311,7 +315,7 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 b->token->value.type == 1
                 )
         {
-            // TODO: is string
+            // is string
             return KEY_STRING;
         }
         else
