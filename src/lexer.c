@@ -212,6 +212,18 @@ TOKEN_T *get_next_token() {
                         state = ST_OP_LESSER_THAN;
                     }
                 }
+                else if (*edge == '?') {
+                    *edge = lexer_fget();
+                    if(*edge=='>') {
+                        token->type = PROG_END;
+                        //lexer_unget(*edge);
+
+                        set_line_num(token);
+                        return token;
+                    }
+
+                    exit(1);
+                }
                 else if (*edge == '>') state = ST_OP_GREATER_THAN;
                 else if (*edge == '"') state = ST_STRING_LITERAL;
                 else if (*edge == ';') state = ST_SEMICOLON;
