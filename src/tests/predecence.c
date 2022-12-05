@@ -388,6 +388,20 @@ int test_expr16()
     return get_result(stack);
 }
 
+int test_expr17()
+{
+    printf("\n___________________________\n");
+    printf("Test expression 5.1 !== 6.4");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_double(stack, 5.1);
+    add_op(stack, TYPE_NOT_EQUALS);
+    add_double(stack, 6.4);
+
+    return get_result(stack);
+}
+
 int main()
 {
     int a = 0;
@@ -412,5 +426,6 @@ int main()
     test_expr14();
     test_expr15();
     test_expr16();
+    test_expr17();
 //    printf("%d%d%d%d%d", a,b,c,d,e);
 }

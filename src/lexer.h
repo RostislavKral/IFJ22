@@ -55,10 +55,12 @@ enum T_STATE {
     ST_READ,
     ST_SLINE_COMMENT,
     ST_MLINE_COMMENT,
+    ST_PROG_START,
+    ST_PROG_END
 };
 
 TOKEN_T * get_next_token();
-void lexer_unget(char *edge);
+void lexer_unget(char edge);
 char lexer_fget();
 void set_line_num(TOKEN_T* token);
 

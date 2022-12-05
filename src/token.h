@@ -16,6 +16,7 @@ enum T_TOKEN_TYPE
     OPERATOR,       //  7
     ISEOF,          //  8   EOF
     PROG_START,     //  9   <?php
+    PROG_END,
     SEMICOLON,      //  10
     LBRACE,         //  11
     RBRACE,         //  12

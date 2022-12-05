@@ -590,6 +590,12 @@ void WriteToken(TOKEN_T * token) {
         case FUNC_CALL:
             printf("FUNC CALL name: %s", token->name);
             break;
+        case PROG_START:
+            printf("PROG_START <?php");
+            break;
+        case PROG_END:
+            printf("PROG_END ?>");
+            break;
 
         default:
             printf("UNKNOWN: type: %d, name: %s, value type: %d", token->type, token->name, token->value.type);

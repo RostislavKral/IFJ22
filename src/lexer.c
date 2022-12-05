@@ -28,6 +28,16 @@ int is_keyword(char *keyword) {
     return -1;
 }
 
+bool is_program_start(char* keyword)
+{
+    return strcmp(keyword, "<?php") == 0;
+}
+
+bool is_program_end(char* keyword)
+{
+    return strcmp(keyword, "?>") == 0;
+}
+
 
 enum T_STATE getFunctionCallOrKeywordLexeme(char *keyword) {
     int lexeme = is_keyword(keyword);
@@ -58,7 +68,16 @@ enum T_STATE getFunctionCallOrKeywordLexeme(char *keyword) {
 
 
         }
-    } else {
+    }
+    else if(is_program_start(keyword))
+    {
+        return ST_PROG_START;
+    }
+    else if(is_program_end(keyword))
+    {
+        return ST_PROG_END;
+    }
+    else {
         return ST_FUNC_CALL;
     }
 
@@ -83,15 +102,15 @@ char *c;
 int line_number = 1;
 int char_number = 0;
 
-void lexer_unget(char *edge)
+void lexer_unget(char edge)
 {
     char_number--;
-    if (*edge == '\n')
+    if (edge == '\n')
     {
         line_number--;
     }
 
-    ungetc(*edge, stdin);
+    ungetc(edge, stdin);
 }
 
 char lexer_fget()
@@ -166,7 +185,21 @@ TOKEN_T *get_next_token() {
                 else if (*edge == '/') state = ST_OP_DIVIDE;
                 else if (*edge == '*') state = ST_OP_MULTIPLY;
                 else if (*edge == '.') state = ST_OP_CONCAT;
-                else if (*edge == '<') state = ST_OP_LESSER_THAN;
+                else if (*edge == '<')
+                {
+                    char tmp = lexer_fget();
+                    if (tmp == '?')
+                    {
+                        lexer_unget(tmp);
+                        lexer_unget(*edge);
+                        state = ST_READ;
+                    }
+                    else
+                    {
+                        lexer_unget(tmp);
+                        state = ST_OP_LESSER_THAN;
+                    }
+                }
                 else if (*edge == '>') state = ST_OP_GREATER_THAN;
                 else if (*edge == '"') state = ST_STRING_LITERAL;
                 else if (*edge == ';') state = ST_SEMICOLON;
@@ -182,14 +215,14 @@ TOKEN_T *get_next_token() {
                 else {
                     //printf("____%s", edge);
                     state = ST_READ;
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
                 }
 
 
                 /* This was added by SniehNikita */
                 if (isdigit(*edge)) {
                     state = ST_INT_LITERAL;
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
                 }
                 /* ----------------------------- */
 
@@ -204,7 +237,16 @@ TOKEN_T *get_next_token() {
             case ST_SLINE_COMMENT:
                 if (*edge == '\n') state = ST_START;
                 break;
+            case ST_PROG_START:
+                token->type = PROG_START;
 
+                set_line_num(token);
+                return token;
+            case ST_PROG_END:
+                token->type = PROG_END;
+
+                set_line_num(token);
+                return token;
             case ST_OP_TYPE_NOT_EQUALS:
                 token->type = OPERATOR;
                 token->operators = TYPE_NOT_EQUALS;
@@ -242,7 +284,7 @@ TOKEN_T *get_next_token() {
                     str_conc(&str, edge);
                     continue;
                 }
-                lexer_unget(edge);
+                lexer_unget(*edge);
                 token->type = TOKEN_ID;
                 token->name = str.str;
 
@@ -272,7 +314,7 @@ TOKEN_T *get_next_token() {
                     state = ST_OP_EQUALS;
                     break;
                 }
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = ASSIGN;
                 token->name = NULL;
@@ -280,7 +322,7 @@ TOKEN_T *get_next_token() {
                 set_line_num(token);
                 return token;
             case ST_OP_PLUS:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -289,7 +331,7 @@ TOKEN_T *get_next_token() {
                 set_line_num(token);
                 return token;
             case ST_OP_MINUS:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -298,7 +340,7 @@ TOKEN_T *get_next_token() {
                 set_line_num(token);
                 return token;
             case ST_OP_MULTIPLY:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -309,7 +351,7 @@ TOKEN_T *get_next_token() {
             case ST_OP_DIVIDE:
 
                 if (*edge != '/' && *edge != '*') {
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
 
                     token->type = OPERATOR;
                     token->name = NULL;
@@ -325,7 +367,7 @@ TOKEN_T *get_next_token() {
                     break;
                 }
             case ST_OP_CONCAT:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -338,7 +380,7 @@ TOKEN_T *get_next_token() {
                     state = ST_OP_LESS_EQUAL;
                     break;
                 }
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -347,7 +389,7 @@ TOKEN_T *get_next_token() {
                 set_line_num(token);
                 return token;
             case ST_OP_LESS_EQUAL:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -356,7 +398,7 @@ TOKEN_T *get_next_token() {
                 set_line_num(token);
                 return token;
             case ST_OP_GREATER_EQUAL:
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -369,7 +411,7 @@ TOKEN_T *get_next_token() {
                     state = ST_OP_GREATER_EQUAL;
                     break;
                 }
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 token->type = OPERATOR;
                 token->name = NULL;
@@ -383,7 +425,7 @@ TOKEN_T *get_next_token() {
                     str_conc(&fun_name, edge);
                     continue;
                 }*
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
 
 */
@@ -391,7 +433,7 @@ TOKEN_T *get_next_token() {
 
                     //  exit(1);
                     if (*edge == '(') {
-                        lexer_unget(edge);
+                        lexer_unget(*edge);
                     }
 
                     token->type = FUNC_ID;
@@ -441,7 +483,7 @@ TOKEN_T *get_next_token() {
 
                     token->value.double_val = test;
                     isValid = 1;
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.type = 2;
                     token->value.double_val += token->value.int_val;
@@ -452,7 +494,7 @@ TOKEN_T *get_next_token() {
                 } else {
                     //printf("%d", isValid);
 
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
                     token->type = LITERAL;
                     if (isValid == 1) {
                         token->value.type = 2;
@@ -480,7 +522,7 @@ TOKEN_T *get_next_token() {
                     // if (*edge == '"') break;
                 } else {
 
-                    lexer_unget(edge);
+                    lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;
@@ -491,107 +533,107 @@ TOKEN_T *get_next_token() {
                 break;
             case ST_LEFT_PARENTHESES:
                 token->type = LPAR;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_RIGHT_PARENTHESES:
                 token->type = RPAR;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_LEFT_CURLYBRACKET:
                 token->type = LBRACE;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_RIGHT_CURLYBRACKET:
                 token->type = RBRACE;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_COMMA:
                 token->type = COMMA;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_FLOAT:
                 token->type = KEYWORD;
                 token->keyword = KEY_FLOAT;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_INT:
                 token->type = KEYWORD;
                 token->keyword = KEY_INT;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_STRING:
                 token->type = KEYWORD;
                 token->keyword = KEY_STRING;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_COLON:
                 token->type = KEYWORD;
                 token->keyword = KEY_COLON;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_IF:
                 token->type = KEYWORD;
                 token->keyword = KEY_IF;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_VOID:
                 token->type = KEYWORD;
                 token->keyword = KEY_VOID;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_RETURN:
                 token->type = KEYWORD;
                 token->keyword = KEY_RETURN;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_ELSE:
                 token->type = KEYWORD;
                 token->keyword = KEY_ELSE;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_WHILE:
                 token->type = KEYWORD;
                 token->keyword = KEY_WHILE_LOOP;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_KEYWORD_NULL:
                 token->type = KEYWORD;
                 token->keyword = KEY_NULL;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_SEMICOLON:
                 token->type = SEMICOLON;
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
@@ -600,7 +642,7 @@ TOKEN_T *get_next_token() {
                 token->name = str.str;
                 // printf("__________%s", str.str);
                 //str_destroy(&str);
-                lexer_unget(edge);
+                lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
@@ -611,9 +653,7 @@ TOKEN_T *get_next_token() {
                 if (*edge == ' ' || *edge == '(' || *edge == '\n') {
 
                     //  exit(1);
-                    if (*edge == '(') {
-                        lexer_unget(edge);
-                    }
+                    lexer_unget(*edge);
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
 
