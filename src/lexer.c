@@ -287,7 +287,7 @@ TOKEN_T *get_next_token() {
 
 
             case ST_MLINE_COMMENT:
-
+                if(*edge == EOF) exit(1);
                 if (*edge == '/') state = ST_START;
                 break;
             case ST_VAR:
@@ -533,18 +533,19 @@ TOKEN_T *get_next_token() {
 
             case ST_STRING_LITERAL:
 
+                if(*edge == EOF) exit(1);
                 if (*edge != '"') {
 
                     str_conc(&str, edge);
                     // *edge = lexer_fget();
                     // if (*edge == '"') break;
+
                 } else {
 
                    // lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;
-
                     set_line_num(token);
                     return token;
                 }
@@ -667,7 +668,7 @@ TOKEN_T *get_next_token() {
             case ST_READ:
 //                printf(" ");
                 // printf("______%c", *edge);
-
+                if(*edge == EOF) exit(1);
                 if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}' ||
                 *edge == ';' || *edge == '=' || *edge == ',' || *edge == ':' || *edge == '-' || *edge == '+' || *edge == '/'
                 || *edge == '$' || *edge == '>' || *edge == '"' || *edge == '!' || *edge == '*'
@@ -678,6 +679,8 @@ TOKEN_T *get_next_token() {
                     {
                         lexer_unget(*edge);
                     }
+
+
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
 
