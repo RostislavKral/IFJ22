@@ -1,4 +1,5 @@
 <?php
-$a=10
+if($x==null)
+function foo():void{}
 
-ahoj
+foo()

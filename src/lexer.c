@@ -308,6 +308,7 @@ TOKEN_T *get_next_token() {
                 token->operators = TYPE_EQUALS;
                 token->name = NULL;
 
+                lexer_unget(*edge);
                 set_line_num(token);
                 return token;
             case ST_OP_EQUALS:
@@ -319,6 +320,7 @@ TOKEN_T *get_next_token() {
                 token->operators = EQUALS;
                 token->name = NULL;
 
+                lexer_unget(*edge);
                 set_line_num(token);
                 return token;
             case ST_OP_ASSIGN:
@@ -666,7 +668,7 @@ TOKEN_T *get_next_token() {
 //                printf(" ");
                 // printf("______%c", *edge);
 
-                if (*edge == ' ' || *edge == '(' || *edge == '\n') {
+                if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}') {
 
                     //  exit(1);
                     if (*edge != ' ')
