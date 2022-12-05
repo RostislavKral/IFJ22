@@ -390,7 +390,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_ELSE:
                         break;
                     case KEY_FLOAT:
-                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
+                        //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_IF:
                         token = get_next_token();
@@ -424,6 +424,10 @@ void analyze_token(htab_t* symtable){
                         break;
                     case KEY_FUNCTION:
                         break;
+                    case NULL_KEYWORD:
+                        break;
+                    case KEY_BOOLEAN:
+                        break;
                 }
                 break;
             case TOKEN_ID:
@@ -435,7 +439,6 @@ void analyze_token(htab_t* symtable){
                 //analyze_token(symtable);
                 break;
             case LITERAL:
-                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case ASSIGN:
                 exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
@@ -456,7 +459,7 @@ void analyze_token(htab_t* symtable){
                 exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case SEMICOLON:
-                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
+                //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LBRACE:
                 scope.openedBracesCount++;
@@ -477,6 +480,14 @@ void analyze_token(htab_t* symtable){
                 if (strcmp(token->name, "write") == 0){
                     builtin_write(symtable);
                 } else function_call(token, symtable);
+                break;
+            case NULL_TYPE:
+                break;
+            case PROG_END:
+                scope.isDefined = false;
+                scope.strictTypesDeclared = false;
+                break;
+            case DOLLAR:
                 break;
         }
         if (token->type == ISEOF) break;
