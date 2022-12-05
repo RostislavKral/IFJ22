@@ -145,24 +145,46 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
 
     for (int i = 1; i < stFunction->data.params_count+1; ++i) {
         TOKEN_T *tmp = get_next_token();
-        if (tmp->type != TOKEN_ID && tmp->type != LITERAL) exit_with_message(tmp->lineNum, tmp->charNum, "invalid token", SEM_F_DECLARATION_ERR);
-        printf("param: %d", tmp->value.type);
+        if (tmp->type != TOKEN_ID && tmp->type != LITERAL) exit_with_message(tmp->lineNum, tmp->charNum, "Invalid number of arguments", SEM_F_CALL_PARAM_ERR);
+//        printf("param: %d", tmp->value.type);
         if (tmp->type == TOKEN_ID){
             htab_item_t *param = htab_find_var(symtable,tmp->name, scope.num);
-            if(stFunction->data.data_type[i] == 0 && param->data.data_type == KEY_INT ||
-               stFunction->data.data_type[i] == 1 && param->data.data_type == KEY_STRING ||
-               stFunction->data.data_type[i] == 2 && param->data.data_type == KEY_FLOAT
+
+            if (param == NULL)
+            {
+                exit_with_message(tmp->lineNum, tmp->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
+            }
+
+            if((stFunction->data.data_type[i] == KEY_INT && param->data.data_type[0] == KEY_INT) ||
+                (stFunction->data.data_type[i] == KEY_STRING && param->data.data_type[0] == KEY_STRING) ||
+                (stFunction->data.data_type[i] == KEY_FLOAT && param->data.data_type[0] == KEY_FLOAT)
                     ) paramArr[i] = tmp;
-            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_DECLARATION_ERR);
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_CALL_PARAM_ERR);
         } else {
             printf("\n%u\n",stFunction->data.data_type[i]);
             if(tmp->value.type == 0 && stFunction->data.data_type[i] == KEY_INT ||
                tmp->value.type == 1 && stFunction->data.data_type[i] == KEY_STRING ||
                tmp->value.type == 2 && stFunction->data.data_type[i] == KEY_FLOAT
                     ) paramArr[i] = tmp;
-            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type2", SEM_F_DECLARATION_ERR);
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type2", SEM_F_CALL_PARAM_ERR);
         }
     }
+
+    TOKEN_T *tmp = get_next_token();
+    if (tmp->type == TOKEN_ID || tmp->type == COMMA)
+    {
+        exit_with_message(tmp->lineNum, tmp->charNum, "Invalid number of arguments", SYNTAX_ERR);
+    }
+    else if (tmp->type != RPAR)
+    {
+        exit_with_message(tmp->lineNum, tmp->charNum, "Expected ')'", SYNTAX_ERR);
+    }
+    tmp = get_next_token();
+    if (tmp->type != SEMICOLON)
+    {
+        exit_with_message(tmp->lineNum, tmp->charNum, "Missing semicolon after function call", SYNTAX_ERR);
+    }
+
     //TODO code gen
 }
 

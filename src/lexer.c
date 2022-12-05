@@ -670,7 +670,7 @@ TOKEN_T *get_next_token() {
 
                 if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}' ||
                 *edge == ';' || *edge == '=' || *edge == ',' || *edge == ':' || *edge == '-' || *edge == '+' || *edge == '/'
-                || *edge == '$' || *edge == '>' || *edge == '"' || *edge == '!' || *edge == '*' || *edge == '.'
+                || *edge == '$' || *edge == '>' || *edge == '"' || *edge == '!' || *edge == '*'
                         ) {
 
                     //  exit(1);

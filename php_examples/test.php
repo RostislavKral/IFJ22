@@ -1,3 +1,5 @@
 <?php
 declare(strict_types=1);
-reads($a);
+$a = 5.1;
+$b = "ahoj";
+ord($b);
