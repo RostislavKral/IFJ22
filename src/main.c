@@ -25,9 +25,9 @@ int main() {
         // TODO redo
         if (token != NULL) { free(token); token = NULL; }
 
-      token = get_next_token();
+        token = get_next_token();
 //       // analyze_token_key(*token);
-       WriteToken(token);
+        WriteToken(token);
 //
 //        // TODO remove
     } while (token->type != ISEOF);
@@ -38,5 +38,6 @@ int main() {
 
     return 0;
 }
+
 
 

@@ -15,9 +15,6 @@
 #include "expressions.h"
 #include "expression_stack.h"
 
-#define bool int
-#define true 1
-#define false 0
 
 int table [18][18] = {
 //                  NULL  *    /    +    -    .    <    >   <=   >=    =   !=   ===  !==   (    )   ID    $
