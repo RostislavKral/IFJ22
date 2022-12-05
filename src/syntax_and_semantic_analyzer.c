@@ -276,7 +276,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         if(functionHelper.fReturnTypePass == false){
             if(token->keyword == KEY_COLON){
                 TOKEN_T *returnTypeToken = get_next_token();
-                if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
+                if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT || returnTypeToken->keyword == KEY_VOID){
                     functionHelper.returnType = returnTypeToken->keyword;
                     functionHelper.fReturnTypePass = true;
                     continue;
