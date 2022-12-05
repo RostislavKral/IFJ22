@@ -161,14 +161,10 @@ TOKEN_T *get_next_token() {
            printf("%s \n\n\n", str.str);
        }*/
 
-        if (*edge == EOF) {
-            token->type = ISEOF;
-            token->name = NULL;
 
-            set_line_num(token);
-            return token;
-        }
-        char eof_tmp = lexer_fget();
+
+   /*     char eof_tmp = lexer_fget();
+        printf("%c", eof_tmp);
         if(eof_tmp==EOF){
             token->type = ISEOF;
             token->name = NULL;
@@ -177,11 +173,17 @@ TOKEN_T *get_next_token() {
             return token;
         } else {
             lexer_unget(eof_tmp);
-        }
+        }*/
         switch (state) {
             case ST_START:
+                if (*edge == EOF) {
+                    token->type = ISEOF;
+                    token->name = NULL;
 
-                if (*edge == '(') state = ST_LEFT_PARENTHESES;
+                    set_line_num(token);
+                    return token;
+                }
+                else if (*edge == '(') state = ST_LEFT_PARENTHESES;
                 else if (*edge == ' ') state = ST_START;
                 else if (*edge == '\n') state = ST_START;
                 else if (*edge == ')') state = ST_RIGHT_PARENTHESES;
