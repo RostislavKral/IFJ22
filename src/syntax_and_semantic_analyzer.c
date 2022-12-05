@@ -352,7 +352,7 @@ void builtin_write(htab_t* symtable){
 }
 
 void analyze_token(htab_t* symtable){
-    //TODO ELSE
+    //TODO ELSE, Return
     TOKEN_T *previousToken;
     while (true){
         TOKEN_T *token;
@@ -390,6 +390,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_ELSE:
                         break;
                     case KEY_FLOAT:
+                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_IF:
                         token = get_next_token();
@@ -402,12 +403,14 @@ void analyze_token(htab_t* symtable){
                         }
                         break;
                     case KEY_INT:
+                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_NULL:
                         break;
                     case KEY_RETURN:
                         break;
                     case KEY_STRING:
+                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_WHILE_LOOP:
                         while_condition(token, symtable);
@@ -432,21 +435,28 @@ void analyze_token(htab_t* symtable){
                 //analyze_token(symtable);
                 break;
             case LITERAL:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case ASSIGN:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LPAR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case RPAR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case OPERATOR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case ISEOF:
                 //TODO: EOF exit, check opened functions, params, attr, etc.
                 break;
             case PROG_START:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case SEMICOLON:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LBRACE:
                 scope.openedBracesCount++;
@@ -458,8 +468,10 @@ void analyze_token(htab_t* symtable){
                 scope.num--;
                 break;
             case COMMA:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case DATA_TYPE:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case FUNC_CALL:
                 if (strcmp(token->name, "write") == 0){
