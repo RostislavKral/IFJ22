@@ -299,7 +299,7 @@ BSTnode* BST_init()
     root->left = NULL;
     root->right = NULL;
     root->token = NULL;
-    root->type = NULL_KEYWORD;
+    root->type = KEY_NULL;
 
     return root;
 }

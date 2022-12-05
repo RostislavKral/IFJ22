@@ -34,9 +34,9 @@ void print_return_type(BSTnode* node)
     {
         printf("STRING");
     }
-    if (node->type == NULL_KEYWORD)
+    if (node->type == KEY_NULL)
     {
-        printf("NULL_KEYWORD");
+        printf("NULL");
     }
 }
 
@@ -48,6 +48,13 @@ void add_var(DLList* stack, char* name)
     DLL_insert_last(stack, token);
 }
 
+void add_null(DLList* stack)
+{
+    TOKEN_T* token = malloc(sizeof (TOKEN_T));
+    token->keyword = KEY_NULL;
+    DLL_insert_last(stack, token);
+}
+
 void add_int(DLList* stack, int value)
 {
     TOKEN_T* token = malloc(sizeof (TOKEN_T));
@@ -56,6 +63,7 @@ void add_int(DLList* stack, int value)
     token->value.int_val = value;
     DLL_insert_last(stack, token);
 }
+
 void add_string(DLList* stack, char* string)
 {
     TOKEN_T* token = malloc(sizeof (TOKEN_T));
@@ -444,6 +452,46 @@ int test_expr18()
     return get_result(stack);
 }
 
+int test_expr19()
+{
+    printf("\n___________________________\n");
+    printf("Test expression null");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_null(stack);
+
+    return get_result(stack);
+}
+
+int test_expr20()
+{
+    printf("\n___________________________\n");
+    printf("Test expression null < a");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_null(stack);
+    add_op(stack, LESS);
+    add_var(stack, "a");
+
+    return get_result(stack);
+}
+
+int test_expr21()
+{
+    printf("\n___________________________\n");
+    printf("Test expression null + a");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_null(stack);
+    add_op(stack, PLUS);
+    add_var(stack, "a");
+
+    return get_result(stack);
+}
+
 int main()
 {
     int a = 0;
@@ -470,5 +518,8 @@ int main()
     test_expr16();
     test_expr17();
     test_expr18();
+    test_expr19();
+    test_expr20();
+    test_expr21();
 //    printf("%d%d%d%d%d", a,b,c,d,e);
 }

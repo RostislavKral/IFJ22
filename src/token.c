@@ -49,6 +49,10 @@ void token_print(TOKEN_T* token)
             printf("%f", token->value.double_val);
         }
     }
+    else if (token->keyword == KEY_NULL)
+    {
+        printf("null");
+    }
     else if (token->type == DOLLAR)
     {
         printf("$");
@@ -117,6 +121,10 @@ void token_print(TOKEN_T* token)
 
 enum T_KEYWORD get_keyword_from_token(TOKEN_T* token)
 {
+    if (token->keyword == KEY_NULL)
+    {
+        return KEY_NULL;
+    }
     if (token->value.type == 0)
     {
         return KEY_INT;
@@ -130,5 +138,5 @@ enum T_KEYWORD get_keyword_from_token(TOKEN_T* token)
         return KEY_FLOAT;
     }
 
-    return NULL_KEYWORD;
+    return KEY_NULL;
 }

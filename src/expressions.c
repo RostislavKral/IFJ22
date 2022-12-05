@@ -56,6 +56,7 @@ int get_column(TOKEN_T* token)
 
     if(token->type == TOKEN_ID) return 16;
     if(token->type == LITERAL)  return 16;
+    if(token->keyword == KEY_NULL)  return 16;
 
     if(token == NULL)           return 17;
     if(token->type == DOLLAR)   return 17;
@@ -85,7 +86,7 @@ bool reduce(DLList* stack, Stack* stop_stack)
             // assert that expression is (E)
             if (
                     stop->nextItem                    ->token->type == LPAR &&
-                   (stop->nextItem->nextItem          ->token->type == TOKEN_ID || stop->nextItem->nextItem->token->type == LITERAL) &&
+                   (stop->nextItem->nextItem          ->token->type == TOKEN_ID || stop->nextItem->nextItem->token->type == LITERAL || stop->nextItem->nextItem->token->keyword == KEY_NULL) &&
                     stop->nextItem->nextItem->nextItem->token->type == RPAR
                     )
             {
@@ -104,7 +105,7 @@ bool reduce(DLList* stack, Stack* stop_stack)
             }
                 // Rule E -> E + E  (OR ANY BINARY OPERATION)
             else if (
-                   (stop->nextItem                    ->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL) &&
+                   (stop->nextItem                    ->token->type == TOKEN_ID || stop->nextItem                    ->token->type == LITERAL) &&
                     stop->nextItem->nextItem          ->token->type == OPERATOR &&
                    (stop->nextItem->nextItem->nextItem->token->type == TOKEN_ID || stop->nextItem->nextItem->nextItem->token->type == LITERAL)
                     )
@@ -113,19 +114,9 @@ bool reduce(DLList* stack, Stack* stop_stack)
                 DLLItem* operator = DLL_pop(stack, stop->nextItem);
                 DLLItem* id2 = DLL_pop(stack, stop->nextItem);
 
-                enum T_KEYWORD type = validate_expression(id, operator, id2);
-                if(type == NULL_KEYWORD)
-                {
-                    // expression is not valid
-                    free(id);
-                    free(operator);
-                    free(id2);
-                    return false;
-                }
-
                 DLLItem* item = DLL_insert_after(stack, stop, id->token);
                 item->bst = BST_make_tree_from_expression(id, operator, id2);
-                item->bst->type = type;
+                item->bst->type = validate_expression(id, operator, id2);
 
                 free(id);
                 free(operator);
@@ -134,7 +125,7 @@ bool reduce(DLList* stack, Stack* stop_stack)
                 reduced = 1;
             }
         }
-        else if (stop->nextItem->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL)
+        else if (stop->nextItem->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL || stop->nextItem->token->keyword == KEY_NULL)
         {
             DLLItem* item = stop->nextItem;
             item->bst = BST_init_token(item);
@@ -213,7 +204,7 @@ BSTnode* analyze_precedence(DLList* list)
     DLLItem* item = DLL_pop_last(stack);
     DLLItem* dollar = DLL_pop_last(stack);
     if (
-            (item->token->type == TOKEN_ID || item->token->type == LITERAL) &&
+            (item->token->type == TOKEN_ID || item->token->type == LITERAL || item->token->keyword == KEY_NULL) &&
             dollar->token->type == DOLLAR &&
             stack->first == NULL)
     {
@@ -242,15 +233,15 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
 {
     if (operator->token->type != OPERATOR)
     {
-        return NULL_KEYWORD;
+        return KEY_NULL;
     }
-    if (a->token->type != TOKEN_ID && a->token->type != LITERAL)
+    if (a->token->type != TOKEN_ID && a->token->type != LITERAL && a->token->keyword != KEY_NULL)
     {
-        return NULL_KEYWORD;
+        return KEY_NULL;
     }
-    if (b->token->type != TOKEN_ID && b->token->type != LITERAL)
+    if (b->token->type != TOKEN_ID && b->token->type != LITERAL && a->token->keyword != KEY_NULL)
     {
-        return NULL_KEYWORD;
+        return KEY_NULL;
     }
 //    printf("AHOOOOOOOJ %d %d %d", a->token->value.type, operator->token->operators, b->token->value.type);
     if (
@@ -274,7 +265,7 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
         }
         else
         {
-            return NULL_KEYWORD;
+            return KEY_NULL;
         }
     }
     else if(operator->token->operators == DIVIDE)
@@ -288,15 +279,13 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
         }
         else
         {
-            return NULL_KEYWORD;
+            return KEY_NULL;
         }
     }
     else if (operator->token->operators == LESS ||
              operator->token->operators == GREATER ||
              operator->token->operators == LESS_EQUAL ||
-             operator->token->operators == GREATER_EQUAL ||
-             operator->token->operators == TYPE_EQUALS ||
-             operator->token->operators == TYPE_NOT_EQUALS
+             operator->token->operators == GREATER_EQUAL
              )
     {
         if (
@@ -307,6 +296,12 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
             // is boolean
             return KEY_BOOLEAN;
         }
+    }
+    else if(
+            operator->token->operators == TYPE_EQUALS ||
+            operator->token->operators == TYPE_NOT_EQUALS)
+    {
+        return KEY_BOOLEAN;
     }
     else if (operator->token->operators == CONCAT)
     {
@@ -320,9 +315,9 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
         }
         else
         {
-            return NULL_KEYWORD;
+            return KEY_NULL;
         }
     }
 
-    return NULL_KEYWORD;
+    return KEY_NULL;
 }
