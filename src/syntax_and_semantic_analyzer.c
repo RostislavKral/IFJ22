@@ -56,20 +56,14 @@ void function_end_parsing(){
     //scope.openedBracesCount--;
 };
 
-//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-void analyze_and_store_expression(DLList *list,TOKEN_T* token){
-    TOKEN_T *nextToken = get_next_token();
-    if(nextToken->operators == token->operators){
-        // TODO: ERR 2 operatory za s sebou -> tohle se nemusi resit, resi to uz precedencni
-        // TODO: poslat cely expression v DLL listu, pouzivej insert last (abych to necetl odzadu)
-        // TODO: poslat jakykoliv vyraz, za "=". Kdyby v tom vyrazu bylo, hodim automaticky error.y
-    }
-    DLL_insert_last(list, token);
-
+void while_condition(TOKEN_T* token, htab_t* symtable){
+    DLList* condExpList = expression_list(symtable, RPAR);
+    if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
+    BSTnode* condExprBST = analyze_precedence(condExpList);
+    if (condExprBST == NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    scope.num++;
+    gen_if(condExprBST);
 }
-
-//TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 
 void if_condition(TOKEN_T* token, htab_t* symtable){
     DLList* condExpList = expression_list(symtable, RPAR);
@@ -103,7 +97,10 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
 
     DLList* precedenceList = expression_list(symtable, SEMICOLON);
     BSTnode *expressionTree = analyze_precedence(precedenceList);
+
     if (expressionTree != NULL){
+        //one element
+        int a = scope.num;
         if (expressionTree->token->type == LITERAL){
             if (expressionTree->token->value.type == 0){
                 htab_value val =  {.int_value = expressionTree->token->value.int_val};
@@ -116,6 +113,7 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
                 if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
             }
         } else {
+            //tree
             htab_value zero = {.str_value = NULL};
             if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
         }
@@ -254,7 +252,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             exit_with_message(token->lineNum, token->charNum, "declaration error", SYNTAX_ERR);
         }
     }
-    //htab_insert_func(symtable,)
+    //htab_insert_func(symtable)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
     DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
     for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
@@ -266,27 +264,22 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
     DLL_dispose_list(functionHelper.paramsList);
-    //TODO DEBUG
-    htab_item_t* stFunction = htab_find_func(symtable, functionHelper.name);
-    enum T_KEYWORD arr = (stFunction->data.data_type[1]);
-    enum T_KEYWORD arr1 = (stFunction->data.data_type[2]);
-    enum T_KEYWORD arr2 = (stFunction->data.data_type[3]);
-    //enum T_KEYWORD arr[stFunction->data.params_count] = stFunction->data.data_type;
+
     // START PARSING Function BODY
-    analyze_token(symtable);
+    //analyze_token(symtable);
 };
 
 void analyze_token(htab_t* symtable){
+    //TODO SCOPE CHECK
     while (true){
         TOKEN_T *token;
         token = get_next_token();
         WriteToken(token);
-        //TODO UNCOMMENT WHEN LEXER DONE
-//    if(scope.isDefined == false && token->keyword != KEY_BEGIN){
-//        exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
-//    } else if (scope.isDefined == false && token->keyword == KEY_BEGIN){
-//        scope.isDefined = true;
-//    }
+        if(scope.isDefined == false && token->type != PROG_START){
+            exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
+        } else if (scope.isDefined == false && token->type == PROG_START){
+            scope.isDefined = true;
+        }
         switch (token->type) {
             case KEYWORD:
                 switch (token->keyword) {
@@ -312,6 +305,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_STRING:
                         break;
                     case KEY_WHILE_LOOP:
+                        while_condition(token, symtable);
                         break;
                     case KEY_VOID:
                         break;
