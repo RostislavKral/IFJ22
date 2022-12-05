@@ -139,7 +139,7 @@ TOKEN_T *get_next_token() {
     enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof(char));
-
+    bool read = 1;
 
     DYN_STRING_T str, fun_name;
     str_init(&str);
@@ -459,14 +459,18 @@ TOKEN_T *get_next_token() {
 
                 /* This was added by SniehNikita */
             case ST_INT_LITERAL:
-                // token->value.int_val = 0;
+                //token->value.int_val = 1;
                 token->value.double_val = 0;
                 int isValid = 0;
 
-
+                //printf("%c\n", *edge);
                 if (isdigit(*edge)) {
                     // TODO might be overflow if too big number
-                    token->value.int_val = token->value.int_val * 10 + (*edge - '0');
+                    if(read != 1) {
+                        token->value.int_val = token->value.int_val * 10 + (*edge - '0');
+                    }
+
+                    read = 0;
                 } else if (*edge == '.') {
                     // char c;
                     double test, tmp;
