@@ -128,7 +128,12 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
         } else {
             //tree
             htab_value zero = {.str_value = NULL};
-            if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)){
+                gen_expression(varNameToken, expressionTree,scope.num,true);
+            } else {
+                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero);
+                gen_expression(varNameToken, expressionTree,scope.num,false);
+            }
         }
     }
 }
@@ -347,7 +352,7 @@ void builtin_write(htab_t* symtable){
 }
 
 void analyze_token(htab_t* symtable){
-    //TODO ELSE, declare(strict_types = 1);
+    //TODO ELSE
     TOKEN_T *previousToken;
     while (true){
         TOKEN_T *token;
