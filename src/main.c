@@ -14,7 +14,7 @@ void insert_builtins(htab_t *symtable)
     one_string_param[0] = KEY_STRING;
 
     enum T_KEYWORD one_int_param[1];
-    one_string_param[0] = KEY_INT;
+    one_int_param[0] = KEY_INT;
 
     enum T_KEYWORD substring_param[3];
     substring_param[0] = KEY_STRING;

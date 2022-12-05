@@ -668,7 +668,10 @@ TOKEN_T *get_next_token() {
 //                printf(" ");
                 // printf("______%c", *edge);
 
-                if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}' || *edge == ';') {
+                if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}' ||
+                *edge == ';' || *edge == '=' || *edge == ',' || *edge == ':' || *edge == '-' || *edge == '+' || *edge == '/'
+                || *edge == '$' || *edge == '>' || *edge == '"' || *edge == '!' || *edge == '*'
+                        ) {
 
                     //  exit(1);
                     if (*edge != ' ')
