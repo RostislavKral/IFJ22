@@ -114,3 +114,21 @@ void token_print(TOKEN_T* token)
         printf("!==");
     }
 }
+
+enum T_KEYWORD get_keyword_from_token(TOKEN_T* token)
+{
+    if (token->value.type == 0)
+    {
+        return KEY_INT;
+    }
+    if (token->value.type == 1)
+    {
+        return KEY_STRING;
+    }
+    if (token->value.type == 2)
+    {
+        return KEY_FLOAT;
+    }
+
+    return NULL_KEYWORD;
+}

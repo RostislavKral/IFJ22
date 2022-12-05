@@ -115,4 +115,5 @@ enum ERROR_CODE{
 };
 void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE errorCode);
 void token_print(TOKEN_T* token);
+enum T_KEYWORD get_keyword_from_token(TOKEN_T* token);
 #endif
