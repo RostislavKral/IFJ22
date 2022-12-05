@@ -78,6 +78,10 @@ void htab_free(htab_t *t)
 
 bool htab_insert_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab_value value)
 {
+    if (htab_find_var(t, name, scope) != NULL){
+        return false;
+    }
+    
     htab_item_t *new_item = malloc(sizeof(htab_item_t));
     if (new_item == NULL) {
         exit(99);
