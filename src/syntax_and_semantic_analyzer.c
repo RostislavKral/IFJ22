@@ -52,7 +52,6 @@ void function_end_parsing(){
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
     functionHelper.paramsList = NULL;
-    scope.num--;
     //scope.openedBracesCount--;
 };
 
@@ -61,7 +60,6 @@ void while_condition(TOKEN_T* token, htab_t* symtable){
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
-    scope.num++;
     gen_if(condExprBST);
 }
 
@@ -104,13 +102,19 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
         if (expressionTree->token->type == LITERAL){
             if (expressionTree->token->value.type == 0){
                 htab_value val =  {.int_value = expressionTree->token->value.int_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                }
             } else if (expressionTree->token->value.type == 1){
                 htab_value val =  {.str_value = expressionTree->token->value.char_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                }
             } else if (expressionTree->token->value.type == 2){
                 htab_value val =  {.float_value = expressionTree->token->value.double_val};
-                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) {
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                }
             }
         } else {
             //tree
@@ -243,8 +247,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         }
         if(token->type == LBRACE && functionHelper.fNamePass && functionHelper.fParamPass){
             scope.lastScopeOpeningToken = token;
-            scope.num++;
-            //scope.openedBracesCount++;
+            scope.openedBracesCount++;
             functionHelper.fHeadParsed = true;
             functionHelper.fBodyParsing = true;
             functionHelper.fBraceCountCheck = scope.openedBracesCount;
@@ -259,7 +262,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         paramArr[i] = tmp->token->keyword;
         tmp = tmp->nextItem;
     }
-    enum T_KEYWORD test = functionHelper.returnType;
+
     if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
@@ -294,6 +297,7 @@ void analyze_token(htab_t* symtable){
                         } else {
                             //expression parse
                             if_condition(token,symtable);
+                            scope.num++;
                         }
                         break;
                     case KEY_INT:
@@ -306,6 +310,7 @@ void analyze_token(htab_t* symtable){
                         break;
                     case KEY_WHILE_LOOP:
                         while_condition(token, symtable);
+                        scope.num++;
                         break;
                     case KEY_VOID:
                         break;
@@ -322,6 +327,7 @@ void analyze_token(htab_t* symtable){
                 break;
             case FUNC_ID:
                 function_detected(token, symtable);
+                scope.num++;
                 //analyze_token(symtable);
                 break;
             case LITERAL:
@@ -338,7 +344,6 @@ void analyze_token(htab_t* symtable){
                 //TODO: EOF exit, check opened functions, params, attr, etc.
                 break;
             case PROG_START:
-                //TODO: call generate code
                 break;
             case SEMICOLON:
                 break;
@@ -349,6 +354,7 @@ void analyze_token(htab_t* symtable){
                 //this will stop function parsing, hopefully
                 if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
                 scope.openedBracesCount--;
+                scope.num--;
                 break;
             case COMMA:
                 break;
