@@ -281,17 +281,46 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //analyze_token(symtable);
 };
 
-void builtin_write(){
+void builtin_write(htab_t* symtable){
     TOKEN_T *tmpToken = get_next_token();
     if (tmpToken->type != LPAR) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "expected (", SYNTAX_ERR);
 
     DLList *dynamicParams = malloc(sizeof (struct DLList));
     DLL_init(dynamicParams);
     tmpToken = get_next_token();
-    while (tmpToken->type != LPAR){
-        DLL_insert_first(dynamicParams, tmpToken);
+    while (tmpToken->type != RPAR && tmpToken != NULL){
+        if (tmpToken->type == COMMA) tmpToken = get_next_token();
+        if (tmpToken->type != LITERAL && tmpToken->type != TOKEN_ID) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
+        DLL_insert_last(dynamicParams, tmpToken);
         tmpToken = get_next_token();
-        if (tmpToken->type != LPAR && tmpToken->type != LITERAL && tmpToken->type == TOKEN_ID) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
+    }
+    DLLItem *tmpItem = DLL_get_first(dynamicParams);
+    while (tmpItem != NULL){
+        if(tmpItem->token->type == TOKEN_ID){
+            htab_item_t *item = htab_find_var(symtable, tmpItem->token->name,scope.num);
+           // printf("KOKOT LEO: %d\n",item->data.value.int_value);
+            if (item->data.data_type[0] == KEY_INT) {
+                tmpItem->token->value.type = 0;
+                tmpItem->token->value.int_val = item->data.value.int_value;
+            }
+            else if (item->data.data_type[0] == KEY_FLOAT){
+                tmpItem->token->value.type = 2;
+                tmpItem->token->value.double_val = item->data.value.float_value;
+            } else if (item->data.data_type[0] == KEY_STRING){
+                tmpItem->token->value.type = 1;
+                tmpItem->token->value.char_val = item->data.value.str_value;
+            }
+        }
+        if (tmpItem->token->value.type == 0){
+            printf("%d",tmpItem->token->value.int_val);
+        } else if(tmpItem->token->value.type == 2){
+            printf("%a",tmpItem->token->value.double_val);
+        } else if (tmpItem->token->value.type == 1){
+            printf("%s",tmpItem->token->value.char_val);
+        } else {
+            exit_with_message(tmpItem->token->lineNum, tmpItem->token->charNum, "INTERNAL ERR", SEM_F_CALL_PARAM_ERR);
+        }
+        tmpItem = tmpItem->nextItem;
     }
 }
 
@@ -406,7 +435,9 @@ void analyze_token(htab_t* symtable){
             case DATA_TYPE:
                 break;
             case FUNC_CALL:
-                function_call(token, symtable);
+                if (strcmp(token->name, "write") == 0){
+                    builtin_write(symtable);
+                } else function_call(token, symtable);
                 break;
         }
         if (token->type == ISEOF) break;
