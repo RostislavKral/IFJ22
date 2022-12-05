@@ -1,4 +1,2 @@
 write("ahoj");
 ahoj()
-
-
