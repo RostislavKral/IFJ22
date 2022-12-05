@@ -135,7 +135,7 @@ void set_line_num(TOKEN_T* token)
 TOKEN_T *get_next_token() {
     TOKEN_T *token;
     token = malloc(sizeof(TOKEN_T));
-
+    token->value.int_val = 0;
     enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof(char));
@@ -459,7 +459,7 @@ TOKEN_T *get_next_token() {
 
                 /* This was added by SniehNikita */
             case ST_INT_LITERAL:
-                //token->value.int_val = 1;
+                //token->value.int_val = 0;
                 token->value.double_val = 0;
                 int isValid = 0;
 
