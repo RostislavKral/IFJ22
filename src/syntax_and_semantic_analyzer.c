@@ -30,7 +30,8 @@ scopeHelper scope = {
         .openedBracesCount = 0,
         .lastScopeOpeningToken = NULL,
         .isDefined = false,
-        .openedIfCount = 0
+        .openedIfCount = 0,
+        .strictTypesDeclared = false
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -280,10 +281,22 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //analyze_token(symtable);
 };
 
+void builtin_write(){
+    TOKEN_T *tmpToken = get_next_token();
+    if (tmpToken->type != LPAR) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "expected (", SYNTAX_ERR);
 
+    DLList *dynamicParams = malloc(sizeof (struct DLList));
+    DLL_init(dynamicParams);
+    tmpToken = get_next_token();
+    while (tmpToken->type != LPAR){
+        DLL_insert_first(dynamicParams, tmpToken);
+        tmpToken = get_next_token();
+        if (tmpToken->type != LPAR && tmpToken->type != LITERAL && tmpToken->type == TOKEN_ID) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
+    }
+}
 
 void analyze_token(htab_t* symtable){
-    //TODO ELSE
+    //TODO ELSE, declare(strict_types = 1);
     TOKEN_T *previousToken;
     while (true){
         TOKEN_T *token;
@@ -293,6 +306,27 @@ void analyze_token(htab_t* symtable){
             exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
         } else if (scope.isDefined == false && token->type == PROG_START){
             scope.isDefined = true;
+            continue;
+        } else if (scope.isDefined && !scope.strictTypesDeclared){
+            if (token->type != FUNC_CALL) exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
+            else {
+                if (strcmp(token->name, "declare") == 0){
+                    token = get_next_token();
+                    if (token->type != LPAR)exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
+                    else token = get_next_token();
+                    if (strcmp(token->name, "strict_types") == 0){
+                        token = get_next_token();
+                        if (token->type == ASSIGN){
+                            token = get_next_token();
+                            if (token->type == LITERAL && token->value.type == 0 && token->value.int_val == 1) scope.strictTypesDeclared = true;
+                            token = get_next_token();
+                            if (token->type != RPAR) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
+                            token = get_next_token();
+                            if(token->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
+                    }  else exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
+                    }
+                };
+            }
         }
         switch (token->type) {
             case KEYWORD:

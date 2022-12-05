@@ -47,10 +47,10 @@ typedef struct {
     TOKEN_T *lastScopeOpeningToken;
     //for function definitions
     htab_t* globalSymTable;
-    //for local vars frames
-    htab_t* localSymTable;
     //Check if already <?php is parsed
     bool isDefined;
+    //declare strict types
+    bool strictTypesDeclared;
     //num of opened ifs
     int openedIfCount;
 } scopeHelper;
