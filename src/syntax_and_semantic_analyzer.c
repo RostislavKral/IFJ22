@@ -12,6 +12,7 @@
 
 #include "syntax_and_semantic_analyzer.h"
 #include "lexer.h"
+#include "codegen.h"
 
 parseFunctionHelper functionHelper = {
         .fParsing = false,
@@ -72,33 +73,45 @@ void if_condition(){
     }
 }
 
-void var_declaration(TOKEN_T token){
-    if (token.keyword == KEY_INT || token.keyword == KEY_FLOAT || token.keyword == KEY_STRING){
-        TOKEN_T *operatorToken = get_next_token();
-        if(operatorToken->type != EQUALS) exit_with_message(operatorToken->lineNum, operatorToken->charNum, "Invalid assing",SYNTAX_ERR);
-        //TODO store to symtable
-    } else {
-        exit_with_message(token.lineNum, token.charNum, "CASE STATEMENT ERR", SEM_OTHER);
-    }
-}
+void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
+    TOKEN_T *equalToken = get_next_token();
+    if (equalToken->type != ASSIGN) exit_with_message(equalToken->lineNum, equalToken->charNum, "Invalid operator to assing", SYNTAX_ERR);
 
-void variable_token(TOKEN_T *variable,htab_t* symtable){
-    TOKEN_T *operator = get_next_token();
-    if (operator->operators == EQUALS){
-        //TODO CHECK symtable IF EXISTS..
-        if(true){
-            //update value
-            TOKEN_T* expression = get_next_token();
-
-        } else {
-            //TODO ADD TO LOCAL SYMTABLE
-            //htab_lookup_add(scope.localSymTable,operator->name);
-
+    DLList *precedenceList = malloc(sizeof (struct DLList));
+    TOKEN_T *tmpToken = get_next_token();
+    while (tmpToken->type != SEMICOLON){
+        if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR){
+            if (tmpToken->type == TOKEN_ID){
+                htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
+                if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
+            }
+            DLL_insert_last(precedenceList, tmpToken);
+            tmpToken = get_next_token();
         }
-    } else {
-        exit_with_message(operator->lineNum,operator->charNum,"Invalid operator", SYNTAX_ERR);
+        else exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Invalid token in assign or EOF", SYNTAX_ERR);
+    }
+    BSTnode *expressionTree = analyze_precedence(precedenceList);
+    if (expressionTree != NULL){
+        if (expressionTree->token->type == LITERAL){
+            if (expressionTree->token->value.type == 0){
+                htab_value val =  {.int_value = expressionTree->token->value.int_val};
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+            } else if (expressionTree->token->value.type == 1){
+                htab_value val =  {.str_value = expressionTree->token->value.char_val};
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+            } else if (expressionTree->token->value.type == 2){
+                htab_value val =  {.float_value = expressionTree->token->value.double_val};
+                if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+            }
+        } else {
+            htab_value zero = {.str_value = NULL};
+            if(!htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)) exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Insert to symtable failed", GENERAL_ERR);
+        }
+        gen_expression(varNameToken, expressionTree);
     }
 }
+
+
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 void function_call(TOKEN_T *functionToken,htab_t* symtable){
@@ -302,7 +315,7 @@ void analyze_token(htab_t* symtable){
                 }
                 break;
             case TOKEN_ID:
-                variable_token(token,symtable);
+                var_declaration(symtable, token);
                 break;
             case FUNC_ID:
                 function_detected(token, symtable);

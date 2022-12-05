@@ -46,7 +46,7 @@ typedef enum {
 typedef union {
     int int_value;
     char *str_value;
-    float float_value;
+    double float_value;
 } htab_value;
 
 
