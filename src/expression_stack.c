@@ -1,8 +1,11 @@
-//
-// Created by jeza on 2.12.22.
-//
+/**
+ * @file expressions_stack.c
+ * @author Hoang Nam Nguyen (xnguye22)
+ * @brief Expressions structures
+ */
 
 #include "expression_stack.h"
+#include "token.h"
 
 void DLL_init(DLList* list){
     list->itemsCount = 0;
@@ -21,6 +24,7 @@ void DLL_dispose_list(DLList* list){
 
 DLLItem* DLL_insert_first(DLList *list, TOKEN_T* token) {
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    newItem->bst = NULL;
     newItem->token = token;
     newItem->nextItem = list->first;
     newItem->prevItem = NULL;
@@ -41,6 +45,7 @@ DLLItem* DLL_insert_first(DLList *list, TOKEN_T* token) {
 }
 DLLItem* DLL_insert_last(DLList *list, TOKEN_T* token){
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    newItem->bst = NULL;
     newItem->token = token;
     newItem->nextItem = NULL;
     newItem->prevItem = list->last;
@@ -62,6 +67,7 @@ DLLItem* DLL_insert_last(DLList *list, TOKEN_T* token){
 
 DLLItem* DLL_insert_after(DLList *list, DLLItem *item, TOKEN_T* token){
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    newItem->bst = NULL;
     newItem->token = token;
     newItem->prevItem = item;
     newItem->nextItem = item->nextItem;
@@ -284,4 +290,74 @@ void Stack_print(Stack* stack)
         item = item->next;
     }
     printf("\n");
+}
+
+BSTnode* BST_init()
+{
+    BSTnode* root = malloc(sizeof(BSTnode));
+
+    root->left = NULL;
+    root->right = NULL;
+    root->token = NULL;
+
+    return root;
+}
+
+BSTnode* BST_init_token(DLLItem* item)
+{
+    BSTnode* root = malloc(sizeof(BSTnode));
+
+    root->left = NULL;
+    root->right = NULL;
+    root->token = item->token;
+
+    return root;
+}
+
+BSTnode* BST_make_tree_from_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
+{
+    BSTnode* root = BST_init_token(operator);
+
+    if (a->bst) root->left = a->bst;
+    else root->left = BST_init_token(a);
+
+    if (b->bst) root->right = b->bst;
+    else root->right = BST_init_token(b);
+
+    return root;
+}
+
+BSTnode* BST_make_tree_from_parentheses(DLLItem* parentheses, DLLItem* id)
+{
+    BSTnode* root = BST_init_token(parentheses);
+
+    if (id->bst) root->left = id->bst;
+    else root->left = BST_init_token(id);
+
+    return root;
+}
+
+
+void BST_print(BSTnode* root, int level)
+{
+    if (root == NULL)
+        return;
+
+
+    BST_print(root->left, level + 1);
+
+    for (int i = 0; i < level; i++)
+        printf("  ");
+    token_print(root->token);
+    printf("\n");
+
+    BST_print(root->right, level + 1);
+}
+
+void BST_dispose(BSTnode* root)
+{
+    if (root->left) BST_dispose(root->left);
+    if (root->right) BST_dispose(root->right);
+
+    free(root);
 }

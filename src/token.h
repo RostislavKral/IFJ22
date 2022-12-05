@@ -112,5 +112,5 @@ enum ERROR_CODE{
     GENERAL_ERR             //99  interní chyba překladače tj. neovlivněná vstupním programem (např. chyba alo-kace paměti atd.).
 };
 void exit_with_message(int lineNum, int charNum, char* message, enum ERROR_CODE errorCode);
-
+void token_print(TOKEN_T* token);
 #endif
