@@ -186,7 +186,7 @@ void analyze_token(htab_t* symtable);
 void function_detected(TOKEN_T* token,htab_t* symtable);
 void function_end_parsing();
 void if_condition();
-void variable_token(TOKEN_T *variable,htab_t* symtable);
+void var_declaration(htab_t* symtable,TOKEN_T *variable);
 void function_call(TOKEN_T *funcName,htab_t* symtable);
 
 
