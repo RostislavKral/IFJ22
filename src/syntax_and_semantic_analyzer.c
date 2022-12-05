@@ -40,52 +40,6 @@ bool is_token_eof(TOKEN_T* token){
     }
 }
 
-//frameList* create_new_frame() {
-//    frameList *newFrameList = malloc(sizeof (struct List));
-//   newFrameList->firstElement = NULL;
-//    return newFrameList;
-//}
-//
-//void remove_frame(frameList *frame){
-//    //kontrola existence
-//    if (frame != NULL || frame->firstElement != NULL) {
-//        struct frameElement *delNode = frame->firstElement;
-//        //projedu cely frame od zacatku do konce postupne uvolnuji dokud nanarazim na konec
-//        while (delNode != NULL){
-//            frame->firstElement = delNode->nextElement;
-//            free(delNode);
-//            delNode = frame->firstElement;
-//        }
-//        frame->firstElement = NULL;
-//    }
-//}
-//void frame_error(){
-//    printf("*ERROR* The program has performed an illegal operation.\n");
-//    exit(8);
-//}
-//void insert_to_frame(frameList *frame, TOKEN_T token){
-//    struct frameElement *newFrameElement = malloc(sizeof(struct frameElement));
-//    if (frame == NULL ||newFrameElement == NULL){
-//        frame_error();
-//    } else {
-//        // set dat a nastavim jako first
-//        newFrameElement->localVariableToken = token;
-//        newFrameElement->nextElement = frame->firstElement;
-//        frame->firstElement = newFrameElement;
-//    }
-//}
-//
-//frameElementPtr search_in_frame(frameList frame, TOKEN_T token){
-//    frameElementPtr tmp = frame.firstElement;
-//    while(tmp != NULL){
-//        if (tmp->localVariableToken.type == token.type && tmp->localVariableToken.name == token.name){
-//            return tmp;
-//        }
-//        tmp = tmp->nextElement;
-//    }
-//    return NULL;
-//}
-
 void function_end_parsing(){
     functionHelper.fParsing = false;
     functionHelper.fNamePass = false;
@@ -95,6 +49,7 @@ void function_end_parsing(){
     functionHelper.fParamCount = 0;
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
+    functionHelper.paramsList = NULL;
     scope.num--;
     scope.openedBracesCount--;
 };
@@ -143,12 +98,39 @@ void variable_token(TOKEN_T *variable,htab_t* symtable){
         exit_with_message(operator->lineNum,operator->charNum,"Invalid operator", SYNTAX_ERR);
     }
 }
-
-void function_call(TOKEN_T *funcName,htab_t* symtable){
-    //htab_find();
-
-}
 //TODO !!!!!!!!!!!!!!!!!!!!!!!!!! END NOT FINISHED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+void function_call(TOKEN_T *functionToken,htab_t* symtable){
+    htab_item_t* stFunction = htab_find_func(symtable, functionToken->name);
+
+    if (stFunction == NULL) exit_with_message(functionToken->lineNum, functionToken->charNum,"Function doesnt exist", SEM_F_DECLARATION_ERR);
+    TOKEN_T *pars = get_next_token();
+
+    if (pars->type != LPAR) exit_with_message(pars->lineNum, pars->charNum, "Expected '('", SYNTAX_ERR);
+    TOKEN_T *paramArr[stFunction->data.params_count];
+
+    for (int i = 1; i < stFunction->data.params_count+1; ++i) {
+        TOKEN_T *tmp = get_next_token();
+        if (tmp->type != TOKEN_ID && tmp->type != LITERAL) exit_with_message(tmp->lineNum, tmp->charNum, "invalid token", SEM_F_DECLARATION_ERR);
+        printf("param: %d", tmp->value.type);
+        if (tmp->type == TOKEN_ID){
+            htab_item_t *param = htab_find_var(symtable,tmp->name, scope.num);
+            if(stFunction->data.data_type[i] == 0 && param->data.data_type == KEY_INT ||
+               stFunction->data.data_type[i] == 1 && param->data.data_type == KEY_STRING ||
+               stFunction->data.data_type[i] == 2 && param->data.data_type == KEY_FLOAT
+                    ) paramArr[i] = tmp;
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_DECLARATION_ERR);
+        } else {
+            printf("\n%u\n",stFunction->data.data_type[i]);
+            if(tmp->value.type == 0 && stFunction->data.data_type[i] == KEY_INT ||
+               tmp->value.type == 1 && stFunction->data.data_type[i] == KEY_STRING ||
+               tmp->value.type == 2 && stFunction->data.data_type[i] == KEY_FLOAT
+                    ) paramArr[i] = tmp;
+            else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type2", SEM_F_DECLARATION_ERR);
+        }
+    }
+    //TODO code gen
+}
 
 
 void function_detected(TOKEN_T* initToken, htab_t* symtable){
@@ -206,7 +188,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
                                 DLL_init(functionHelper.paramsList);
                             }
-                            DLL_insert_first(functionHelper.paramsList, paramToken);
+                            DLL_insert_last(functionHelper.paramsList, paramToken);
                         }
                     } else if (paramToken->type == COMMA) {
                         functionHelper.fParamCount++;
@@ -230,7 +212,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             if(token->keyword == KEY_COLON){
                 TOKEN_T *returnTypeToken = get_next_token();
                 if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
-                    functionHelper.returnType = returnTypeToken->type;
+                    functionHelper.returnType = returnTypeToken->keyword;
                     functionHelper.fReturnTypePass = true;
                     continue;
                 } else {
@@ -252,103 +234,112 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //htab_insert_func(symtable,)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
     DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
-    for (int i = 0; i < functionHelper.fParamCount; ++i) {
+    for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
         paramArr[i] = tmp->token->keyword;
-        tmp->nextItem;
+        tmp = tmp->nextItem;
     }
-    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount, paramArr)){
+    enum T_KEYWORD test = functionHelper.returnType;
+    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
     DLL_dispose_list(functionHelper.paramsList);
-
+    //TODO DEBUG
+    htab_item_t* stFunction = htab_find_func(symtable, functionHelper.name);
+    enum T_KEYWORD arr = (stFunction->data.data_type[1]);
+    enum T_KEYWORD arr1 = (stFunction->data.data_type[2]);
+    enum T_KEYWORD arr2 = (stFunction->data.data_type[3]);
+    //enum T_KEYWORD arr[stFunction->data.params_count] = stFunction->data.data_type;
     // START PARSING Function BODY
     analyze_token(symtable);
 };
 
 void analyze_token(htab_t* symtable){
-    TOKEN_T *token;
-    token = get_next_token();
-    WriteToken(token);
-    //TODO UNCOMMENT WHEN LEXER DONE
+    while (true){
+        TOKEN_T *token;
+        token = get_next_token();
+        WriteToken(token);
+        //TODO UNCOMMENT WHEN LEXER DONE
 //    if(scope.isDefined == false && token->keyword != KEY_BEGIN){
 //        exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
 //    } else if (scope.isDefined == false && token->keyword == KEY_BEGIN){
 //        scope.isDefined = true;
 //    }
-    switch (token->type) {
-        case KEYWORD:
-            switch (token->keyword) {
-                case KEY_ELSE:
-                    break;
-                case KEY_FLOAT:
-                    break;
-                case KEY_IF:
-                    token = get_next_token();
-                    if(token->type != LPAR){
-                        exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
-                    } else {
-                        //expression parse
-                        if_condition();
-                    }
-                    break;
-                case KEY_INT:
-                    break;
-                case KEY_NULL:
-                    break;
-                case KEY_RETURN:
-                    break;
-                case KEY_STRING:
-                    break;
-                case KEY_WHILE_LOOP:
-                    break;
-                case KEY_VOID:
-                    break;
-                case KEY_BEGIN:
-                    break;
-                case KEY_COLON:
-                    break;
-                case KEY_FUNCTION:
-                    break;
-            }
-            break;
-        case TOKEN_ID:
-            variable_token(token,symtable);
-            break;
-        case FUNC_ID:
-            function_detected(token, symtable);
-            analyze_token(symtable);
-            break;
-        case LITERAL:
-            break;
-        case ASSIGN:
-            break;
-        case LPAR:
-            break;
-        case RPAR:
-            break;
-        case OPERATOR:
-            break;
-        case ISEOF:
-            //TODO: EOF exit, check opened functions, params, attr, etc.
-            break;
-        case PROG_START:
-            //TODO: call generate code
-            break;
-        case SEMICOLON:
-            break;
-        case LBRACE:
-            break;
-        case RBRACE:
-            //this will stop function parsing, hopefully
-            if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
-            break;
-        case COMMA:
-            break;
-        case DATA_TYPE:
-            break;
-        case FUNC_CALL:
-            function_call(token, symtable);
-            break;
+        switch (token->type) {
+            case KEYWORD:
+                switch (token->keyword) {
+                    case KEY_ELSE:
+                        break;
+                    case KEY_FLOAT:
+                        break;
+                    case KEY_IF:
+                        token = get_next_token();
+                        if(token->type != LPAR){
+                            exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
+                        } else {
+                            //expression parse
+                            if_condition();
+                        }
+                        break;
+                    case KEY_INT:
+                        break;
+                    case KEY_NULL:
+                        break;
+                    case KEY_RETURN:
+                        break;
+                    case KEY_STRING:
+                        break;
+                    case KEY_WHILE_LOOP:
+                        break;
+                    case KEY_VOID:
+                        break;
+                    case KEY_BEGIN:
+                        break;
+                    case KEY_COLON:
+                        break;
+                    case KEY_FUNCTION:
+                        break;
+                }
+                break;
+            case TOKEN_ID:
+                variable_token(token,symtable);
+                break;
+            case FUNC_ID:
+                function_detected(token, symtable);
+                //analyze_token(symtable);
+                break;
+            case LITERAL:
+                break;
+            case ASSIGN:
+                break;
+            case LPAR:
+                break;
+            case RPAR:
+                break;
+            case OPERATOR:
+                break;
+            case ISEOF:
+                //TODO: EOF exit, check opened functions, params, attr, etc.
+                break;
+            case PROG_START:
+                //TODO: call generate code
+                break;
+            case SEMICOLON:
+                break;
+            case LBRACE:
+                break;
+            case RBRACE:
+                //this will stop function parsing, hopefully
+                if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
+                break;
+            case COMMA:
+                break;
+            case DATA_TYPE:
+                break;
+            case FUNC_CALL:
+                function_call(token, symtable);
+                break;
+        }
+        if (token->type == ISEOF) break;
     }
 };
 
@@ -582,9 +573,11 @@ void WriteToken(TOKEN_T * token) {
                 case MINUS:
                     printf("OPERATOR: -\n");
                     break;
-
+                case TYPE_EQUALS:
+                    printf("OPERATOR: === \n");
+                    break;
                 default:
-                    printf("OPERATOR: unknown\n");
+                    printf("OPERATOR: unknown, %u\n", token->operators);
                     break;
             }
             break;
