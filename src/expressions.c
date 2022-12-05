@@ -217,8 +217,6 @@ BSTnode* analyze_precedence(DLList* list)
     {
         BSTnode* node = item->bst;
 
-        gen_expression(item->token, node);
-
         free(item);
         free(dollar);
         return node;
