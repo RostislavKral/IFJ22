@@ -1,10 +1,13 @@
 <?php
 declare(strict_types=1);
-$a = 5.1;
+$a = 5;
 $b = 6;
 
 $c = ($a * $b) + ($b / 5) - ($a - 5);
-$c = "ahoj" . " svete";
+
+write($c);
+
+$c = "ahoj" . "svete";
 // $d = $a * 5;
 // $c = 5 === 10;
 // float $A = 0.0;
@@ -14,3 +17,4 @@ $c = "ahoj" . " svete";
 //
 // moje_fce($b);
 // chr($b);
+write($c);

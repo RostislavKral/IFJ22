@@ -12,9 +12,11 @@
 
 
 // int gen_code(RULE_T * rule);
+void gen_header();
 int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration);
 int gen_if(BSTnode* conditionTree);
 int gen_declare_var(TOKEN_T* token, int scope);
+void gen_write(TOKEN_T* token);
 
 
 void print_token_value(TOKEN_T* token, char* frame);

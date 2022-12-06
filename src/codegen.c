@@ -9,6 +9,20 @@ int if_stack = 0;   // number of current if dephs
 int while_count = 0;   // total while count
 int while_stack = 0;   // number of current while dephs
 
+void gen_header()
+{
+    printf(".IFJcode22\n");
+    printf("CREATEFRAME\n");
+    printf("PUSHFRAME\n");
+    printf("CREATEFRAME\n");
+}
+
+void gen_write(TOKEN_T* token)
+{
+    printf("WRITE ");
+    print_token_value(token, "LF");
+    printf("\n");
+}
 
 
 // token = expression
@@ -17,10 +31,10 @@ int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
 
     if (token->type == TOKEN_ID && isDeclaration)
     {
-        printf(">>>>>>CODEGEN>>>>>> DEFVAR LF@%s\n", token->name);
+        printf("DEFVAR LF@%s\n", token->name);
         if (node->token->type == LITERAL)
         {
-            printf(">>>>>>CODEGEN>>>>>> MOV LF@%s, ", token->name);print_token_value(node->token, "LF");printf("\n");
+            printf("MOVE LF@%s ", token->name);print_token_value(node->token, "LF");printf("\n");
         }
     }
 
@@ -28,9 +42,11 @@ int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
     {
 //        BST_print(node, 2);
         tmp_var = 0;
-        printf(">>>>>>CODEGEN>>>>>> CREATEFRAME\n");
+        printf("CREATEFRAME\n");
+        printf("DEFVAR TF@first_tmp\n");
+        printf("DEFVAR TF@second_tmp\n");
         iterate_tree(node, token);
-        printf(">>>>>>CODEGEN>>>>>> CREATEFRAME\n");
+        printf("CREATEFRAME\n");
         tmp_var = 0;
     }
 
@@ -72,15 +88,15 @@ int gen_if(BSTnode* node){
     if_stack++;
     if_count++;
 
-    printf(">>>>>>CODEGEN>>>>>> DEFVAR TF@%s\n", "tmp_if_expr_var");
-    printf(">>>>>>CODEGEN>>>>>> MOV TF@%s 0\n", "tmp_if_expr_var");
+    printf("DEFVAR TF@%s\n", "tmp_if_expr_var");
+    printf("MOVE TF@%s 0\n", "tmp_if_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
     token->name = "tmp_if_expr_var";
 
     gen_expression(token, node, 1, false); // 1 for local scope ( TODO )
 
     char * jmpName = get_jmp_name(1); 
-    printf(">>>>>>CODEGEN>>>>>> JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    printf("JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
     free(jmpName);
 
     free(token);
@@ -88,10 +104,10 @@ int gen_if(BSTnode* node){
 
 int gen_else() {
     char * jmpName = get_jmp_name(2);
-    printf(">>>>>>CODEGEN>>>>>> JUMP %s\n", jmpName);
+    printf("JUMP %s\n", jmpName);
     free(jmpName);
     jmpName = get_jmp_name(1);
-    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    printf("LABEL %s\n", jmpName);
     free(jmpName);
 
     return 0;
@@ -99,7 +115,7 @@ int gen_else() {
 
 int gen_else_exit() {
     char * jmpName = get_jmp_name(2);
-    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    printf("LABEL %s\n", jmpName);
     if_stack--;
     free(jmpName);
 
@@ -110,13 +126,13 @@ void gen_while(BSTnode* node) {
     if_stack++;
     if_count++;
 
-    printf(">>>>>>CODEGEN>>>>>> DEFVAR TF@%s\n", "tmp_while_expr_var");
-    printf(">>>>>>CODEGEN>>>>>> MOV TF@%s 0\n", "tmp_while_expr_var");
+    printf("DEFVAR TF@%s\n", "tmp_while_expr_var");
+    printf("MOVE TF@%s 0\n", "tmp_while_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
     token->name = "tmp_while_expr_var";
 
     char * jmpName = get_jmp_name(4); 
-    printf(">>>>>>CODEGEN>>>>>> JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    printf("JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
     free(jmpName);
 
     free(token);
@@ -125,11 +141,11 @@ void gen_while(BSTnode* node) {
 
 void gen_while_exit(BSTnode* node) {
     char * jmpName = get_jmp_name(3); 
-    printf(">>>>>>CODEGEN>>>>>> JUMP %s\n", jmpName);
+    printf("JUMP %s\n", jmpName);
     free(jmpName);
     
     jmpName = get_jmp_name(4); 
-    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    printf("LABEL %s\n", jmpName);
     free(jmpName);
 
     if_stack--;
@@ -242,34 +258,34 @@ void print_expression(BSTnode* node, TOKEN_T* token, char* operation)
 
     if (node->left->token->type == OPERATOR && node->right->token->type == OPERATOR)
     {
-        printf(">>>>>>CODEGEN>>>>>> %s TF@%s%d, TF@%s%d, TF@%s%d\n", operation, token->name, tmp_var,
+        printf("%s TF@%s%d TF@%s%d TF@%s%d\n", operation, token->name, tmp_var,
                token->name, tmp_var - 1,
                token->name, tmp_var
         );
-        printf(">>>>>>CODEGEN>>>>>> MOV LF@%s, TF@%s%d\n", token->name, token->name, tmp_var);
+        printf("MOVE LF@%s TF@%s%d\n", token->name, token->name, tmp_var);
     }
     else if (node->left->token->type == OPERATOR)
     {
-        printf(">>>>>>CODEGEN>>>>>> %s LF@%s, LF@%s, ", operation, token->name, token->name);
+        printf("%s LF@%s LF@%s ", operation, token->name, token->name);
         print_token_value(node->right->token, "LF");
         printf("\n");
     }
     else if (node->right->token->type == OPERATOR)
     {
-        printf(">>>>>>CODEGEN>>>>>> %s LF@%s, LF@%s, ", operation, token->name, token->name);
+        printf("%s LF@%s LF@%s, ", operation, token->name, token->name);
         print_token_value(node->left->token, "LF");
         printf("\n");
     }
     else
     {
-        printf(">>>>>>CODEGEN>>>>>> DEFVAR TF@%s%d\n", token->name, ++tmp_var);
-        printf(">>>>>>CODEGEN>>>>>> %s TF@%s%d, ", operation, token->name, tmp_var);
+        printf("DEFVAR TF@%s%d\n", token->name, ++tmp_var);
+        printf("%s TF@%s%d ", operation, token->name, tmp_var);
         print_token_value(node->left->token, "LF");
-        printf(", ");
+        printf(" ");
         print_token_value(node->right->token, "LF");
         printf("\n");
 
-        printf(">>>>>>CODEGEN>>>>>> MOV LF@%s, TF@%s%d\n", token->name, token->name, tmp_var);
+        printf("MOVE LF@%s TF@%s%d\n", token->name, token->name, tmp_var);
     }
 
 }

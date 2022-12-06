@@ -182,7 +182,7 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
                     ) paramArr[i] = tmp;
             else exit_with_message(tmp->lineNum, tmp->charNum, "Invalid data type", SEM_F_CALL_PARAM_ERR);
         } else {
-            printf("\n%u\n",stFunction->data.data_type[i]);
+            // printf("\n%u\n",stFunction->data.data_type[i]);
             if(tmp->value.type == 0 && stFunction->data.data_type[i] == KEY_INT ||
                tmp->value.type == 1 && stFunction->data.data_type[i] == KEY_STRING ||
                tmp->value.type == 2 && stFunction->data.data_type[i] == KEY_FLOAT
@@ -352,6 +352,12 @@ void builtin_write(htab_t* symtable){
         if (tmpToken->type == COMMA) tmpToken = get_next_token();
         if (tmpToken->type != LITERAL && tmpToken->type != TOKEN_ID) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
         DLL_insert_last(dynamicParams, tmpToken);
+
+        if (tmpToken != NULL)
+        {
+            gen_write(tmpToken);
+        }
+
         tmpToken = get_next_token();
     }
     DLLItem *tmpItem = DLL_get_first(dynamicParams);
@@ -372,11 +378,11 @@ void builtin_write(htab_t* symtable){
             }
         }
         if (tmpItem->token->value.type == 0){
-            printf("%d",tmpItem->token->value.int_val);
+//            printf("%d",tmpItem->token->value.int_val);
         } else if(tmpItem->token->value.type == 2){
-            printf("%a",tmpItem->token->value.double_val);
+//            printf("%a",tmpItem->token->value.double_val);
         } else if (tmpItem->token->value.type == 1){
-            printf("%s",tmpItem->token->value.char_val);
+//            printf("%s",tmpItem->token->value.char_val);
         } else {
             exit_with_message(tmpItem->token->lineNum, tmpItem->token->charNum, "INTERNAL ERR", SEM_F_CALL_PARAM_ERR);
         }
@@ -390,10 +396,13 @@ void analyze_token(htab_t* symtable){
     while (true){
         TOKEN_T *token;
         token = get_next_token();
-        WriteToken(token);
+//        WriteToken(token);
         if(scope.isDefined == false && token->type != PROG_START){
             exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
         } else if (scope.isDefined == false && token->type == PROG_START){
+
+            gen_header();
+
             scope.isDefined = true;
             continue;
         } else if (scope.isDefined && !scope.strictTypesDeclared){
