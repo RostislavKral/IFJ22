@@ -56,6 +56,7 @@ void function_end_parsing(){
     functionHelper.paramsList = NULL;
     functionHelper.paramsListNames = NULL;
     //scope.openedBracesCount--;
+    scope.num--;
 };
 
 void while_condition(TOKEN_T* token, htab_t* symtable){
@@ -398,6 +399,7 @@ void builtin_write(htab_t* symtable){
 
 void checkReturnType(TOKEN_T* token, htab_t* symtable){
     TOKEN_T* returnValToken = get_next_token();
+    if (functionHelper.returnType == KEY_VOID && returnValToken->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
     if (returnValToken->type == TOKEN_ID){
         htab_item_t* varToken = htab_find_var(symtable, returnValToken->name,scope.num);
         if (varToken == NULL) exit_with_message(returnValToken->lineNum, returnValToken->charNum, "Return var not found", SEM_UNDEF_VAR_ERR);
@@ -477,7 +479,7 @@ void analyze_token(htab_t* symtable){
                             //expression parse
                             scope.lastScopeOpeningToken = previousToken;
                             if_condition(token,symtable);
-                            scope.num++;
+                            //scope.num++;
                         }
                         break;
                     case KEY_INT:
@@ -494,7 +496,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_WHILE_LOOP:
                         scope.lastScopeOpeningToken = token;
                         while_condition(token, symtable);
-                        scope.num++;
+                        //scope.num++;
                         break;
                     case KEY_VOID:
                         break;
@@ -548,7 +550,7 @@ void analyze_token(htab_t* symtable){
                 //this will stop function parsing, hopefully
                 if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
                 scope.openedBracesCount--;
-                scope.num--;
+                //scope.num--;
                 break;
             case COMMA:
                 exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
