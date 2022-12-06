@@ -494,6 +494,13 @@ TOKEN_T *get_next_token() {
 
                     read = 0;
                 } else if (*edge == '.') {
+                    *edge = lexer_fget();
+                    if (!isdigit(*edge))
+                    {
+                        exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
+                    }
+                    lexer_unget(*edge);
+
                     // char c;
                     double test, tmp;
                     int offset = 10;
