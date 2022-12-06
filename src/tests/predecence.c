@@ -173,6 +173,22 @@ int test_expr2()
 
     return get_result(stack);
 }
+int test_expr2_2()
+{
+    printf("\n___________________________\n");
+    printf("Test expression a + b * c");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+
+    add_var(stack, "a");
+    add_op(stack, MULTIPLY);
+    add_var(stack, "b");
+    add_op(stack, PLUS);
+    add_var(stack, "c");
+
+    return get_result(stack);
+}
 
 
 int test_expr3()
@@ -502,6 +518,7 @@ int main()
 
     a = test_expr1();
     b = test_expr2();
+    test_expr2_2();
     c = test_expr3();
     d = test_expr4();
     e = test_expr5();

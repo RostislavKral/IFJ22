@@ -47,6 +47,8 @@ DLList* DLL_copy(DLList* list);
 void DLL_print(DLList* list);
 void DLL_item_print(DLLItem* item);
 
+int DLL_has_value(DLList* list, TOKEN_T* token);
+
 
 typedef struct StackItem{
     DLLItem* item;

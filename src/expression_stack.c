@@ -160,6 +160,20 @@ DLList* DLL_copy(DLList* list)
     return newList;
 }
 
+int DLL_has_value(DLList* list, TOKEN_T* token)
+{
+    DLLItem* item = list->first;
+    while(item)
+    {
+        if (item->token == token)
+        {
+            return 1;
+        }
+        item = item->nextItem;
+    }
+    return 0;
+}
+
 void DLL_item_print(DLLItem* item)
 {
     if (item->token->type == TOKEN_ID)
@@ -321,10 +335,10 @@ BSTnode* BST_make_tree_from_expression(DLLItem* a, DLLItem* operator, DLLItem* b
     BSTnode* root = BST_init_token(operator);
 
     if (a->bst) root->left = a->bst;
-    else root->left = BST_init_token(a);
+    else root->left = a->bst;
 
     if (b->bst) root->right = b->bst;
-    else root->right = BST_init_token(b);
+    else root->right = b->bst;
 
     return root;
 }

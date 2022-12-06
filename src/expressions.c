@@ -69,77 +69,152 @@ int get_operator(DLList* stack, TOKEN_T* token)
     return table[get_row(stack)][get_column(token)];
 }
 
+int get_priority(TOKEN_T* operator)
+{
+    if (operator->operators == MULTIPLY)            return 1;
+    if (operator->operators == DIVIDE)              return 1;
+    if (operator->operators == PLUS)                return 2;
+    if (operator->operators == MINUS)               return 2;
+    if (operator->operators == CONCAT)              return 2;
+    if (operator->operators == LESS)                return 3;
+    if (operator->operators == GREATER)             return 3;
+    if (operator->operators == LESS_EQUAL)          return 3;
+    if (operator->operators == GREATER_EQUAL)       return 3;
+    if (operator->operators == TYPE_EQUALS)         return 4;
+    if (operator->operators == TYPE_NOT_EQUALS)     return 4;
 
+    return 0;
+}
+
+int compare_operators(TOKEN_T* operator, TOKEN_T* operator_stack)
+{
+    if (operator->type != OPERATOR && operator_stack->type != OPERATOR)
+    {
+        return -1;
+    }
+
+    int priority = get_priority(operator);
+    int priority_stack = get_priority(operator_stack);
+
+    return priority > priority_stack;
+}
 
 bool reduce(DLList* stack, Stack* stop_stack)
 {
     StackItem* tmp = Stack_pop(stop_stack);
 
-
-    while(tmp)
+    if (!DLL_has_value(stack, tmp->item->token))
     {
-        DLLItem* stop = tmp->item;
-        int reduced = 0;
+        return true;
+    }
 
-        if (stop->nextItem && stop->nextItem->nextItem && stop->nextItem->nextItem->nextItem)
+    DLLItem* stop = tmp->item;
+    int reduced = 0;
+
+    if (stop->nextItem && stop->nextItem->nextItem && stop->nextItem->nextItem->nextItem)
+    {
+        // assert that expression is (E)
+        if (
+                stop->nextItem                    ->token->type == LPAR &&
+               (stop->nextItem->nextItem          ->token->type == TOKEN_ID || stop->nextItem->nextItem->token->type == LITERAL || stop->nextItem->nextItem->token->keyword == KEY_NULL) &&
+                stop->nextItem->nextItem->nextItem->token->type == RPAR
+                )
         {
-            // assert that expression is (E)
-            if (
-                    stop->nextItem                    ->token->type == LPAR &&
-                   (stop->nextItem->nextItem          ->token->type == TOKEN_ID || stop->nextItem->nextItem->token->type == LITERAL || stop->nextItem->nextItem->token->keyword == KEY_NULL) &&
-                    stop->nextItem->nextItem->nextItem->token->type == RPAR
-                    )
-            {
-                DLLItem* lpar = DLL_pop(stack, stop->nextItem);
-                DLLItem* id = DLL_pop(stack, stop->nextItem);
-                DLLItem* rpar = DLL_pop(stack, stop->nextItem);
+            DLLItem* lpar = DLL_pop(stack, stop->nextItem);
+            DLLItem* id = DLL_pop(stack, stop->nextItem);
+            DLLItem* rpar = DLL_pop(stack, stop->nextItem);
 
-                DLLItem* item = DLL_insert_after(stack, stop, id->token);
-                item->bst = BST_make_tree_from_parentheses(lpar, id);
+            DLLItem* item = DLL_insert_after(stack, stop, id->token);
+            item->bst = BST_make_tree_from_parentheses(lpar, id);
 
-                free(lpar);
-                free(id);
-                free(rpar);
+            free(lpar);
+            free(id);
+            free(rpar);
 
-                reduced = 1;
-            }
-                // Rule E -> E + E  (OR ANY BINARY OPERATION)
-            else if (
-                   (stop->nextItem                    ->token->type == TOKEN_ID || stop->nextItem                    ->token->type == LITERAL) &&
-                    stop->nextItem->nextItem          ->token->type == OPERATOR &&
-                   (stop->nextItem->nextItem->nextItem->token->type == TOKEN_ID || stop->nextItem->nextItem->nextItem->token->type == LITERAL)
-                    )
-            {
-                DLLItem* id = DLL_pop(stack, stop->nextItem);
-                DLLItem* operator = DLL_pop(stack, stop->nextItem);
-                DLLItem* id2 = DLL_pop(stack, stop->nextItem);
-
-                DLLItem* item = DLL_insert_after(stack, stop, id->token);
-                item->bst = BST_make_tree_from_expression(id, operator, id2);
-                item->bst->type = validate_expression(id, operator, id2);
-
-                free(id);
-                free(operator);
-                free(id2);
-
-                reduced = 1;
-            }
-        }
-        else if (stop->nextItem->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL || stop->nextItem->token->keyword == KEY_NULL)
-        {
-            DLLItem* item = stop->nextItem;
-            item->bst = BST_init_token(item);
             reduced = 1;
         }
-
-        if (reduced == 0)
+            // Rule E -> E + E  (OR ANY BINARY OPERATION)
+        else if (
+               (stop->nextItem                    ->token->type == TOKEN_ID || stop->nextItem                    ->token->type == LITERAL || stop->nextItem->token->keyword == KEY_NULL) &&
+                stop->nextItem->nextItem          ->token->type == OPERATOR &&
+               (stop->nextItem->nextItem->nextItem->token->type == TOKEN_ID || stop->nextItem->nextItem->nextItem->token->type == LITERAL || stop->nextItem->nextItem->nextItem->token->keyword == KEY_NULL)
+                )
         {
-            Stack_push(stop_stack, tmp->item);
-            break;
+            // get previous operator
+            // compare operators
+            // if this operator is higher, process, otherwise skip
+            // if I get ( before operator, process
+
+            DLLItem* id = DLL_pop(stack, stop->nextItem);
+            DLLItem* operator = DLL_pop(stack, stop->nextItem);
+            DLLItem* id2 = DLL_pop(stack, stop->nextItem);
+
+            DLLItem* iterator = stop;
+            while (iterator)
+            {
+                if (iterator->token->type == DOLLAR)
+                {
+                    DLLItem* item = DLL_insert_after(stack, stop, id->token);
+                    item->bst = BST_make_tree_from_expression(id, operator, id2);
+                    item->bst->type = validate_expression(id, operator, id2);
+
+                    break;
+                }
+                if (iterator->token->type == LPAR)
+                {
+                    DLLItem* item = DLL_insert_after(stack, stop, id->token);
+                    item->bst = BST_make_tree_from_expression(id, operator, id2);
+                    item->bst->type = validate_expression(id, operator, id2);
+
+//                        free(id);
+//                        free(operator);
+//                        free(id2);
+                    break;
+                }
+                if (iterator->token->type == OPERATOR && compare_operators(operator->token, iterator->token))
+                {
+                    DLL_insert_after(stack, stop, id2->token)->bst = id2->bst;
+                    DLL_insert_after(stack, stop, operator->token)->bst = operator->bst;
+                    DLL_insert_after(stack, stop, id->token)->bst = id->bst;
+
+                    Stack_push(stop_stack, tmp->item);
+                    Stack_push(stop_stack, iterator->prevItem->prevItem);
+                    return true;
+                }
+                if (iterator->token->type == OPERATOR && !compare_operators(operator->token, iterator->token))
+                {
+                    DLLItem* item = DLL_insert_after(stack, stop, id->token);
+                    item->bst = BST_make_tree_from_expression(id, operator, id2);
+                    item->bst->type = validate_expression(id, operator, id2);
+
+//                        free(id);
+//                        free(operator);
+//                        free(id2);
+                    break;
+                }
+                iterator = iterator->prevItem;
+            }
+
+            reduced = 1;
         }
-        free(tmp);
-        tmp = Stack_pop(stop_stack);
     }
+    else if (stop->nextItem->token->type == TOKEN_ID || stop->nextItem->token->type == LITERAL || stop->nextItem->token->keyword == KEY_NULL)
+    {
+        DLLItem* item = stop->nextItem;
+        if (!item->bst)
+        {
+            item->bst = BST_init_token(item);
+        }
+        reduced = 1;
+    }
+
+    if (reduced == 0)
+    {
+//            Stack_push(stop_stack, tmp->item);
+        return true;
+    }
+    free(tmp);
+//        tmp = Stack_pop(stop_stack);
     return true;
 }
 
@@ -192,8 +267,14 @@ BSTnode* analyze_precedence(DLList* list)
 
         iterator = iterator->nextItem;
     }
-    if(reduce(stack, stop_stack) == false)
-    {
+    while(stop_stack->first) {
+        if (reduce(stack, stop_stack) == false) {
+            return NULL;
+        }
+    }
+
+    Stack_push(stop_stack, stack->first);
+    if (reduce(stack, stop_stack) == false) {
         return NULL;
     }
 //    printf("end:\n");
@@ -214,6 +295,13 @@ BSTnode* analyze_precedence(DLList* list)
         free(dollar);
         return node;
     }
+//    DLLItem* dollar = DLL_pop_last(stack);
+//    if (dollar->token->type == DOLLAR && stack->first == NULL)
+//    {
+//        free(dollar);
+//        printf("JUPI");
+//        return NULL;
+//    }
 
 //    free(item);
 //    free(dollar);
@@ -252,7 +340,8 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
     {
         if (
                 (a->token->value.type == 0 || a->token->value.type == 2) &&
-                (b->token->value.type == 0 || b->token->value.type == 2)
+                (b->token->value.type == 0 || b->token->value.type == 2) &&
+                (a->token->keyword != KEY_NULL && b->token->keyword != KEY_NULL)
                 )
         {
             if (a->token->value.type == 0 && b->token->value.type == 0)
