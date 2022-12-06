@@ -158,7 +158,7 @@ TOKEN_T *get_next_token() {
 
 
     while (true) {
-        escape = *edge;
+//        escape = *edge;
 //        *edge = fgetc(stdin);
         *edge = lexer_fget();
         edge[1] = '\0';
@@ -587,16 +587,82 @@ TOKEN_T *get_next_token() {
             case ST_STRING_LITERAL:
 
                 if(*edge == EOF) exit(1);
-                printf("%c\n", *edge);
+//                printf("%c\n", *edge);
 
-                if(escape != 92 && *edge == '$' ) exit(1);
-                if (*edge != '"') {
+//                if(escape != 92 && *edge == '$' ) exit(1);
+                bool is_enter = false;
+//                if (*edge == '\\'
+//                || (*edge == 92 || (0 <= *edge && *edge <= 32) || *edge == 35)
+//                )
+//                {
+//                    if (*edge == '\\')
+//                    {
+//                        *edge = lexer_fget();
+//                    }
+//                    if (0 <= *edge && *edge <= 9 && !is_escape)
+//                    {
+//                        char* num = malloc(sizeof (char ));
+//                        sprintf(num, "%d", (int)*edge);
+//                        str_conc(&str, "\\00");
+//                        str_conc(&str, num);
+//                    }
+//                    else if (10 <= *edge && *edge <= 99 && !is_escape)
+//                    {
+//                        char* num = malloc(sizeof (char ) * 2);
+//                        sprintf(num, "%d", (int)*edge);
+//                        str_conc(&str, "\\0");
+//                        str_conc(&str, num);
+//                    }
+//                    else if (100 <= *edge && !is_escape)
+//                    {
+//                        char* num = malloc(sizeof (char ) * 3);
+//                        sprintf(num, "%d", (int)*edge);
+//                        str_conc(&str, "\\");
+//                        str_conc(&str, num);
+//                    }
+//                }
+//                else
+                if (0 <= *edge && *edge <= 9)
+                {
+                    char* num = malloc(sizeof (char ));
+                    sprintf(num, "%d", (int)*edge);
+                    str_conc(&str, "\\00");
+                    str_conc(&str, num);
+                }
+                else if (*edge == 92 || (10 <= *edge && *edge <= 32) || *edge == 35)
+                {
+                    if (*edge == '\\')
+                    {
+                        *edge = lexer_fget();
+                        if (*edge == 'n')
+                        {
+                            str_conc(&str, "\\010");
+                        }
+                        else
+                        {
+                            char* num = malloc(sizeof (char ) * 2);
+                            sprintf(num, "%d", (int)*edge);
+                            str_conc(&str, "\\0");
+                            str_conc(&str, num);
+                        }
+                    }
+                    else
+                    {
+
+                        char* num = malloc(sizeof (char ) * 2);
+                        sprintf(num, "%d", (int)*edge);
+                        str_conc(&str, "\\0");
+                        str_conc(&str, num);
+                    }
+                }
+                else if (*edge != '"') {
 
                     str_conc(&str, edge);
                     // *edge = lexer_fget();
                     // if (*edge == '"') break;
 
-                } else {
+                }
+                else {
 
                    // lexer_unget(*edge);
                     token->type = LITERAL;

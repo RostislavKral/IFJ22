@@ -217,7 +217,7 @@ void print_token_value(TOKEN_T* token, char* frame)
         }
         if (token->value.type == 2)
         {
-            printf("float@%f", token->value.double_val);
+            printf("float@%a", token->value.double_val);
         }
     }
     else if(token->type == TOKEN_ID)
@@ -326,6 +326,8 @@ void select_expression(BSTnode* node, TOKEN_T* token)
             }
             break;
         case CONCAT:
+            printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "");printf("\n");
+            printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "");printf("\n");
             break;
         case LESS:
         case GREATER:
