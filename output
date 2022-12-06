@@ -3,42 +3,45 @@ CREATEFRAME
 PUSHFRAME
 CREATEFRAME
 DEFVAR LF@a
-MOVE LF@a float@0x1.4666666666666p+2
+MOVE LF@a int@5
 DEFVAR LF@b
 MOVE LF@b int@6
 DEFVAR LF@c
 CREATEFRAME
 DEFVAR TF@first_tmp
 DEFVAR TF@second_tmp
-MOVE TF@first_tmp LF@a
-MOVE TF@second_tmp LF@b
-INT2FLOAT TF@second_tmp TF@second_tmp
 DEFVAR TF@c1
-MUL TF@c1 TF@first_tmp TF@second_tmp
+MUL TF@c1 LF@a LF@b
 MOVE LF@c TF@c1
 DEFVAR TF@c2
-DIV TF@c2 TF@first_tmp TF@second_tmp
+IDIV TF@c2 LF@b int@5
 MOVE LF@c TF@c2
 ADD TF@c2 TF@c1 TF@c2
 MOVE LF@c TF@c2
-MOVE TF@first_tmp LF@a
-MOVE TF@second_tmp int@5
-INT2FLOAT TF@second_tmp TF@second_tmp
 DEFVAR TF@c3
-SUB TF@c3 TF@first_tmp TF@second_tmp
+SUB TF@c3 LF@a int@5
 MOVE LF@c TF@c3
 SUB TF@c3 TF@c2 TF@c3
 MOVE LF@c TF@c3
 CREATEFRAME
 WRITE LF@c
 WRITE string@\010
+WRITE LF@c
+WRITE string@\010
 CREATEFRAME
 DEFVAR TF@first_tmp
 DEFVAR TF@second_tmp
-MOVE TF@first_tmp string@ahoj
-MOVE TF@second_tmp string@\032svete\010
 DEFVAR TF@c1
-CONCAT TF@c1 TF@first_tmp TF@second_tmp
+ADD TF@c1 int@10 int@1
+MOVE LF@c TF@c1
+CREATEFRAME
+WRITE LF@c
+WRITE string@\010
+CREATEFRAME
+DEFVAR TF@first_tmp
+DEFVAR TF@second_tmp
+DEFVAR TF@c1
+CONCAT TF@c1 string@ahoj string@\032svete\010
 MOVE LF@c TF@c1
 CREATEFRAME
 WRITE LF@c

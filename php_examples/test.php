@@ -1,14 +1,17 @@
 <?php
 declare(strict_types=1);
-$a = 5.1;
+$a = 5;
 $b = 6;
 
 $c = ($a * $b) + ($b / 5) - ($a - 5);
+write($c, "\n");
 // $c = $a / $b;
+write($c, "\n");
 // $c = ($a * $b) + ($b / 5) - ($a - 5);
 //
 // write($c);
 //
+$c = 10 + 1;
 write($c, "\n");
 $c = "ahoj" . " svete\n";
 // $d = $a < $b;

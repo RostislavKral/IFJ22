@@ -309,41 +309,47 @@ void select_expression(BSTnode* node, TOKEN_T* token)
 
     char* instruction = get_instruction(node);
 
-    switch (node->token->operators) {
-        case MULTIPLY:
-        case DIVIDE:
-        case PLUS:
-        case MINUS:
-            if (node->left->type == KEY_INT && node->right->type == KEY_INT){}
-            else if (node->left->type == KEY_FLOAT && node->right->type == KEY_FLOAT) {}
-            else if (node->right->type == KEY_FLOAT)
-            {
-                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
-                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
-                printf("INT2FLOAT TF@first_tmp TF@first_tmp\n");
-            }
-            else if (node->left->type == KEY_FLOAT)
-            {
-                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
-                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
-                printf("INT2FLOAT TF@second_tmp TF@second_tmp\n");
-            }
-            break;
-        case CONCAT:
-            printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
-            printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
-            break;
-        case LESS:
-        case GREATER:
-        case LESS_EQUAL:
-        case GREATER_EQUAL:
-            break;
-        case TYPE_EQUALS:
-        case TYPE_NOT_EQUALS:
-            break;
-        default:
-            break;
-    }
+//    switch (node->token->operators) {
+//        case MULTIPLY:
+//        case DIVIDE:
+//        case PLUS:
+//        case MINUS:
+//            if (node->left->type == KEY_INT && node->right->type == KEY_INT){
+//                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+//                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
+//            }
+//            else if (node->left->type == KEY_FLOAT && node->right->type == KEY_FLOAT) {
+//                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+//                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
+//            }
+//            else if (node->right->type == KEY_FLOAT)
+//            {
+//                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+//                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
+//                printf("INT2FLOAT TF@first_tmp TF@first_tmp\n");
+//            }
+//            else if (node->left->type == KEY_FLOAT)
+//            {
+//                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+//                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
+//                printf("INT2FLOAT TF@second_tmp TF@second_tmp\n");
+//            }
+//            break;
+//        case CONCAT:
+//            printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+//            printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
+//            break;
+//        case LESS:
+//        case GREATER:
+//        case LESS_EQUAL:
+//        case GREATER_EQUAL:
+//            break;
+//        case TYPE_EQUALS:
+//        case TYPE_NOT_EQUALS:
+//            break;
+//        default:
+//            break;
+//    }
 
     print_expression(node, token, instruction);
 }
@@ -375,10 +381,11 @@ void print_expression(BSTnode* node, TOKEN_T* token, char* operation)
     else
     {
         printf("DEFVAR TF@%s%d\n", token->name, ++tmp_var);
-        printf("%s TF@%s%d TF@first_tmp TF@second_tmp", operation, token->name, tmp_var);
-//        print_token_value(node->left->token, "LF");
-//        printf(" ");
-//        print_token_value(node->right->token, "LF");
+//        printf("%s TF@%s%d TF@first_tmp TF@second_tmp", operation, token->name, tmp_var);
+        printf("%s TF@%s%d ", operation, token->name, tmp_var);
+        print_token_value(node->left->token, "LF");
+        printf(" ");
+        print_token_value(node->right->token, "LF");
         printf("\n");
 
         printf("MOVE LF@%s TF@%s%d\n", token->name, token->name, tmp_var);
