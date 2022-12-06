@@ -62,7 +62,8 @@ void function_end_parsing(){
 void while_condition(TOKEN_T* token, htab_t* symtable){
     TOKEN_T* lparToken = get_next_token();
     if (lparToken->type != LPAR) exit_with_message(lparToken->lineNum,lparToken->charNum,"Invalid expression in condition", SYNTAX_ERR);
-    DLList* condExpList = expression_list(symtable, RPAR);
+    TOKEN_T *tmpToken = get_next_token();
+    DLList* condExpList = expression_list(tmpToken,symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
@@ -70,7 +71,8 @@ void while_condition(TOKEN_T* token, htab_t* symtable){
 }
 
 void if_condition(TOKEN_T* token, htab_t* symtable){
-    DLList* condExpList = expression_list(symtable, RPAR);
+    TOKEN_T *tmpToken = get_next_token();
+    DLList* condExpList = expression_list(tmpToken, symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
@@ -78,7 +80,8 @@ void if_condition(TOKEN_T* token, htab_t* symtable){
     gen_if(condExprBST);
 }
 void else_condition(TOKEN_T* token, htab_t* symtable){
-    DLList* condExpList = expression_list(symtable, RPAR);
+    TOKEN_T *tmpToken = get_next_token();
+    DLList* condExpList = expression_list(tmpToken, symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
@@ -87,11 +90,11 @@ void else_condition(TOKEN_T* token, htab_t* symtable){
 }
 
 
-DLList *expression_list(htab_t* symtable, enum T_TOKEN_TYPE closingToken){
+DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     DLList *precedenceList = malloc(sizeof (struct DLList));
     DLL_init(precedenceList);
     TOKEN_T *previousTmpToken;
-    TOKEN_T *tmpToken = get_next_token();
+    //TOKEN_T *tmpToken = get_next_token();
     while (tmpToken->type != closingToken){
         if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD) ||
                 tmpToken->type == LPAR || tmpToken->type == RPAR){
@@ -113,55 +116,70 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
     TOKEN_T *equalToken = get_next_token();
     if (equalToken->type != ASSIGN) exit_with_message(equalToken->lineNum, equalToken->charNum, "Invalid operator to assing", SYNTAX_ERR);
 
-    DLList* precedenceList = expression_list(symtable, SEMICOLON);
-    BSTnode *expressionTree = analyze_precedence(precedenceList);
-
-    if (expressionTree == NULL)
-    {
-        exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
-    }
-    if(expressionTree->type == KEY_NULL)
-    {
-        exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
-    }
-
-    //one element
-    if (expressionTree->token->type == LITERAL){
-        if (expressionTree->token->value.type == 0){
-            htab_value val =  {.int_value = expressionTree->token->value.int_val};
-            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                gen_expression(varNameToken, expressionTree, scope.num, true);
-            } else {
-                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                gen_expression(varNameToken, expressionTree, scope.num, false);
+    TOKEN_T* tmpToken = get_next_token();
+    if (tmpToken->type == FUNC_CALL){
+        htab_item_t *item = htab_find_func(symtable, tmpToken->name);
+        if (item != NULL){
+            htab_value val = {.str_value = NULL};
+            function_call(tmpToken,symtable);
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, item->data.data_type[0], val)){
+                //TODO GEN Expr gen_expression(varNameToken, expressionTree, scope.num, true);
             }
-        } else if (expressionTree->token->value.type == 1){
-            htab_value val =  {.str_value = expressionTree->token->value.char_val};
-            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                gen_expression(varNameToken, expressionTree, scope.num, true);
-            } else {
-                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                gen_expression(varNameToken, expressionTree, scope.num, false);
-            }
-        } else if (expressionTree->token->value.type == 2){
-            htab_value val =  {.float_value = expressionTree->token->value.double_val};
-            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                gen_expression(varNameToken, expressionTree, scope.num, true);
-            } else {
-                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                gen_expression(varNameToken, expressionTree, scope.num, false);
-            }
+        } else {
+            exit_with_message(tmpToken->lineNum,tmpToken->charNum, "invalid assing", SEM_F_DECLARATION_ERR);
         }
     } else {
-        //tree
-        htab_value zero = {.str_value = NULL};
-        if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)){
-            gen_expression(varNameToken, expressionTree,scope.num,true);
+        DLList* precedenceList = expression_list(tmpToken, symtable, SEMICOLON);
+        BSTnode *expressionTree = analyze_precedence(precedenceList);
+
+        if (expressionTree == NULL)
+        {
+            exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
+        }
+        if(expressionTree->type == KEY_NULL)
+        {
+            exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
+        }
+
+        //one element
+        if (expressionTree->token->type == LITERAL){
+            if (expressionTree->token->value.type == 0){
+                htab_value val =  {.int_value = expressionTree->token->value.int_val};
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
+                }
+            } else if (expressionTree->token->value.type == 1){
+                htab_value val =  {.str_value = expressionTree->token->value.char_val};
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
+                }
+            } else if (expressionTree->token->value.type == 2){
+                htab_value val =  {.float_value = expressionTree->token->value.double_val};
+                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    gen_expression(varNameToken, expressionTree, scope.num, true);
+                } else {
+                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                    gen_expression(varNameToken, expressionTree, scope.num, false);
+                }
+            }
         } else {
-            htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero);
-            gen_expression(varNameToken, expressionTree,scope.num,false);
+            //tree
+            htab_value zero = {.str_value = NULL};
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)){
+                gen_expression(varNameToken, expressionTree,scope.num,true);
+            } else {
+                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero);
+                gen_expression(varNameToken, expressionTree,scope.num,false);
+            }
         }
     }
+
 }
 
 void function_call(TOKEN_T *functionToken,htab_t* symtable){

@@ -63,7 +63,7 @@ void if_condition(TOKEN_T* token, htab_t* symtable);
 void while_condition(TOKEN_T* token, htab_t* symtable);
 void var_declaration(htab_t* symtable,TOKEN_T *variable);
 void function_call(TOKEN_T *funcName,htab_t* symtable);
-DLList* expression_list(htab_t* symtable, enum  T_TOKEN_TYPE closingToken);
+DLList* expression_list(TOKEN_T* token,htab_t* symtable, enum  T_TOKEN_TYPE closingToken);
 
 
 void WriteToken(TOKEN_T * token);
