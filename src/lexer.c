@@ -101,6 +101,7 @@ bool control = 0;
 char *c;
 int line_number = 1;
 int char_number = 0;
+bool prog_end_read = false;
 
 void lexer_unget(char edge)
 {
@@ -150,6 +151,11 @@ TOKEN_T *get_next_token() {
 //        *edge = fgetc(stdin);
         *edge = lexer_fget();
         edge[1] = '\0';
+
+        if (prog_end_read && *edge != EOF)
+        {
+            exit_with_message(line_number, char_number, "Got character after '?>'", LEXICAL_ERR);
+        }
 //        printf("__________%c", *edge);
 //        printf("%d", state);
 
@@ -218,6 +224,7 @@ TOKEN_T *get_next_token() {
                         token->type = PROG_END;
                         //lexer_unget(*edge);
 
+                        prog_end_read = true;
                         set_line_num(token);
                         return token;
                     }
@@ -259,6 +266,11 @@ TOKEN_T *get_next_token() {
 
                 break;
             case ST_SLINE_COMMENT:
+                if (*edge == EOF)
+                {
+                    lexer_unget(*edge);
+                    state = ST_START;
+                }
                 if (*edge == '\n') state = ST_START;
                 break;
             case ST_PROG_START:
@@ -299,6 +311,11 @@ TOKEN_T *get_next_token() {
 
 
             case ST_MLINE_COMMENT:
+                if (*edge == EOF)
+                {
+                    lexer_unget(*edge);
+                    state = ST_START;
+                }
                 if(*edge == EOF) exit(1);
                 if (*edge == '/') state = ST_START;
                 break;
