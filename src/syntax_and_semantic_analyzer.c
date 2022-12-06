@@ -103,7 +103,9 @@ DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE clo
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
-                tmpToken->value.type = item->data.type;
+                if (item->data.data_type[0] == KEY_FLOAT) tmpToken->value.type = 2;
+                else if (item->data.data_type[0] == KEY_INT) tmpToken->value.type = 0;
+                else tmpToken->type = 1;
             }
             previousTmpToken = tmpToken;
             DLL_insert_last(precedenceList, tmpToken);
