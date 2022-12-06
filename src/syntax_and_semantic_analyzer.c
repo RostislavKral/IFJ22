@@ -160,6 +160,9 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
                 exit_with_message(tmp->lineNum, tmp->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
             }
 
+//            enum T_KEYWORD data = stFunction->data.data_type[i];
+//            enum T_KEYWORD data2 = param->data.data_type[0];
+
             if((stFunction->data.data_type[i] == KEY_INT && param->data.data_type[0] == KEY_INT) ||
                 (stFunction->data.data_type[i] == KEY_STRING && param->data.data_type[0] == KEY_STRING) ||
                 (stFunction->data.data_type[i] == KEY_FLOAT && param->data.data_type[0] == KEY_FLOAT)
