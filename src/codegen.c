@@ -121,15 +121,15 @@ int gen_if(BSTnode* node){
     if_stack++;
     if_count++;
 
-    printf("DEFVAR TF@%s\n", "tmp_if_expr_var");
-    printf("MOVE TF@%s 0\n", "tmp_if_expr_var");
+    printf("DEFVAR LF@%s\n", "tmp_if_expr_var");
+    printf("MOVE LF@%s int@0\n", "tmp_if_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
     token->name = "tmp_if_expr_var";
 
-    gen_expression(token, node, 1, false); // 1 for local scope ( TODO )
+    gen_expression(token, node, 1, true); // 1 for local scope ( TODO )
 
     char * jmpName = get_jmp_name(1); 
-    printf("JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    printf("JUMPIFEQ %s LF@%s int@0\n", jmpName, "tmp_if_expr_var");
     free(jmpName);
 
     free(token);
@@ -155,17 +155,20 @@ int gen_else_exit(BSTnode* conditionTree) {
     return 0;    
 }
 
+
+
+
 void gen_while(BSTnode* node) {
     if_stack++;
     if_count++;
 
     printf("DEFVAR TF@%s\n", "tmp_while_expr_var");
-    printf("MOVE TF@%s 0\n", "tmp_while_expr_var");
+    printf("MOVE TF@%s int@0\n", "tmp_while_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
     token->name = "tmp_while_expr_var";
 
     char * jmpName = get_jmp_name(4); 
-    printf("JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    printf("JUMPIFEQ %s TF@%s int@0\n", jmpName, "tmp_if_expr_var");
     free(jmpName);
 
     free(token);
