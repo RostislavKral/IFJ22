@@ -36,6 +36,7 @@ typedef struct {
     int fBraceCountCheck;
     char * name;
     DLList* paramsList;
+    DLList *paramsListNames;
     enum T_KEYWORD returnType;
 } parseFunctionHelper;
 

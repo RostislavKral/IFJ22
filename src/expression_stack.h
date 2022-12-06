@@ -46,6 +46,7 @@ DLLItem* DLL_get_last(DLList* list);
 DLList* DLL_copy(DLList* list);
 void DLL_print(DLList* list);
 void DLL_item_print(DLLItem* item);
+bool DLL_find_token(DLList *list, TOKEN_T* token);
 
 
 typedef struct StackItem{
