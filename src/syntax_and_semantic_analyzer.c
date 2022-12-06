@@ -79,9 +79,11 @@ void if_condition(TOKEN_T* token, htab_t* symtable){
 
 DLList *expression_list(htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     DLList *precedenceList = malloc(sizeof (struct DLList));
+    DLL_init(precedenceList);
     TOKEN_T *tmpToken = get_next_token();
     while (tmpToken->type != closingToken){
-        if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD)){
+        if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD) ||
+                tmpToken->type == LPAR || tmpToken->type == RPAR){
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);

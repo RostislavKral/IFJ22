@@ -508,6 +508,30 @@ int test_expr21()
     return get_result(stack);
 }
 
+int test_expr22()
+{
+    printf("\n___________________________\n");
+    printf("Test expression (a + b) - (c / d) - a");
+    DLList* stack = malloc(sizeof (DLList*));
+    DLL_init(stack);
+
+    add_type(stack, LPAR);
+    add_var(stack, "a");
+    add_op(stack, PLUS);
+    add_var(stack, "b");
+    add_type(stack, RPAR);
+    add_op(stack, MINUS);
+    add_type(stack, LPAR);
+    add_var(stack, "c");
+    add_op(stack, DIVIDE);
+    add_var(stack, "d");
+    add_type(stack, RPAR);
+    add_op(stack, MINUS);
+    add_var(stack, "a");
+
+    return get_result(stack);
+}
+
 int main()
 {
     int a = 0;
@@ -538,5 +562,6 @@ int main()
     test_expr19();
     test_expr20();
     test_expr21();
+    test_expr22();
 //    printf("%d%d%d%d%d", a,b,c,d,e);
 }

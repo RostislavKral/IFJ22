@@ -125,7 +125,8 @@ bool reduce(DLList* stack, Stack* stop_stack)
             DLLItem* rpar = DLL_pop(stack, stop->nextItem);
 
             DLLItem* item = DLL_insert_after(stack, stop, id->token);
-            item->bst = BST_make_tree_from_parentheses(lpar, id);
+//            item->bst = BST_make_tree_from_parentheses(lpar, id);
+            item->bst = id->bst;
 
             free(lpar);
             free(id);
@@ -273,6 +274,10 @@ BSTnode* analyze_precedence(DLList* list)
         }
     }
 
+    Stack_push(stop_stack, stack->first);
+    if (reduce(stack, stop_stack) == false) {
+        return NULL;
+    }
     Stack_push(stop_stack, stack->first);
     if (reduce(stack, stop_stack) == false) {
         return NULL;
