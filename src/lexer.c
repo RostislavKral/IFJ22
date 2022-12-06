@@ -1,7 +1,13 @@
-//
-// Created by rostik on 10/20/22.
-//
-
+/**
+ * @file lexer.c
+ * @author Rostislav Kral xkralr06
+ * @brief lexical analysis / scanner
+ * @version 1.0
+ * @date 2022-12-1
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
 #include "lexer.h"
 #include "token.h"
 #include "dyn_string.h"
@@ -117,7 +123,10 @@ void lexer_unget(char edge)
 char lexer_fget()
 {
     char edge = fgetc(stdin);
+    if(edge != '<' && char_number == 0 && line_number == 1) exit(1);
+
     char_number++;
+
     if (edge == '\n')
     {
         line_number++;
@@ -140,6 +149,7 @@ TOKEN_T *get_next_token() {
     enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof(char));
+    char escape;
     bool read = 1;
 
     DYN_STRING_T str, fun_name;
@@ -148,6 +158,7 @@ TOKEN_T *get_next_token() {
 
 
     while (true) {
+        escape = *edge;
 //        *edge = fgetc(stdin);
         *edge = lexer_fget();
         edge[1] = '\0';
@@ -317,7 +328,17 @@ TOKEN_T *get_next_token() {
                     state = ST_START;
                 }
                 if(*edge == EOF) exit(1);
-                if (*edge == '/') state = ST_START;
+                if (*edge == '*') state = ST_MLINE_COMMENT_END;
+                break;
+
+            case ST_MLINE_COMMENT_END:
+                if (*edge == EOF)
+                {
+                    lexer_unget(*edge);
+                    state = ST_START;
+                }
+                if(*edge == EOF) exit(1);
+                if(*edge == '/') state = ST_START;
                 break;
             case ST_VAR:
 
@@ -566,6 +587,9 @@ TOKEN_T *get_next_token() {
             case ST_STRING_LITERAL:
 
                 if(*edge == EOF) exit(1);
+                printf("%c\n", *edge);
+
+                if(escape != 92 && *edge == '$' ) exit(1);
                 if (*edge != '"') {
 
                     str_conc(&str, edge);
