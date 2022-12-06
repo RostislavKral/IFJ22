@@ -290,6 +290,10 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             if(token->type != FUNC_ID){
                 exit_with_message(token->lineNum,token->charNum,"Invalid function name", SEM_F_DECLARATION_ERR);
             } else {
+                char* arr[10] = {"void","return","int","float","string","else", "if","while","funciton","null"};
+                for (int i = 0; i < 10; ++i) {
+                    if(strcmp(arr[i],token->name) == 0) exit_with_message(token->lineNum,token->charNum,"invalid function name", SYNTAX_ERR);
+                }
                 functionHelper.fNameToken = token;
                 functionHelper.name = token->name;
                 functionHelper.fNamePass = true;
