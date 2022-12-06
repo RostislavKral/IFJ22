@@ -3,11 +3,65 @@
 int tmp_var = 0;
 int tmp_if = 0;
 
-int gen_declare_var(TOKEN_T* token, int scope) {
+int if_count = 0;   // total if count
+int if_stack = 0;   // number of current if 'scope'
 
+
+/*
+
+
+
+
+
+
+if () {
+    if1_1  
+} else {
+    el1_1
 }
+ex1_0
 
+if () {
+    if2_1
 
+    if () {
+        if3_2
+
+        if () {
+            if_4_3
+        } else {
+            el_4_3
+        }
+        ex_4_2
+    } else {
+        el4_2
+    }
+    ex_4_1
+
+    if () {
+        if5_2
+
+        if () {
+            if6_3
+        } else {
+            el6_3
+        }
+        ex_6_2
+    } else {
+        el6_2
+    }
+    ex_6_1
+} else {
+    el6_1
+    if () {
+        if7_2
+    } else () {
+        el7_2
+    }
+    ex_7_1
+}
+ex_7_0
+*/
 
 // token = expression
 int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
@@ -35,8 +89,69 @@ int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
     return 0;
 }
 
-void gen_if(BSTnode* node){
-    printf("\n\n\nCall of gen_if\n\n\n");
+
+
+
+
+int get_num_len(int num) {
+    if (num == 0) { return 0; }
+    return get_num_len(num / 10) + 1;
+}
+
+char * get_jmp_name(int blablabla) {
+    char * name = malloc(sizeof(char) * (get_num_len(if_count) + get_num_len(if_stack) + 5));
+    switch (blablabla) {
+    case 0:
+        sprintf(name, "if_%d_%d", if_count, if_stack);
+        break;
+    case 1:
+        sprintf(name, "el_%d_%d", if_count, if_stack);
+        break;
+    case 2:
+        sprintf(name, "ex_%d_%d", if_count, if_stack);
+    default:
+        break;
+    }
+
+    return name;
+}
+
+int gen_if(BSTnode* node){
+    if_stack++;
+    if_count++;
+
+    printf(">>>>>>CODEGEN>>>>>> DEFVAR TF@%s\n", "tmp_if_expr_var");
+    printf(">>>>>>CODEGEN>>>>>> MOV TF@%s 0\n", "tmp_if_expr_var");
+    TOKEN_T * token = malloc(sizeof(TOKEN_T));
+    token->name = "tmp_if_expr_var";
+
+    gen_expression(token, node, 1, false); // 1 for local scope ( TODO )
+
+    char * jmpName = get_jmp_name(1); 
+    printf(">>>>>>CODEGEN>>>>>> JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    free(jmpName);
+
+    free(token);
+}
+
+int gen_else() {
+    char * jmpName = get_jmp_name(2);
+    printf(">>>>>>CODEGEN>>>>>> JUMP %s\n", jmpName);
+    free(jmpName);
+    jmpName = get_jmp_name(1);
+    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    free(jmpName);
+
+    return 0;
+}
+
+int gen_else_exit() {
+    if_stack--;
+    char * jmpName = get_jmp_name(2);
+    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    free(jmpName);
+
+    return 0;    
 }
 
 void gen_function()
