@@ -9,6 +9,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "token.h"
+#include <stdbool.h>
 
 typedef struct BSTnode{
     TOKEN_T* token;
