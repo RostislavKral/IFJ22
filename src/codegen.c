@@ -114,7 +114,7 @@ int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
 //    } else {
 //
 //    }
-    BST_print(node, 2);
+//    BST_print(node, 2);
     iterate_tree(node, token);
 
     return 0;

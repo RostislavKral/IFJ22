@@ -5,3 +5,10 @@ $b = 6;
 
 $c = $a + $b * $b + 5;
 $d = $a * 5;
+
+// function moje_fce(int $d): int
+// {
+// }
+//
+// moje_fce($b);
+chr($b);
