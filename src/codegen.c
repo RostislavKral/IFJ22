@@ -264,7 +264,8 @@ char* get_instruction(BSTnode* node)
         // if result is integer
         if (node->left->type == KEY_INT && node->right->type == KEY_INT)
         {
-            return "IDIV";
+//            return "IDIV";
+            return "DIV";
         }
         else
         {
@@ -317,20 +318,20 @@ void select_expression(BSTnode* node, TOKEN_T* token)
             else if (node->left->type == KEY_FLOAT && node->right->type == KEY_FLOAT) {}
             else if (node->right->type == KEY_FLOAT)
             {
-                printf("MOVE TF@first_tmp LF@%s\n", node->left->token->name);
-                printf("MOVE TF@second_tmp LF@%s\n", node->right->token->name);
+                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
                 printf("INT2FLOAT TF@first_tmp TF@first_tmp\n");
             }
             else if (node->left->type == KEY_FLOAT)
             {
-                printf("MOVE TF@first_tmp LF@%s\n", node->left->token->name);
-                printf("MOVE TF@second_tmp LF@%s\n", node->right->token->name);
+                printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+                printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
                 printf("INT2FLOAT TF@second_tmp TF@second_tmp\n");
             }
             break;
         case CONCAT:
-            printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "");printf("\n");
-            printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "");printf("\n");
+            printf("MOVE TF@first_tmp ");print_token_value(node->left->token, "LF");printf("\n");
+            printf("MOVE TF@second_tmp ");print_token_value(node->right->token, "LF");printf("\n");
             break;
         case LESS:
         case GREATER:

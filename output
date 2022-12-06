@@ -14,8 +14,21 @@ MOVE TF@first_tmp LF@a
 MOVE TF@second_tmp LF@b
 INT2FLOAT TF@second_tmp TF@second_tmp
 DEFVAR TF@c1
-DIV TF@c1 TF@first_tmp TF@second_tmp
+MUL TF@c1 TF@first_tmp TF@second_tmp
 MOVE LF@c TF@c1
+DEFVAR TF@c2
+DIV TF@c2 TF@first_tmp TF@second_tmp
+MOVE LF@c TF@c2
+ADD TF@c2 TF@c1 TF@c2
+MOVE LF@c TF@c2
+MOVE TF@first_tmp LF@a
+MOVE TF@second_tmp int@5
+INT2FLOAT TF@second_tmp TF@second_tmp
+DEFVAR TF@c3
+SUB TF@c3 TF@first_tmp TF@second_tmp
+MOVE LF@c TF@c3
+SUB TF@c3 TF@c2 TF@c3
+MOVE LF@c TF@c3
 CREATEFRAME
 WRITE LF@c
 WRITE string@\010
