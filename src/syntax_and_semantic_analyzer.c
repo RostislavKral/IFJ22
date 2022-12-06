@@ -253,10 +253,11 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
                                 DLL_init(functionHelper.paramsList);
                             }
+                            functionHelper.fParamCount++;
                             DLL_insert_last(functionHelper.paramsList, paramToken);
                         }
                     } else if (paramToken->type == COMMA) {
-                        functionHelper.fParamCount++;
+                        //functionHelper.fParamCount++;
                     } else {
                         //ERR invalid token expecting dataType
                         exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float", SYNTAX_ERR);
@@ -297,15 +298,16 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     }
     //htab_insert_func(symtable)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
+
+    int a = functionHelper.fParamCount;
     if (functionHelper.fParamCount != 0) {
-        DLLItem *tmp;
-        tmp = DLL_get_first(functionHelper.paramsList);
-        for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
+        DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
+        for (int i = 0; i < functionHelper.fParamCount; ++i) {
             paramArr[i] = tmp->token->keyword;
             tmp = tmp->nextItem;
         }
     }
-    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
+    if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
     if(functionHelper.fParamCount != 0)DLL_dispose_list(functionHelper.paramsList);
