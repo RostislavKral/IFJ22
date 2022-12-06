@@ -328,13 +328,9 @@ TOKEN_T *get_next_token() {
                     state = ST_OP_TYPE_EQUALS;
                     break;
                 }
-                token->type = OPERATOR;
-                token->operators = EQUALS;
-                token->name = NULL;
 
-                lexer_unget(*edge);
-                set_line_num(token);
-                return token;
+                exit_with_message(line_number, char_number, "Undefined expression: '=='", LEXICAL_ERR);
+
             case ST_OP_ASSIGN:
                 if (*edge == '=') {
                     state = ST_OP_EQUALS;

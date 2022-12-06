@@ -5,7 +5,7 @@ $b = 6;
 
 $c = $a + $b * $b + 5;
 $d = $a * 5;
-==
+$c = 5 === 10;
 // function moje_fce(int $d): int
 // {
 // }
