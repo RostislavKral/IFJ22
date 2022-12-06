@@ -135,7 +135,7 @@ int gen_if(BSTnode* node){
     free(token);
 }
 
-int gen_else(BSTnode* conditionTree) {
+int gen_else() {
     char * jmpName = get_jmp_name(2);
     printf("JUMP %s\n", jmpName);
     free(jmpName);
@@ -146,7 +146,7 @@ int gen_else(BSTnode* conditionTree) {
     return 0;
 }
 
-int gen_else_exit(BSTnode* conditionTree) {
+int gen_else_exit() {
     char * jmpName = get_jmp_name(2);
     printf("LABEL %s\n", jmpName);
     if_stack--;
@@ -175,7 +175,7 @@ void gen_while(BSTnode* node) {
 }
 
 
-void gen_while_exit(BSTnode* node) {
+void gen_while_exit() {
     char * jmpName = get_jmp_name(3); 
     printf("JUMP %s\n", jmpName);
     free(jmpName);
