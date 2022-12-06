@@ -385,7 +385,9 @@ void analyze_token(htab_t* symtable){
                             if (token->type != RPAR) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
                             token = get_next_token();
                             if(token->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
-                    }  else exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
+                        }
+                    } else {
+                        exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
                     }
                 };
             }
@@ -492,6 +494,7 @@ void analyze_token(htab_t* symtable){
             case PROG_END:
                 scope.isDefined = false;
                 scope.strictTypesDeclared = false;
+                token = get_next_token();
                 break;
             case DOLLAR:
                 break;
