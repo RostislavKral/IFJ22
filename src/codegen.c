@@ -226,6 +226,76 @@ void print_token_value(TOKEN_T* token, char* frame)
     }
 }
 
+//void print_literal(TOKEN_T* token)
+//{
+//    if (token->value.type == 0)
+//    {
+//        printf("int@%d", token->value.int_val);
+//    }
+//    if (token->value.type == 1)
+//    {
+//        printf("string@%s", token->value.char_val);
+//    }
+//    if (token->value.type == 2)
+//    {
+//        printf("float@%a", token->value.double_val);
+//    }
+//}
+
+char* get_instruction(BSTnode* node)
+{
+    if (node->token->operators == PLUS)
+    {
+        return "ADD";
+    }
+    else if (node->token->operators == MULTIPLY)
+    {
+        return "MUL";
+    }
+    else if (node->token->operators == MINUS)
+    {
+        return "SUB";
+    }
+    else if (node->token->operators == DIVIDE)
+    {
+        // if result is integer
+        if (node->left->type == KEY_INT && node->right->type == KEY_INT)
+        {
+            return "IDIV";
+        }
+        else
+        {
+            return "DIV";
+        }
+    }
+    else if (node->token->operators == LESS)
+    {
+        return "LT";
+    }
+    else if (node->token->operators == GREATER)
+    {
+        return "GT";
+    }
+    else if (node->token->operators == EQUALS)
+    {
+        return "EQ";
+    }
+        // TODO: LESS_EQUAL = !GREATHER and GREATER_EQUAL = !LESS (use NOT instruction)
+//    else if (node->token->operators == LESS_EQUAL)
+//    {
+//        return "LT";
+//    }
+//    else if (node->token->operators == GREATER_EQUAL)
+//    {
+//        return "GT";
+//    }
+    else if (node->token->operators == CONCAT)
+    {
+        return "CONCAT";
+    }
+    // TODO: add more operations
+}
+
 void select_expression(BSTnode* node, TOKEN_T* token)
 {
     if (node->token->type != OPERATOR)
@@ -233,56 +303,43 @@ void select_expression(BSTnode* node, TOKEN_T* token)
         return;
     }
 
-    if (node->token->operators == PLUS)
-    {
-        print_expression(node, token, "ADD");
+    char* instruction = get_instruction(node);
+
+    switch (node->token->operators) {
+        case MULTIPLY:
+        case DIVIDE:
+        case PLUS:
+        case MINUS:
+            if (node->left->type == KEY_INT && node->right->type == KEY_INT){}
+            else if (node->left->type == KEY_FLOAT && node->right->type == KEY_FLOAT) {}
+            else if (node->right->type == KEY_FLOAT)
+            {
+                printf("MOVE TF@first_tmp LF@%s\n", node->left->token->name);
+                printf("MOVE TF@second_tmp LF@%s\n", node->right->token->name);
+                printf("INT2FLOAT TF@first_tmp TF@first_tmp\n");
+            }
+            else if (node->left->type == KEY_FLOAT)
+            {
+                printf("MOVE TF@first_tmp LF@%s\n", node->left->token->name);
+                printf("MOVE TF@second_tmp LF@%s\n", node->right->token->name);
+                printf("INT2FLOAT TF@second_tmp TF@second_tmp\n");
+            }
+            break;
+        case CONCAT:
+            break;
+        case LESS:
+        case GREATER:
+        case LESS_EQUAL:
+        case GREATER_EQUAL:
+            break;
+        case TYPE_EQUALS:
+        case TYPE_NOT_EQUALS:
+            break;
+        default:
+            break;
     }
-    else if (node->token->operators == MULTIPLY)
-    {
-        print_expression(node, token, "MUL");
-    }
-    else if (node->token->operators == MINUS)
-    {
-        print_expression(node, token, "SUB");
-    }
-    else if (node->token->operators == DIVIDE)
-    {
-        // if result is integer
-        if (node->left->type == KEY_INT && node->right->type == KEY_INT)
-        {
-            print_expression(node, token, "IDIV");
-        }
-        else
-        {
-            print_expression(node, token, "DIV");
-        }
-    }
-    else if (node->token->operators == LESS)
-    {
-        print_expression(node, token, "LT");
-    }
-    else if (node->token->operators == GREATER)
-    {
-        print_expression(node, token, "GT");
-    }
-    else if (node->token->operators == EQUALS)
-    {
-        print_expression(node, token, "EQ");
-    }
-    // TODO: LESS_EQUAL = !GREATHER and GREATER_EQUAL = !LESS (use NOT instruction)
-//    else if (node->token->operators == LESS_EQUAL)
-//    {
-//        print_expression(node, token, "LT");
-//    }
-//    else if (node->token->operators == GREATER_EQUAL)
-//    {
-//        print_expression(node, token, "GT");
-//    }
-    else if (node->token->operators == CONCAT)
-    {
-        print_expression(node, token, "CONCAT");
-    }
-    // TODO: add more operations
+
+    print_expression(node, token, instruction);
 }
 
 void print_expression(BSTnode* node, TOKEN_T* token, char* operation)
@@ -312,10 +369,10 @@ void print_expression(BSTnode* node, TOKEN_T* token, char* operation)
     else
     {
         printf("DEFVAR TF@%s%d\n", token->name, ++tmp_var);
-        printf("%s TF@%s%d ", operation, token->name, tmp_var);
-        print_token_value(node->left->token, "LF");
-        printf(" ");
-        print_token_value(node->right->token, "LF");
+        printf("%s TF@%s%d TF@first_tmp TF@second_tmp", operation, token->name, tmp_var);
+//        print_token_value(node->left->token, "LF");
+//        printf(" ");
+//        print_token_value(node->right->token, "LF");
         printf("\n");
 
         printf("MOVE LF@%s TF@%s%d\n", token->name, token->name, tmp_var);

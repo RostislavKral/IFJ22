@@ -20,7 +20,7 @@ int gen_else_exit(BSTnode* conditionTree);
 int gen_declare_var(TOKEN_T* token, int scope);
 void gen_write(TOKEN_T* token);
 
-
+void print_literal(TOKEN_T* token);
 void print_token_value(TOKEN_T* token, char* frame);
 void print_expression(BSTnode* node, TOKEN_T* token, char* operation);
 void iterate_tree(BSTnode* node, TOKEN_T* token);
