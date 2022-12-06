@@ -64,7 +64,7 @@ void while_condition(TOKEN_T* token, htab_t* symtable){
     DLList* condExpList = expression_list(symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
-    if (condExprBST == NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
     gen_if(condExprBST);
 }
 
@@ -72,7 +72,7 @@ void if_condition(TOKEN_T* token, htab_t* symtable){
     DLList* condExpList = expression_list(symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
-    if (condExprBST == NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
     scope.openedIfCount++;
     gen_if(condExprBST);
 }
@@ -101,43 +101,50 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
     DLList* precedenceList = expression_list(symtable, SEMICOLON);
     BSTnode *expressionTree = analyze_precedence(precedenceList);
 
-    if (expressionTree != NULL){
-        //one element
-        if (expressionTree->token->type == LITERAL){
-            if (expressionTree->token->value.type == 0){
-                htab_value val =  {.int_value = expressionTree->token->value.int_val};
-                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                    gen_expression(varNameToken, expressionTree, scope.num, true);
-                } else {
-                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                    gen_expression(varNameToken, expressionTree, scope.num, false);
-                }
-            } else if (expressionTree->token->value.type == 1){
-                htab_value val =  {.str_value = expressionTree->token->value.char_val};
-                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                    gen_expression(varNameToken, expressionTree, scope.num, true);
-                } else {
-                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                    gen_expression(varNameToken, expressionTree, scope.num, false);
-                }
-            } else if (expressionTree->token->value.type == 2){
-                htab_value val =  {.float_value = expressionTree->token->value.double_val};
-                if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
-                    gen_expression(varNameToken, expressionTree, scope.num, true);
-                } else {
-                    htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
-                    gen_expression(varNameToken, expressionTree, scope.num, false);
-                }
-            }
-        } else {
-            //tree
-            htab_value zero = {.str_value = NULL};
-            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)){
-                gen_expression(varNameToken, expressionTree,scope.num,true);
+    if (expressionTree == NULL)
+    {
+        exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
+    }
+    if(expressionTree->type == KEY_NULL)
+    {
+        exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
+    }
+
+    //one element
+    if (expressionTree->token->type == LITERAL){
+        if (expressionTree->token->value.type == 0){
+            htab_value val =  {.int_value = expressionTree->token->value.int_val};
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                gen_expression(varNameToken, expressionTree, scope.num, true);
             } else {
-                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero);
-                gen_expression(varNameToken, expressionTree,scope.num,false);
+                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                gen_expression(varNameToken, expressionTree, scope.num, false);
             }
+        } else if (expressionTree->token->value.type == 1){
+            htab_value val =  {.str_value = expressionTree->token->value.char_val};
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                gen_expression(varNameToken, expressionTree, scope.num, true);
+            } else {
+                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                gen_expression(varNameToken, expressionTree, scope.num, false);
+            }
+        } else if (expressionTree->token->value.type == 2){
+            htab_value val =  {.float_value = expressionTree->token->value.double_val};
+            if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                gen_expression(varNameToken, expressionTree, scope.num, true);
+            } else {
+                htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
+                gen_expression(varNameToken, expressionTree, scope.num, false);
+            }
+        }
+    } else {
+        //tree
+        htab_value zero = {.str_value = NULL};
+        if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero)){
+            gen_expression(varNameToken, expressionTree,scope.num,true);
+        } else {
+            htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, zero);
+            gen_expression(varNameToken, expressionTree,scope.num,false);
         }
     }
 }
