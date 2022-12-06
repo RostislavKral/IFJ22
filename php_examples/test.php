@@ -1,5 +1,7 @@
 <?php
 declare(strict_types=1);
 $a = 5.1;
-$b = "ahoj";
-ord($b);
+$b = 6;
+
+$c = $a + $b * $b + 5;
+$d = $a * 5;
