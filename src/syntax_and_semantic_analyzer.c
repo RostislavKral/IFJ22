@@ -238,6 +238,10 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             //if ( is found, cycle until )
             if(token->type == LPAR){
                 TOKEN_T *paramToken = get_next_token();
+                if(paramToken->type == RPAR) {
+                    functionHelper.fParamPass = true;
+                    continue;
+                }
                 while (functionHelper.fParamPass == false){
                     if(paramToken->keyword == KEY_INT || paramToken->keyword == KEY_STRING || paramToken->keyword == KEY_FLOAT){
                         TOKEN_T *paramName = get_next_token();
@@ -272,7 +276,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         if(functionHelper.fReturnTypePass == false){
             if(token->keyword == KEY_COLON){
                 TOKEN_T *returnTypeToken = get_next_token();
-                if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT){
+                if(returnTypeToken->keyword == KEY_STRING || returnTypeToken->keyword == KEY_INT || returnTypeToken->keyword == KEY_FLOAT || returnTypeToken->keyword == KEY_VOID){
                     functionHelper.returnType = returnTypeToken->keyword;
                     functionHelper.fReturnTypePass = true;
                     continue;
@@ -293,16 +297,18 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     }
     //htab_insert_func(symtable)
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
-    DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
-    for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
-        paramArr[i] = tmp->token->keyword;
-        tmp = tmp->nextItem;
+    if (functionHelper.fParamCount != 0) {
+        DLLItem *tmp;
+        tmp = DLL_get_first(functionHelper.paramsList);
+        for (int i = 0; i < functionHelper.fParamCount+1; ++i) {
+            paramArr[i] = tmp->token->keyword;
+            tmp = tmp->nextItem;
+        }
     }
-
     if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount+1, paramArr)){
         exit_with_message(initToken->lineNum, initToken->charNum, "Symtable insert failed", GENERAL_ERR);
     }
-    DLL_dispose_list(functionHelper.paramsList);
+    if(functionHelper.fParamCount != 0)DLL_dispose_list(functionHelper.paramsList);
 
     // START PARSING Function BODY
     //analyze_token(symtable);
@@ -352,7 +358,7 @@ void builtin_write(htab_t* symtable){
 }
 
 void analyze_token(htab_t* symtable){
-    //TODO ELSE
+    //TODO ELSE, Return
     TOKEN_T *previousToken;
     while (true){
         TOKEN_T *token;
@@ -379,7 +385,9 @@ void analyze_token(htab_t* symtable){
                             if (token->type != RPAR) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
                             token = get_next_token();
                             if(token->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "RPAR missing", SYNTAX_ERR);
-                    }  else exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
+                        }
+                    } else {
+                        exit_with_message(token->lineNum, token->charNum, "strict types missing", SYNTAX_ERR);
                     }
                 };
             }
@@ -390,6 +398,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_ELSE:
                         break;
                     case KEY_FLOAT:
+                        //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_IF:
                         token = get_next_token();
@@ -402,12 +411,14 @@ void analyze_token(htab_t* symtable){
                         }
                         break;
                     case KEY_INT:
+                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_NULL:
                         break;
                     case KEY_RETURN:
                         break;
                     case KEY_STRING:
+                        exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_WHILE_LOOP:
                         while_condition(token, symtable);
@@ -420,6 +431,10 @@ void analyze_token(htab_t* symtable){
                     case KEY_COLON:
                         break;
                     case KEY_FUNCTION:
+                        break;
+                    case NULL_KEYWORD:
+                        break;
+                    case KEY_BOOLEAN:
                         break;
                 }
                 break;
@@ -434,19 +449,25 @@ void analyze_token(htab_t* symtable){
             case LITERAL:
                 break;
             case ASSIGN:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LPAR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case RPAR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case OPERATOR:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case ISEOF:
                 //TODO: EOF exit, check opened functions, params, attr, etc.
                 break;
             case PROG_START:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case SEMICOLON:
+                //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LBRACE:
                 scope.openedBracesCount++;
@@ -458,13 +479,24 @@ void analyze_token(htab_t* symtable){
                 scope.num--;
                 break;
             case COMMA:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case DATA_TYPE:
+                exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case FUNC_CALL:
                 if (strcmp(token->name, "write") == 0){
                     builtin_write(symtable);
                 } else function_call(token, symtable);
+                break;
+            case NULL_TYPE:
+                break;
+            case PROG_END:
+                scope.isDefined = false;
+                scope.strictTypesDeclared = false;
+                token = get_next_token();
+                break;
+            case DOLLAR:
                 break;
         }
         if (token->type == ISEOF) break;
