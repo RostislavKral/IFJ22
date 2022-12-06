@@ -54,6 +54,7 @@ typedef struct {
     bool strictTypesDeclared;
     //num of opened ifs
     int openedIfCount;
+    int openedWhileCount;
 } scopeHelper;
 
 void analyze_token(htab_t* symtable);

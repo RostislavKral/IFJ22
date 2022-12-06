@@ -32,7 +32,8 @@ scopeHelper scope = {
         .lastScopeOpeningToken = NULL,
         .isDefined = false,
         .openedIfCount = 0,
-        .strictTypesDeclared = false
+        .strictTypesDeclared = false,
+        .openedWhileCount = 0
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -102,6 +103,7 @@ DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE clo
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
+                tmpToken->value.type = item->data.type;
             }
             previousTmpToken = tmpToken;
             DLL_insert_last(precedenceList, tmpToken);
@@ -162,6 +164,7 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
             } else if (expressionTree->token->value.type == 2){
                 htab_value val =  {.float_value = expressionTree->token->value.double_val};
                 if(htab_insert_var(symtable, varNameToken->name, scope.num, expressionTree->type, val)){
+                    htab_item_t *test = htab_find_var(symtable,varNameToken->name, scope.num);
                     gen_expression(varNameToken, expressionTree, scope.num, true);
                 } else {
                     htab_update_var(symtable, varNameToken->name, scope.num, expressionTree->type, val);
