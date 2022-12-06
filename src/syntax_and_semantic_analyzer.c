@@ -24,7 +24,8 @@ parseFunctionHelper functionHelper = {
         .fReturnTypePass = false,
         .fBraceCountCheck = 0,
         .paramsList = NULL,
-        .paramsListNames = NULL
+        .paramsListNames = NULL,
+        .fNameToken = NULL
 };
 scopeHelper scope = {
         .num = 0,
@@ -33,7 +34,7 @@ scopeHelper scope = {
         .isDefined = false,
         .openedIfCount = 0,
         .strictTypesDeclared = false,
-        .openedWhileCount = 0
+        .parseNext = true
 };
 
 bool is_token_eof(TOKEN_T* token){
@@ -56,8 +57,10 @@ void function_end_parsing(){
     functionHelper.fBraceCountCheck = 0;
     functionHelper.paramsList = NULL;
     functionHelper.paramsListNames = NULL;
-    //scope.openedBracesCount--;
+    functionHelper.fNameToken = NULL;
+    scope.openedBracesCount--;
     scope.num--;
+    DLL_pop_first(scope.braceList);
 };
 
 void while_condition(TOKEN_T* token, htab_t* symtable){
@@ -68,6 +71,8 @@ void while_condition(TOKEN_T* token, htab_t* symtable){
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    open_brace_list(token);
+    token = get_next_token();
     gen_if(condExprBST);
 }
 
@@ -78,16 +83,15 @@ void if_condition(TOKEN_T* token, htab_t* symtable){
     BSTnode* condExprBST = analyze_precedence(condExpList);
     if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
     scope.openedIfCount++;
+    open_brace_list(token);
+    token = get_next_token();
+    //if (token->type == RBRACE) close_brace_list();
     gen_if(condExprBST);
 }
 void else_condition(TOKEN_T* token, htab_t* symtable){
     TOKEN_T *tmpToken = get_next_token();
-    DLList* condExpList = expression_list(tmpToken, symtable, RPAR);
-    if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
-    BSTnode* condExprBST = analyze_precedence(condExpList);
-    if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
-    scope.openedIfCount++;
-    gen_else(condExprBST);
+    open_brace_list(token);
+    gen_else();
 }
 
 
@@ -187,6 +191,7 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
 
 }
 
+
 void function_call(TOKEN_T *functionToken,htab_t* symtable){
 
     htab_item_t* stFunction = htab_find_func(symtable, functionToken->name);
@@ -285,6 +290,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
             if(token->type != FUNC_ID){
                 exit_with_message(token->lineNum,token->charNum,"Invalid function name", SEM_F_DECLARATION_ERR);
             } else {
+                functionHelper.fNameToken = token;
                 functionHelper.name = token->name;
                 functionHelper.fNamePass = true;
                 continue;
@@ -349,7 +355,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
         }
         if(token->type == LBRACE && functionHelper.fNamePass && functionHelper.fParamPass){
             scope.lastScopeOpeningToken = token;
-            scope.openedBracesCount++;
+            open_brace_list(functionHelper.fNameToken);
             functionHelper.fHeadParsed = true;
             functionHelper.fBodyParsing = true;
             functionHelper.fBraceCountCheck = scope.openedBracesCount;
@@ -450,20 +456,46 @@ void checkReturnType(TOKEN_T* token, htab_t* symtable){
     }
 
 }
-
+void open_brace_list(TOKEN_T *token){
+    DLL_insert_first(scope.braceList, token);
+    scope.openedBracesCount++;
+}
+TOKEN_T *close_brace_list(){
+    if (scope.braceList->itemsCount == 0) exit_with_message(0,0,"missing opening brace", SYNTAX_ERR);
+    DLLItem *item = DLL_pop_first(scope.braceList);
+    scope.openedBracesCount--;
+    if(item->token->keyword == KEY_IF){
+        TOKEN_T *tmpToken = get_next_token();
+        if (tmpToken->type == RBRACE){
+            scope.openedBracesCount--;
+            DLL_pop_first(scope.braceList);
+        }
+        if (tmpToken->type == KEY_ELSE){
+            else_condition(tmpToken, scope.globalSymTable);
+        } else {
+            return tmpToken;
+        }
+    } else if (item->token->keyword == KEY_ELSE){
+        gen_else_exit();
+    } else if (item->tokenType == FUNC_ID){
+        if (scope.openedBracesCount != 0) exit_with_message(item->token->lineNum, item->token->charNum, "Missing brace", SYNTAX_ERR);
+    }
+    return NULL;
+}
 void analyze_token(htab_t* symtable){
+    scope.globalSymTable =symtable;
+    scope.braceList = malloc(sizeof (struct DLList));
+    DLL_init(scope.braceList);
     //TODO ELSE, Return
     TOKEN_T *previousToken;
+    TOKEN_T *token;
     while (true){
-        TOKEN_T *token;
-        token = get_next_token();
-//        WriteToken(token);
+        if(scope.parseNext) token = get_next_token();
+        scope.parseNext = true;
         if(scope.isDefined == false && token->type != PROG_START){
             exit_with_message(token->lineNum, token->charNum,"You must declare header <?php first", SYNTAX_ERR);
         } else if (scope.isDefined == false && token->type == PROG_START){
-
             gen_header();
-
             scope.isDefined = true;
             continue;
         } else if (scope.isDefined && !scope.strictTypesDeclared){
@@ -510,7 +542,7 @@ void analyze_token(htab_t* symtable){
                         } else {
                             //expression parse
                             scope.lastScopeOpeningToken = previousToken;
-                            if_condition(token,symtable);
+                            if_condition(previousToken,symtable);
                             //scope.num++;
                         }
                         break;
@@ -576,12 +608,21 @@ void analyze_token(htab_t* symtable){
                 //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case LBRACE:
-                scope.openedBracesCount++;
+                open_brace_list(token);
+                //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                 break;
             case RBRACE:
                 //this will stop function parsing, hopefully
                 if(functionHelper.fParsing && scope.openedBracesCount == functionHelper.fBraceCountCheck) function_detected(token,symtable);
-                scope.openedBracesCount--;
+                else{
+                    TOKEN_T *tmp = close_brace_list();
+                    if (tmp != NULL){
+                        token = tmp;
+                        scope.parseNext = false;
+                    }
+                }
+                //scope.openedBracesCount--;
+
                 //scope.num--;
                 break;
             case COMMA:
@@ -600,11 +641,7 @@ void analyze_token(htab_t* symtable){
             case PROG_END:
                 scope.isDefined = false;
                 scope.strictTypesDeclared = false;
-                token = get_next_token();
-                token = get_next_token();
-                token = get_next_token();
-                token = get_next_token();
-                token = get_next_token();
+                if(scope.openedBracesCount != 0) exit_with_message(token->lineNum, token->charNum,"opened braces", SYNTAX_ERR);
                 token = get_next_token();
                 break;
             case DOLLAR:

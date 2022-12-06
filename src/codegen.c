@@ -146,7 +146,7 @@ int gen_else(BSTnode* conditionTree) {
     return 0;
 }
 
-int gen_else_exit(BSTnode* conditionTree) {
+int gen_else_exit() {
     char * jmpName = get_jmp_name(2);
     printf("LABEL %s\n", jmpName);
     if_stack--;
