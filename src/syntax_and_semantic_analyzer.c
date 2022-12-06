@@ -23,7 +23,8 @@ parseFunctionHelper functionHelper = {
         .fParamCount = 0,
         .fReturnTypePass = false,
         .fBraceCountCheck = 0,
-        .paramsList = NULL
+        .paramsList = NULL,
+        .paramsListNames = NULL
 };
 scopeHelper scope = {
         .num = 0,
@@ -53,10 +54,13 @@ void function_end_parsing(){
     functionHelper.fReturnTypePass = false;
     functionHelper.fBraceCountCheck = 0;
     functionHelper.paramsList = NULL;
+    functionHelper.paramsListNames = NULL;
     //scope.openedBracesCount--;
 };
 
 void while_condition(TOKEN_T* token, htab_t* symtable){
+    TOKEN_T* lparToken = get_next_token();
+    if (lparToken->type != LPAR) exit_with_message(lparToken->lineNum,lparToken->charNum,"Invalid expression in condition", SYNTAX_ERR);
     DLList* condExpList = expression_list(symtable, RPAR);
     if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
     BSTnode* condExprBST = analyze_precedence(condExpList);
@@ -200,7 +204,12 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
 void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //F already declared
     if(initToken->type == FUNC_ID && htab_find_func(symtable,initToken->name) != NULL){
-        exit_with_message(initToken->lineNum,initToken->charNum, "Function is already declared", SEM_F_DECLARATION_ERR);
+        TOKEN_T *test = get_next_token();
+        while(test->type != SEMICOLON){
+            if (test->keyword == KEY_COLON) exit_with_message(test->lineNum,test->charNum, "Function is already declared", SEM_F_DECLARATION_ERR);
+            test = get_next_token();
+        }
+        exit_with_message(initToken->lineNum,initToken->charNum, "bad call", SYNTAX_ERR);
     }
     //catch declaration of f in f
     if((functionHelper.fParsing == true && initToken->type == FUNC_ID) || (functionHelper.fParsing == true && initToken->keyword == KEY_FUNCTION)){
@@ -254,10 +263,14 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                         } else {
                             if (functionHelper.paramsList == NULL) {
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
+                                functionHelper.paramsListNames = malloc(sizeof (struct DLList));;
                                 DLL_init(functionHelper.paramsList);
+                                DLL_init(functionHelper.paramsListNames);
                             }
                             functionHelper.fParamCount++;
+                            if(DLL_find_token(functionHelper.paramsListNames, paramName))exit_with_message(paramToken->lineNum,paramToken->charNum, "redeclaration",SEM_F_CALL_PARAM_ERR);
                             DLL_insert_last(functionHelper.paramsList, paramToken);
+                            DLL_insert_last(functionHelper.paramsListNames, paramName);
                         }
                     } else if (paramToken->type == COMMA) {
                         //functionHelper.fParamCount++;
@@ -401,16 +414,21 @@ void analyze_token(htab_t* symtable){
             case KEYWORD:
                 switch (token->keyword) {
                     case KEY_ELSE:
+                        if (scope.lastScopeOpeningToken == NULL || scope.lastScopeOpeningToken->keyword != KEY_IF){
+                            exit_with_message(token->lineNum, token->charNum, "Must define IF first", SYNTAX_ERR);
+                        }
                         break;
                     case KEY_FLOAT:
                         //exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_IF:
+                        previousToken = token;
                         token = get_next_token();
                         if(token->type != LPAR){
                             exit_with_message(token->lineNum,token->charNum,"Expected '('", SYNTAX_ERR);
                         } else {
                             //expression parse
+                            scope.lastScopeOpeningToken = previousToken;
                             if_condition(token,symtable);
                             scope.num++;
                         }
@@ -426,6 +444,7 @@ void analyze_token(htab_t* symtable){
                         exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
                         break;
                     case KEY_WHILE_LOOP:
+                        scope.lastScopeOpeningToken = token;
                         while_condition(token, symtable);
                         scope.num++;
                         break;
@@ -499,6 +518,7 @@ void analyze_token(htab_t* symtable){
             case PROG_END:
                 scope.isDefined = false;
                 scope.strictTypesDeclared = false;
+                token = get_next_token();
                 token = get_next_token();
                 break;
             case DOLLAR:

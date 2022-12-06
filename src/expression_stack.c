@@ -4,8 +4,12 @@
  * @brief Expressions structures
  */
 
+#include <stdbool.h>
+#include <string.h>
 #include "expression_stack.h"
 #include "token.h"
+#include "stdlib.h"
+#include "stdio.h"
 
 void DLL_init(DLList* list){
     list->itemsCount = 0;
@@ -21,7 +25,14 @@ void DLL_dispose_list(DLList* list){
         free(tmp);
     }
 }
-
+bool DLL_find_token(DLList *list, TOKEN_T* token){
+    DLLItem *item = DLL_get_first(list);
+    while (item != NULL){
+        if(strcmp(item->token->name,token->name) == 0) return true;
+        item = item->nextItem;
+    }
+    return false;
+}
 DLLItem* DLL_insert_first(DLList *list, TOKEN_T* token) {
     DLLItem *newItem = malloc(sizeof(DLLItem));
     newItem->bst = NULL;
