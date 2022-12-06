@@ -4,64 +4,12 @@ int tmp_var = 0;
 int tmp_if = 0;
 
 int if_count = 0;   // total if count
-int if_stack = 0;   // number of current if 'scope'
+int if_stack = 0;   // number of current if dephs
+
+int while_count = 0;   // total while count
+int while_stack = 0;   // number of current while dephs
 
 
-/*
-
-
-
-
-
-
-if () {
-    if1_1  
-} else {
-    el1_1
-}
-ex1_0
-
-if () {
-    if2_1
-
-    if () {
-        if3_2
-
-        if () {
-            if_4_3
-        } else {
-            el_4_3
-        }
-        ex_4_2
-    } else {
-        el4_2
-    }
-    ex_4_1
-
-    if () {
-        if5_2
-
-        if () {
-            if6_3
-        } else {
-            el6_3
-        }
-        ex_6_2
-    } else {
-        el6_2
-    }
-    ex_6_1
-} else {
-    el6_1
-    if () {
-        if7_2
-    } else () {
-        el7_2
-    }
-    ex_7_1
-}
-ex_7_0
-*/
 
 // token = expression
 int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
@@ -101,14 +49,18 @@ int get_num_len(int num) {
 char * get_jmp_name(int blablabla) {
     char * name = malloc(sizeof(char) * (get_num_len(if_count) + get_num_len(if_stack) + 5));
     switch (blablabla) {
-    case 0:
+    case 0: // if
         sprintf(name, "if_%d_%d", if_count, if_stack);
         break;
-    case 1:
+    case 1:// else
         sprintf(name, "el_%d_%d", if_count, if_stack);
         break;
-    case 2:
+    case 2: // else exit
         sprintf(name, "ex_%d_%d", if_count, if_stack);
+    case 3: // while start
+        sprintf(name, "wh_%d_%d", while_count, while_stack);
+    case 4: // while end
+        sprintf(name, "we_%d_%d", while_count, while_stack);
     default:
         break;
     }
@@ -146,18 +98,50 @@ int gen_else() {
 }
 
 int gen_else_exit() {
-    if_stack--;
     char * jmpName = get_jmp_name(2);
     printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    if_stack--;
     free(jmpName);
 
     return 0;    
 }
 
+void gen_while(BSTnode* node) {
+    if_stack++;
+    if_count++;
+
+    printf(">>>>>>CODEGEN>>>>>> DEFVAR TF@%s\n", "tmp_while_expr_var");
+    printf(">>>>>>CODEGEN>>>>>> MOV TF@%s 0\n", "tmp_while_expr_var");
+    TOKEN_T * token = malloc(sizeof(TOKEN_T));
+    token->name = "tmp_while_expr_var";
+
+    char * jmpName = get_jmp_name(4); 
+    printf(">>>>>>CODEGEN>>>>>> JUMPIFEQ %s TF@%s 0\n", jmpName, "tmp_if_expr_var");
+    free(jmpName);
+
+    free(token);
+}
+
+
+void gen_while_exit(BSTnode* node) {
+    char * jmpName = get_jmp_name(3); 
+    printf(">>>>>>CODEGEN>>>>>> JUMP %s\n", jmpName);
+    free(jmpName);
+    
+    jmpName = get_jmp_name(4); 
+    printf(">>>>>>CODEGEN>>>>>> LABEL %s\n", jmpName);
+    free(jmpName);
+
+    if_stack--;
+}
+
+
 void gen_function()
 {
     printf("\n\n\nCall of gen function\n\n\n");
 }
+
+
 
 
 void iterate_tree(BSTnode* node, TOKEN_T* token)
