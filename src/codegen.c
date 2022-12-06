@@ -24,6 +24,39 @@ void gen_write(TOKEN_T* token)
     printf("\n");
 }
 
+void gen_func_call(htab_item_t* item, char* name)
+{
+    // TODO: add builtin functions
+    if (strcmp(name, "reads") == 0)
+    {
+
+    }
+    else if (strcmp(name, "readi") == 0)
+    {
+
+    }
+    else if (strcmp(name, "reads") == 0)
+    {
+
+    }
+    else if (strcmp(name, "strlen") == 0)
+    {
+
+    }
+    else if (strcmp(name, "substring") == 0)
+    {
+
+    }
+    else if (strcmp(name, "ord") == 0)
+    {
+
+    }
+    else if (strcmp(name, "chr") == 0)
+    {
+
+    }
+    printf("\n");
+}
 
 // token = expression
 int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
@@ -102,7 +135,7 @@ int gen_if(BSTnode* node){
     free(token);
 }
 
-int gen_else() {
+int gen_else(BSTnode* conditionTree) {
     char * jmpName = get_jmp_name(2);
     printf("JUMP %s\n", jmpName);
     free(jmpName);
@@ -113,7 +146,7 @@ int gen_else() {
     return 0;
 }
 
-int gen_else_exit() {
+int gen_else_exit(BSTnode* conditionTree) {
     char * jmpName = get_jmp_name(2);
     printf("LABEL %s\n", jmpName);
     if_stack--;

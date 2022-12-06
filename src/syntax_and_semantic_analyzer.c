@@ -95,7 +95,7 @@ DLList *expression_list(htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     while (tmpToken->type != closingToken){
         if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD) ||
                 tmpToken->type == LPAR || tmpToken->type == RPAR){
-            if (previousTmpToken != NULL && ((previousTmpToken->type == ASSIGN || previousTmpToken->type == LITERAL) && tmpToken->type != OPERATOR)) exit_with_message(previousTmpToken->lineNum, previousTmpToken->charNum, "Missing operator", SYNTAX_ERR);
+//            if (previousTmpToken != NULL && ((previousTmpToken->type == LPAR || previousTmpToken->type == RPAR || previousTmpToken->type == ASSIGN || previousTmpToken->type == LITERAL) && tmpToken->type != OPERATOR)) exit_with_message(previousTmpToken->lineNum, previousTmpToken->charNum, "Missing operator", SYNTAX_ERR);
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
@@ -219,7 +219,7 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
         exit_with_message(tmp->lineNum, tmp->charNum, "Missing semicolon after function call", SYNTAX_ERR);
     }
 
-    //TODO code gen
+//    gen_func_call(htab_find_func(symtable, functionToken->name), functionToken->name);
 }
 
 

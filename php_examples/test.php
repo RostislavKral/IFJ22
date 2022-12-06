@@ -3,6 +3,7 @@ declare(strict_types=1);
 $a = 5;
 $b = 6;
 
+// $c = ($a * $b) + ($b / 5) - ($a - 5);
 $c = ($a * $b) + ($b / 5) - ($a - 5);
 
 write($c);
@@ -17,4 +18,5 @@ $c = "ahoj" . "svete";
 //
 // moje_fce($b);
 // chr($b);
+reads();
 write($c);

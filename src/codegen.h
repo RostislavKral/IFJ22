@@ -25,4 +25,5 @@ void print_token_value(TOKEN_T* token, char* frame);
 void print_expression(BSTnode* node, TOKEN_T* token, char* operation);
 void iterate_tree(BSTnode* node, TOKEN_T* token);
 void select_expression(BSTnode* node, TOKEN_T* token);
+void gen_func_call(htab_item_t* item, char* name);
 #endif

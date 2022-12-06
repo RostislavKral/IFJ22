@@ -32,4 +32,5 @@ DEFVAR TF@c1
 CONCAT TF@c1 string@ahoj string@svete
 MOVE LF@c TF@c1
 CREATEFRAME
+
 WRITE LF@c
