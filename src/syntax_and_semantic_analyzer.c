@@ -76,18 +76,30 @@ void if_condition(TOKEN_T* token, htab_t* symtable){
     scope.openedIfCount++;
     gen_if(condExprBST);
 }
+void else_condition(TOKEN_T* token, htab_t* symtable){
+    DLList* condExpList = expression_list(symtable, RPAR);
+    if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
+    BSTnode* condExprBST = analyze_precedence(condExpList);
+    if (condExprBST == NULL || condExprBST->type == KEY_NULL) exit_with_message(token->lineNum, token->charNum, "Invalid expression condition", SEM_MATH_ERR);
+    scope.openedIfCount++;
+    gen_else(condExprBST);
+}
+
 
 DLList *expression_list(htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     DLList *precedenceList = malloc(sizeof (struct DLList));
     DLL_init(precedenceList);
+    TOKEN_T *previousTmpToken;
     TOKEN_T *tmpToken = get_next_token();
     while (tmpToken->type != closingToken){
         if (tmpToken->type == LITERAL || tmpToken->type == TOKEN_ID || tmpToken->type == OPERATOR || (tmpToken->keyword == KEY_NULL && tmpToken->type == KEYWORD) ||
                 tmpToken->type == LPAR || tmpToken->type == RPAR){
+            if (previousTmpToken != NULL && ((previousTmpToken->type == ASSIGN || previousTmpToken->type == LITERAL) && tmpToken->type != OPERATOR)) exit_with_message(previousTmpToken->lineNum, previousTmpToken->charNum, "Missing operator", SYNTAX_ERR);
             if (tmpToken->type == TOKEN_ID){
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
             }
+            previousTmpToken = tmpToken;
             DLL_insert_last(precedenceList, tmpToken);
             tmpToken = get_next_token();
         }
@@ -384,6 +396,30 @@ void builtin_write(htab_t* symtable){
     }
 }
 
+void checkReturnType(TOKEN_T* token, htab_t* symtable){
+    TOKEN_T* returnValToken = get_next_token();
+    if (returnValToken->type == TOKEN_ID){
+        htab_item_t* varToken = htab_find_var(symtable, returnValToken->name,scope.num);
+        if (varToken == NULL) exit_with_message(returnValToken->lineNum, returnValToken->charNum, "Return var not found", SEM_UNDEF_VAR_ERR);
+        else {
+            if (varToken->data.data_type[0] != functionHelper.returnType){
+                exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+            }
+        }
+    } else if (returnValToken->type == LITERAL){
+        if (returnValToken->value.type == 0 && functionHelper.returnType != KEY_INT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+        if (returnValToken->value.type == 1 && functionHelper.returnType != KEY_STRING)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+        if (returnValToken->value.type == 2 && functionHelper.returnType != KEY_FLOAT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+    } else if(returnValToken->type == FUNC_CALL){
+        htab_item_t* fCall = htab_find_func(symtable, returnValToken->name);
+        if (fCall->data.data_type[0] != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+        else {
+            function_call(returnValToken, symtable);
+        }
+    }
+
+}
+
 void analyze_token(htab_t* symtable){
     //TODO ELSE, Return
     TOKEN_T *previousToken;
@@ -425,6 +461,8 @@ void analyze_token(htab_t* symtable){
                     case KEY_ELSE:
                         if (scope.lastScopeOpeningToken == NULL || scope.lastScopeOpeningToken->keyword != KEY_IF){
                             exit_with_message(token->lineNum, token->charNum, "Must define IF first", SYNTAX_ERR);
+                        } else {
+                            //else_condition(token,symtable);
                         }
                         break;
                     case KEY_FLOAT:
@@ -448,6 +486,7 @@ void analyze_token(htab_t* symtable){
                     case KEY_NULL:
                         break;
                     case KEY_RETURN:
+                        if (functionHelper.fParsing)checkReturnType(token,symtable);
                         break;
                     case KEY_STRING:
                         exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
@@ -527,6 +566,10 @@ void analyze_token(htab_t* symtable){
             case PROG_END:
                 scope.isDefined = false;
                 scope.strictTypesDeclared = false;
+                token = get_next_token();
+                token = get_next_token();
+                token = get_next_token();
+                token = get_next_token();
                 token = get_next_token();
                 token = get_next_token();
                 break;
