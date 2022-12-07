@@ -243,8 +243,8 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
     {
         exit_with_message(tmp->lineNum, tmp->charNum, "Invalid number of arguments", SYNTAX_ERR);
     }
-    else if (tmp->type != RPAR)
-    {
+    else if (tmp->type != RPAR) {
+        if (stFunction->data.params_count == 0 && tmp->type == SEMICOLON) exit_with_message(tmp->lineNum, tmp->charNum, "syntax err", SYNTAX_ERR);
         exit_with_message(tmp->lineNum, tmp->charNum, "Expected ')'", SEM_F_CALL_PARAM_ERR);
     }
     tmp = get_next_token();
@@ -259,6 +259,8 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
 
 void function_detected(TOKEN_T* initToken, htab_t* symtable){
     //F already declared
+
+    if (initToken->type == FUNC_ID && initToken->name == NULL) exit_with_message(initToken->lineNum,initToken->charNum, "bad call", SYNTAX_ERR);
     if(initToken->type == FUNC_ID && htab_find_func(symtable,initToken->name) != NULL){
         TOKEN_T *test = get_next_token();
         while(test->type != SEMICOLON){
