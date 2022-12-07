@@ -589,7 +589,7 @@ TOKEN_T *get_next_token() {
                 if(*edge == EOF) exit(1);
 //                printf("%c\n", *edge);
 
-//                if(escape != 92 && *edge == '$' ) exit(1);
+                if(*edge == '$') exit_with_message(line_number, char_number, "Found $ in string", LEXICAL_ERR);
                 bool is_enter = false;
 //                if (*edge == '\\'
 //                || (*edge == 92 || (0 <= *edge && *edge <= 32) || *edge == 35)

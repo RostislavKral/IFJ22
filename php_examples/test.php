@@ -1,10 +1,11 @@
 <?php
 declare(strict_types=1);
-$a = 2;
-$b = 3;
+// $a = 2;
+// $b = 3;
 
-$c = ($a * $b) + ($b / 5) * ($a - 5);
-write($c, "\n");
+// $c = ($a * $b) + ($b / 5) * ($a - 5);
+$d = "HELLO $WORLD!";
+// write($c, "\n");
 // $c = $a / $b;
 // write($c, "\n");
 // $c = ($a * $b) + ($b / 5) - ($a - 5);
@@ -13,7 +14,7 @@ write($c, "\n");
 //
 // $c = 10 + 1;
 // write($c, "\n");
-// $c = "ahoj" . " svete\n";
+// $c = $d . " svete\n";
 // $d = $a < $b;
 // $d = $a * 5;
 // $c = 5 === 10;
@@ -25,4 +26,4 @@ write($c, "\n");
 // moje_fce($b);
 // chr($b);
 // reads();
-// write($c);
+write($d);
