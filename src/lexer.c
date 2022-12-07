@@ -579,9 +579,9 @@ TOKEN_T *get_next_token() {
                             e_read = true;
                             *edge = lexer_fget();
 
-                            if (!isdigit(*edge))
+                            if (!isdigit(*edge) && *edge != '+' && *edge != '-')
                             {
-                                exit_with_message(line_number, char_number, "Float not endedn properly (ended with e)", LEXICAL_ERR);
+                                exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
                             }
                             // TODO: read float properly
                         }
