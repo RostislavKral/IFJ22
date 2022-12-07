@@ -335,16 +335,18 @@ void htab_debug_print(htab_t *t)
     }
 }
 
+
 size_t htab_hash_function(const char *str)
 {
     size_t h = 0;
+    int c = 1223;
 
     for (size_t i = 0; i < strlen(str); i++)
     {
-        h = h * 58293 + (int)str[i];
+        h = h * c + (int) str[i];
     }
 
-    h = h * 58293;
+    h = h * c;
 
     return h;
 }
