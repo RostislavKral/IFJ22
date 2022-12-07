@@ -111,6 +111,12 @@ DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE clo
                 if (item->data.data_type[0] == KEY_INT) tmpToken->value.type = 0;
                 if (item->data.data_type[0] == KEY_STRING) tmpToken->value.type = 1;
             }
+            if (tmpToken->keyword == KEY_NULL){
+                tmpToken->type = LITERAL;
+                //tmpToken->keyword = KEY_INT;
+                tmpToken->value.type = 0;
+                tmpToken->value.int_val = 0;
+            }
             previousTmpToken = tmpToken;
             DLL_insert_last(precedenceList, tmpToken);
             tmpToken = get_next_token();
@@ -144,10 +150,10 @@ void var_declaration(htab_t* symtable, TOKEN_T *varNameToken){
         {
             exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
         }
-        if(expressionTree->type == KEY_NULL)
-        {
-            exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
-        }
+//        if(expressionTree->type == KEY_NULL)
+//        {
+//            exit_with_message(varNameToken->lineNum, varNameToken->charNum, "Invalid expression", SEM_MATH_ERR);
+//        }
 
         //one element
         if (expressionTree->token->type == LITERAL){
@@ -239,7 +245,7 @@ void function_call(TOKEN_T *functionToken,htab_t* symtable){
     }
     else if (tmp->type != RPAR)
     {
-        exit_with_message(tmp->lineNum, tmp->charNum, "Expected ')'", SYNTAX_ERR);
+        exit_with_message(tmp->lineNum, tmp->charNum, "Expected ')'", SEM_F_CALL_PARAM_ERR);
     }
     tmp = get_next_token();
     if (tmp->type != SEMICOLON)
@@ -396,7 +402,7 @@ void builtin_write(htab_t* symtable){
     tmpToken = get_next_token();
     while (tmpToken->type != RPAR && tmpToken != NULL){
         if (tmpToken->type == COMMA) tmpToken = get_next_token();
-        if (tmpToken->type != LITERAL && tmpToken->type != TOKEN_ID) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
+        if (tmpToken->type != LITERAL && tmpToken->type != TOKEN_ID && (tmpToken->keyword != KEY_NULL)) exit_with_message(tmpToken->lineNum,tmpToken->charNum,"params err", SYNTAX_ERR);
         DLL_insert_last(dynamicParams, tmpToken);
 
         if (tmpToken != NULL)
@@ -438,6 +444,7 @@ void builtin_write(htab_t* symtable){
 
 void checkReturnType(TOKEN_T* token, htab_t* symtable){
     TOKEN_T* returnValToken = get_next_token();
+    if (functionHelper.returnType == KEY_VOID && returnValToken->type != SEMICOLON)exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SEM_F_RETURN_VAL_ERR);
     if(returnValToken->type == FUNC_CALL){
         htab_item_t* fCall = htab_find_func(symtable, returnValToken->name);
         if (fCall->data.data_type[0] != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
@@ -446,7 +453,7 @@ void checkReturnType(TOKEN_T* token, htab_t* symtable){
         }
     } else {
         DLList* condExpList = expression_list(returnValToken, symtable, SEMICOLON);
-        if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
+        if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SEM_F_RETURN_VAL_ERR);
         BSTnode* condExprBST = analyze_precedence(condExpList);
         if (condExprBST->type != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
     }
