@@ -369,6 +369,10 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 (b->token->value.type == 0 || b->token->value.type == 2)
                 )
         {
+            if (a->token->value.type == 0 && b->token->value.type == 0)
+            {
+                return KEY_INT;
+            }
             return KEY_FLOAT;
         }
         else
