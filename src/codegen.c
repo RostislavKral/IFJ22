@@ -11,6 +11,7 @@ int while_stack = 0;   // number of current while dephs
 
 void gen_header()
 {
+    return;
     printf(".IFJcode22\n");
     printf("CREATEFRAME\n");
     printf("PUSHFRAME\n");
@@ -19,6 +20,7 @@ void gen_header()
 
 void gen_write(TOKEN_T* token)
 {
+    return;
     printf("WRITE ");
     print_token_value(token, "LF");
     printf("\n");
@@ -26,6 +28,7 @@ void gen_write(TOKEN_T* token)
 
 void gen_func_call(htab_item_t* item, char* name)
 {
+    return;
     // TODO: add builtin functions
     if (strcmp(name, "reads") == 0)
     {
@@ -61,7 +64,7 @@ void gen_func_call(htab_item_t* item, char* name)
 // token = expression
 int gen_expression(TOKEN_T* token, BSTnode* node, int scope, bool isDeclaration)
 {
-
+    return 0;
     if (token->type == TOKEN_ID && isDeclaration)
     {
         printf("DEFVAR LF@%s\n", token->name);
@@ -121,6 +124,7 @@ char * get_jmp_name(int blablabla) {
 }
 
 int gen_if(BSTnode* node){
+    return
     if_stack++;
     if_count++;
 
@@ -139,6 +143,7 @@ int gen_if(BSTnode* node){
 }
 
 int gen_else() {
+    return 0;
     char * jmpName = get_jmp_name(2);
     printf("JUMP %s\n", jmpName);
     free(jmpName);
@@ -150,6 +155,7 @@ int gen_else() {
 }
 
 int gen_else_exit() {
+    return 0;
     char * jmpName = get_jmp_name(2);
     printf("LABEL %s\n", jmpName);
     if_stack--;
@@ -162,6 +168,7 @@ int gen_else_exit() {
 
 
 void gen_while(BSTnode* node) {
+    return;
     if_stack++;
     if_count++;
 
@@ -179,6 +186,7 @@ void gen_while(BSTnode* node) {
 
 
 void gen_while_exit() {
+    return;
     char * jmpName = get_jmp_name(3); 
     printf("JUMP %s\n", jmpName);
     free(jmpName);
@@ -193,6 +201,7 @@ void gen_while_exit() {
 
 void gen_function()
 {
+    return;
     printf("\n\n\nCall of gen function\n\n\n");
 }
 
