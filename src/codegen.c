@@ -106,10 +106,13 @@ char * get_jmp_name(int blablabla) {
         break;
     case 2: // else exit
         sprintf(name, "ex_%d_%d", if_count, if_stack);
+        break;
     case 3: // while start
         sprintf(name, "wh_%d_%d", while_count, while_stack);
+        break;
     case 4: // while end
         sprintf(name, "we_%d_%d", while_count, while_stack);
+        break;
     default:
         break;
     }
