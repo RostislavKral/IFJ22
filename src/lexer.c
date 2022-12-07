@@ -548,16 +548,48 @@ TOKEN_T *get_next_token() {
 
                     read = 0;
                 } else if (*edge == '.') {
-                    *edge = lexer_fget();
-                    if (!isdigit(*edge) && *edge != 'e' && *edge != 'E')
-                    {
-                        exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
-                    }
+                    state = ST_DOUBLE_LITERAL;
+                    break;
+                } else {
                     lexer_unget(*edge);
+                    token->type = LITERAL;
 
-                    // char c;
-                    double test, tmp;
-                    int offset = 10;
+                        token->value.type = 0;
+
+
+                    set_line_num(token);
+                    return token;
+                }
+
+                break;
+            case ST_DOUBLE_LITERAL:
+                *edge = lexer_fget();
+                if (!isdigit(*edge) && *edge != 'e' && *edge != 'E')
+                {
+                    exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
+                }
+                lexer_unget(*edge);
+
+                // char c;
+                double test, tmpD;
+                int offset = 10;
+                *edge = lexer_fget();
+
+                if ((*edge == 'e' || *edge == 'E') && !e_read)
+                {
+                    e_read = true;
+                    *edge = lexer_fget();
+
+                    if (!isdigit(*edge) && *edge != '+' && *edge != '-')
+                    {
+                        exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
+                    }
+                    // TODO: read float properly
+                }
+
+                while (isdigit(*edge)) {
+                    tmpD = (double) *edge - '0';
+                    test += tmpD / offset;
                     *edge = lexer_fget();
 
                     if ((*edge == 'e' || *edge == 'E') && !e_read)
@@ -569,98 +601,26 @@ TOKEN_T *get_next_token() {
                         {
                             exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
                         }
-                        // TODO: read float properly
                     }
-
-                    while (isdigit(*edge)) {
-                        tmp = (double) *edge - '0';
-                        test += tmp / offset;
-                        *edge = lexer_fget();
-
-                        if ((*edge == 'e' || *edge == 'E') && !e_read)
-                        {
-                            e_read = true;
-                            *edge = lexer_fget();
-
-                            if (!isdigit(*edge) && *edge != '+' && *edge != '-')
-                            {
-                                exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
-                            }
-                            // TODO: read float properly
-                        }
-                        offset *= 10;
-                    }
-
-                    token->value.double_val = test;
-                    isValid = 1;
-                    lexer_unget(*edge);
-                    token->type = LITERAL;
-                    token->value.type = 2;
-                    token->value.double_val += token->value.int_val;
-                    token->value.int_val = 0;
-
-                    set_line_num(token);
-                    return token;
-                } else {
-                    //printf("%d", isValid);
-
-                    lexer_unget(*edge);
-                    token->type = LITERAL;
-                    if (isValid == 1) {
-                        token->value.type = 2;
-                        token->value.double_val += token->value.int_val;
-                        token->value.int_val = 0;
-                    } else {
-                        token->value.type = 0;
-                    }
-
-                    set_line_num(token);
-                    return token;
+                    offset *= 10;
                 }
 
+                token->value.double_val = test;
+                isValid = 1;
+                lexer_unget(*edge);
+                token->type = LITERAL;
+                token->value.type = 2;
+                token->value.double_val += token->value.int_val;
+                token->value.int_val = 0;
 
-                //exit(1);
-                break;
-                /* ----------------------------- */
-
+                set_line_num(token);
+                return token;
             case ST_STRING_LITERAL:
 
                 if(*edge == EOF) exit(1);
-//                printf("%c\n", *edge);
 
                 if(*edge == '$') exit_with_message(line_number, char_number, "Found $ in string", LEXICAL_ERR);
                 bool is_enter = false;
-//                if (*edge == '\\'
-//                || (*edge == 92 || (0 <= *edge && *edge <= 32) || *edge == 35)
-//                )
-//                {
-//                    if (*edge == '\\')
-//                    {
-//                        *edge = lexer_fget();
-//                    }
-//                    if (0 <= *edge && *edge <= 9 && !is_escape)
-//                    {
-//                        char* num = malloc(sizeof (char ));
-//                        sprintf(num, "%d", (int)*edge);
-//                        str_conc(&str, "\\00");
-//                        str_conc(&str, num);
-//                    }
-//                    else if (10 <= *edge && *edge <= 99 && !is_escape)
-//                    {
-//                        char* num = malloc(sizeof (char ) * 2);
-//                        sprintf(num, "%d", (int)*edge);
-//                        str_conc(&str, "\\0");
-//                        str_conc(&str, num);
-//                    }
-//                    else if (100 <= *edge && !is_escape)
-//                    {
-//                        char* num = malloc(sizeof (char ) * 3);
-//                        sprintf(num, "%d", (int)*edge);
-//                        str_conc(&str, "\\");
-//                        str_conc(&str, num);
-//                    }
-//                }
-//                else
                 if (0 <= *edge && *edge <= 9)
                 {
                     char* num = malloc(sizeof (char ));
@@ -706,15 +666,9 @@ TOKEN_T *get_next_token() {
                     }
                 }
                 else if (*edge != '"') {
-
                     str_conc(&str, edge);
-                    // *edge = lexer_fget();
-                    // if (*edge == '"') break;
-
                 }
                 else {
-
-                   // lexer_unget(*edge);
                     token->type = LITERAL;
                     token->value.char_val = str.str;
                     token->value.type = 1;
@@ -831,22 +785,16 @@ TOKEN_T *get_next_token() {
             case ST_FUNC_CALL:
                 token->type = FUNC_CALL;
                 token->name = str.str;
-                // printf("__________%s", str.str);
-                //str_destroy(&str);
                 lexer_unget(*edge);
 
                 set_line_num(token);
                 return token;
             case ST_READ:
-//                printf(" ");
-                // printf("______%c", *edge);
                 if(*edge == EOF) exit(1);
                 if (*edge == ' ' || *edge == '(' || *edge == '\n' || *edge == ')' || *edge == '{' || *edge == '}' ||
                 *edge == ';' || *edge == '=' || *edge == ',' || *edge == ':' || *edge == '-' || *edge == '+' || *edge == '/'
                 || *edge == '$' || *edge == '>' || *edge == '"' || *edge == '!' || *edge == '*'
                         ) {
-
-                    //  exit(1);
                     if (*edge != ' ')
                     {
                         lexer_unget(*edge);
@@ -856,28 +804,17 @@ TOKEN_T *get_next_token() {
 
                     state = getFunctionCallOrKeywordLexeme(str.str);
 
-                    //str_destroy(&str);
-                    // printf("________%s", str.str);
-                    // printf("%d",state);
                     break;
                 }
-                    // printf("%c", *edge);
                 else {
                     state = ST_READ;
 
                     if (*edge == '~' || *edge == '#' || *edge == '@' || *edge == '&' || *edge == '%' || *edge == '{' || *edge == '}')
                         exit_with_message(line_number, char_number, "Invalid character", LEXICAL_ERR);
-                    //printf("%c-%d-%d ", *edge, line_number, char_number);
-//                    printf("%s", str.str);
+
                     str_conc(&str, edge);
 
                 }
-                // printf("____string: %s\n", str.str);
-                //   break;
-                //   exit(1);
-                /* default:
-                     printf(" ");
-                     //state = ST_READ;*/
         }
 
 
