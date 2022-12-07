@@ -5,6 +5,7 @@
  */
 
 #include "dyn_string.h"
+#include "token.h"
 
 
 int str_destroy(DYN_STRING_T *str) {
@@ -20,6 +21,7 @@ int str_init(DYN_STRING_T *str) {
 
 int str_conc(DYN_STRING_T *str, char *str_to_add) {
     char *new_str = malloc((str->len + strlen(str_to_add) + 1) * sizeof(char));
+    if(new_str == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     
     if (str->str != NULL) {
         strcpy(new_str, str->str);

@@ -33,7 +33,7 @@ int table [18][18] = {
 /*   !=    */     { ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' },
 /*   ===   */     { ' ', '<', '<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '<', '>', '<', '>' },
 /*   !==   */     { ' ', '<', '<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '<', '>', '<', '>' },
-/*   (     */     { ' ', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '<', '<', ' ', '<', ' ' },
+/*   (     */     { ' ', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '<', '<', '=', '<', ' ' },
 /*   )     */     { ' ', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', ' ', '>', '>', ' ', '>', ' ', '>' },
 /*   ID    */     { ' ', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', ' ', '>', '>', ' ', '>', ' ', '>' },
 /*   $     */     { ' ', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', ' ', '<', '<', '<', ' ', '<', ' ' }
@@ -50,6 +50,8 @@ int get_row(DLList* stack)
 
 int get_column(TOKEN_T* token)
 {
+    if(token == NULL)           return 17;
+
     if(token->type == OPERATOR) return token->operators;
     if(token->type == LPAR)     return 14;
     if(token->type == RPAR)     return 15;
@@ -58,7 +60,6 @@ int get_column(TOKEN_T* token)
     if(token->type == LITERAL)  return 16;
     if(token->keyword == KEY_NULL)  return 16;
 
-    if(token == NULL)           return 17;
     if(token->type == DOLLAR)   return 17;
 
     return -1;
@@ -71,6 +72,8 @@ int get_operator(DLList* stack, TOKEN_T* token)
 
 int get_priority(TOKEN_T* operator)
 {
+    if (operator == NULL) return 0;
+
     if (operator->operators == MULTIPLY)            return 1;
     if (operator->operators == DIVIDE)              return 1;
     if (operator->operators == PLUS)                return 2;
@@ -225,10 +228,14 @@ BSTnode* analyze_precedence(DLList* list)
     DLLItem* stop = NULL;
 
     DLList* stack = malloc(sizeof (DLList));
+    if (stack == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
+
     DLL_init(stack);
     DLL_insert_first(stack, create_dollar_token());
 
     Stack* stop_stack = malloc(sizeof (Stack));
+    if (stop_stack == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
+
     Stack_init(stop_stack);
 
     while (iterator)
@@ -318,6 +325,9 @@ BSTnode* analyze_precedence(DLList* list)
 TOKEN_T* create_dollar_token()
 {
     TOKEN_T* token = malloc(sizeof (TOKEN_T));
+
+    if (token == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
+
     token->type = DOLLAR;
 
     return token;

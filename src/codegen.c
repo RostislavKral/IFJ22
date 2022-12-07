@@ -97,6 +97,7 @@ int get_num_len(int num) {
 
 char * get_jmp_name(int blablabla) {
     char * name = malloc(sizeof(char) * (get_num_len(if_count) + get_num_len(if_stack) + 5));
+    if(name == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     switch (blablabla) {
     case 0: // if
         sprintf(name, "if_%d_%d", if_count, if_stack);
@@ -127,6 +128,7 @@ int gen_if(BSTnode* node){
     printf("DEFVAR LF@%s\n", "tmp_if_expr_var");
     printf("MOVE LF@%s int@0\n", "tmp_if_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
+    if(token == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     token->name = "tmp_if_expr_var";
 
     gen_expression(token, node, 1, true); // 1 for local scope ( TODO )
@@ -168,6 +170,7 @@ void gen_while(BSTnode* node) {
     printf("DEFVAR TF@%s\n", "tmp_while_expr_var");
     printf("MOVE TF@%s int@0\n", "tmp_while_expr_var");
     TOKEN_T * token = malloc(sizeof(TOKEN_T));
+    if(token == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     token->name = "tmp_while_expr_var";
 
     char * jmpName = get_jmp_name(4); 
