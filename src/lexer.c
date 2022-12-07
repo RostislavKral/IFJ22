@@ -822,6 +822,9 @@ TOKEN_T *get_next_token() {
                     // printf("%c", *edge);
                 else {
                     state = ST_READ;
+
+                    if (*edge == '~' || *edge == '#' || *edge == '@' || *edge == '&' || *edge == '%')
+                        exit_with_message(line_number, char_number, "Invalid character", LEXICAL_ERR);
                     //printf("%c-%d-%d ", *edge, line_number, char_number);
 //                    printf("%s", str.str);
                     str_conc(&str, edge);
