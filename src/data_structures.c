@@ -6,7 +6,7 @@
 
 #include <stdbool.h>
 #include <string.h>
-#include "expression_stack.h"
+#include "data_structures.h"
 #include "token.h"
 #include "stdlib.h"
 #include "stdio.h"

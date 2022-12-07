@@ -385,11 +385,16 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
     enum T_KEYWORD paramArr[functionHelper.fParamCount+1];
 
     int a = functionHelper.fParamCount;
+    scope.num++;
     if (functionHelper.fParamCount != 0) {
         DLLItem *tmp = DLL_get_first(functionHelper.paramsList);
+        DLLItem *tmpName = DLL_get_first(functionHelper.paramsListNames);
+        htab_value zero = {.int_value = 0};
         for (int i = 0; i < functionHelper.fParamCount; ++i) {
             paramArr[i] = tmp->token->keyword;
+            htab_insert_var(symtable,tmpName->token->name,scope.num, tmp->token->keyword, zero);
             tmp = tmp->nextItem;
+            tmpName = tmpName->nextItem;
         }
     }
     if (!htab_insert_func(symtable,functionHelper.name,functionHelper.returnType,functionHelper.fParamCount, paramArr)){
@@ -618,7 +623,7 @@ void analyze_token(htab_t* symtable){
                 break;
             case FUNC_ID:
                 function_detected(token, symtable);
-                scope.num++;
+                //scope.num++;
                 //analyze_token(symtable);
                 break;
             case LITERAL:

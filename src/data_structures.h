@@ -4,8 +4,8 @@
  * @brief Expressions structures
  */
 
-#ifndef IFJ22_EXPRESSION_STACK_H
-#define IFJ22_EXPRESSION_STACK_H
+#ifndef IFJ22_DATA_STRUCTURES_H
+#define IFJ22_DATA_STRUCTURES_H
 #include "stdlib.h"
 #include "stdio.h"
 #include "token.h"
@@ -75,4 +75,4 @@ BSTnode* BST_make_tree_from_expression(DLLItem* a, DLLItem* operator, DLLItem* b
 BSTnode* BST_make_tree_from_parentheses(DLLItem* parentheses, DLLItem* id);
 void BST_print(BSTnode* root, int level);
 
-#endif //IFJ22_EXPRESSION_STACK_H
+#endif //IFJ22_DATA_STRUCTURES_H
