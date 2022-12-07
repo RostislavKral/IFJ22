@@ -35,6 +35,7 @@ bool DLL_find_token(DLList *list, TOKEN_T* token){
 }
 DLLItem* DLL_insert_first(DLList *list, TOKEN_T* token) {
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    if (newItem == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     newItem->bst = NULL;
     newItem->token = token;
     newItem->nextItem = list->first;
@@ -56,6 +57,7 @@ DLLItem* DLL_insert_first(DLList *list, TOKEN_T* token) {
 }
 DLLItem* DLL_insert_last(DLList *list, TOKEN_T* token){
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    if (newItem == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     newItem->bst = NULL;
     newItem->token = token;
     newItem->nextItem = NULL;
@@ -78,6 +80,7 @@ DLLItem* DLL_insert_last(DLList *list, TOKEN_T* token){
 
 DLLItem* DLL_insert_after(DLList *list, DLLItem *item, TOKEN_T* token){
     DLLItem *newItem = malloc(sizeof(DLLItem));
+    if (newItem == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     newItem->bst = NULL;
     newItem->token = token;
     newItem->prevItem = item;
@@ -158,6 +161,7 @@ DLLItem* DLL_get_last(DLList* list){
 DLList* DLL_copy(DLList* list)
 {
     DLList* newList = malloc(sizeof (DLList*));
+    if (newList == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     newList->itemsCount = list->itemsCount;
 
     DLLItem* item = list->first;
@@ -281,6 +285,7 @@ void Stack_init(Stack* stack)
 StackItem* Stack_push(Stack* stack, DLLItem* item)
 {
     StackItem *newItem = malloc(sizeof(StackItem));
+    if (newItem == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     newItem->item = item;
     newItem->next = stack->first;
 
@@ -320,6 +325,7 @@ void Stack_print(Stack* stack)
 BSTnode* BST_init()
 {
     BSTnode* root = malloc(sizeof(BSTnode));
+    if (root == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
 
     root->left = NULL;
     root->right = NULL;
@@ -332,6 +338,7 @@ BSTnode* BST_init()
 BSTnode* BST_init_token(DLLItem* item)
 {
     BSTnode* root = malloc(sizeof(BSTnode));
+    if (root == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
 
     root->left = NULL;
     root->right = NULL;

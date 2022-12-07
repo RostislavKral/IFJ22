@@ -97,6 +97,7 @@ void else_condition(TOKEN_T* token, htab_t* symtable){
 
 DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE closingToken){
     DLList *precedenceList = malloc(sizeof (struct DLList));
+    if(precedenceList == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     DLL_init(precedenceList);
     TOKEN_T *previousTmpToken;
     //TOKEN_T *tmpToken = get_next_token();
@@ -327,7 +328,9 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                             if (paramName->type != TOKEN_ID) exit_with_message(paramToken->lineNum,paramToken->charNum,"Invalid var", SYNTAX_ERR);
                             if (functionHelper.paramsList == NULL) {
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
-                                functionHelper.paramsListNames = malloc(sizeof (struct DLList));;
+                                if(functionHelper.paramsList == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
+                                functionHelper.paramsListNames = malloc(sizeof (struct DLList));
+                                if(functionHelper.paramsListNames == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
                                 DLL_init(functionHelper.paramsList);
                                 DLL_init(functionHelper.paramsListNames);
                             }
@@ -403,6 +406,7 @@ void builtin_write(htab_t* symtable){
     if (tmpToken->type != LPAR) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "expected (", SYNTAX_ERR);
 
     DLList *dynamicParams = malloc(sizeof (struct DLList));
+    if(dynamicParams == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     DLL_init(dynamicParams);
     tmpToken = get_next_token();
     while (tmpToken->type != RPAR && tmpToken != NULL){
@@ -517,6 +521,7 @@ TOKEN_T *close_brace_list(){
 void analyze_token(htab_t* symtable){
     scope.globalSymTable =symtable;
     scope.braceList = malloc(sizeof (struct DLList));
+    if(scope.braceList == NULL) exit_with_message(0,0, "malloc failed", GENERAL_ERR);
     DLL_init(scope.braceList);
     //TODO ELSE, Return
     TOKEN_T *previousToken;

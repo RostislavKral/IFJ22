@@ -18,7 +18,7 @@ htab_t *htab_init(size_t n)
 
     if ((ht = malloc(sizeof(htab_t))) == NULL)
     {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
         return NULL;
     }
 
@@ -27,7 +27,7 @@ htab_t *htab_init(size_t n)
 
     if ((ht->arr_ptr = malloc(n * sizeof(htab_link_t *))) == NULL)
     {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
         return NULL;
     }
 
@@ -35,6 +35,10 @@ htab_t *htab_init(size_t n)
     for (size_t i = 0; i < ht->arr_size; i++)
     {
         ht->arr_ptr[i] = malloc(sizeof(htab_link_t));
+        if (ht->arr_ptr[i] == NULL) {
+            exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
+        }
+
         (ht->arr_ptr[i])->item = NULL;
     }
 
@@ -84,7 +88,7 @@ bool htab_insert_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab
 
     htab_item_t *new_item = malloc(sizeof(htab_item_t));
     if (new_item == NULL) {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
     }
 
     int index = htab_hash_function(name) % t->arr_size;
@@ -95,7 +99,7 @@ bool htab_insert_var(htab_t *t, char *name, int scope, enum T_KEYWORD type, htab
     new_item->data.type = VAR;
     new_item->data.data_type = malloc(sizeof(enum T_KEYWORD));
     if (new_item->data.data_type == NULL) {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
     }
 
     (new_item->data.data_type)[0] = type;
@@ -151,7 +155,7 @@ bool htab_insert_func(htab_t *t, char *name, enum T_KEYWORD ret_val_type, int pa
 {
     htab_item_t *new_item = malloc(sizeof(htab_item_t));
     if (new_item == NULL) {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
     }
 
     int index = htab_hash_function(name) % t->arr_size;
@@ -163,7 +167,7 @@ bool htab_insert_func(htab_t *t, char *name, enum T_KEYWORD ret_val_type, int pa
 
     new_item->data.data_type = malloc((params_count + 1) * sizeof(enum T_KEYWORD));
     if (new_item->data.data_type == NULL) {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
     }
     
     (new_item->data.data_type)[0] = ret_val_type;
@@ -263,13 +267,16 @@ void htab_resize(htab_t *t, size_t n)
     htab_link_t **new_arr;
     if ((new_arr = malloc(n * sizeof(htab_link_t *))) == NULL)
     {
-        exit(99);
+        exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
     }
 
     // NULLs every pointer in elements
     for (size_t i = 0; i < n; i++)
     {
         new_arr[i] = malloc(sizeof(htab_link_t));
+        if (new_arr[i] == NULL) {
+            exit_with_message(0,0,  "Malloc error",  GENERAL_ERR);
+        }
         (new_arr[i])->item = NULL;
     }
 
