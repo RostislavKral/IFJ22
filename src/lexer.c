@@ -638,6 +638,14 @@ TOKEN_T *get_next_token() {
                         {
                             str_conc(&str, "\\010");
                         }
+                        else if (*edge == 't')
+                        {
+                            str_conc(&str, "\\009");
+                        }
+                        else if (*edge == '\\')
+                        {
+                            str_conc(&str, "\\047");
+                        }
                         else
                         {
                             char* num = malloc(sizeof (char ) * 2);

@@ -392,14 +392,16 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
                 )
         {
             // is boolean
-            return KEY_BOOLEAN;
+//            return KEY_BOOLEAN;
+            return KEY_INT;
         }
     }
     else if(
             operator->token->operators == TYPE_EQUALS ||
             operator->token->operators == TYPE_NOT_EQUALS)
     {
-        return KEY_BOOLEAN;
+//        return KEY_BOOLEAN;
+        return KEY_INT;
     }
     else if (operator->token->operators == CONCAT)
     {

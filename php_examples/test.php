@@ -4,7 +4,7 @@ declare(strict_types=1);
 // $b = 3;
 
 // $c = ($a * $b) + ($b / 5) * ($a - 5);
-$d = "HELLO $WORLD!";
+// $d = "Ahoj\n\"Sve'te \\\042";
 // write($c, "\n");
 // $c = $a / $b;
 // write($c, "\n");
@@ -26,4 +26,6 @@ $d = "HELLO $WORLD!";
 // moje_fce($b);
 // chr($b);
 // reads();
+$d = (((1 + 2) - ((3) * 4)) / 5);
+// $d = 2 * 2 + (3 < 4);
 write($d);
