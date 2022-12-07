@@ -520,7 +520,8 @@ TOKEN_T *get_next_token() {
             case ST_ERROR:
                 break;
 
-                /* This was added by SniehNikita */
+            ST_DOUBLE_LITERAL:
+                break;
             case ST_INT_LITERAL:
                 //token->value.int_val = 0;
                 token->value.double_val = 0;
