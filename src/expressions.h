@@ -15,7 +15,7 @@
 #include "lexer.h"
 #include "token.h"
 #include "expressions.h"
-#include "expression_stack.h"
+#include "data_structures.h"
 
 int get_column(TOKEN_T* token);
 int get_row(DLList* list);

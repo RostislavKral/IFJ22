@@ -4,8 +4,8 @@
  * @brief Tests for precedence analysis (expressions)
  */
 
-#include "../expression_stack.h"
-#include "../expression_stack.c"
+#include "../data_structures.h"
+#include "../data_structures.c"
 #include "../expressions.h"
 #include "../expressions.c"
 #include "../token.c"

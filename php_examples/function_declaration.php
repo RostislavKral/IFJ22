@@ -1,4 +1,9 @@
-$kj; function aa (int $c) : string {}
-$x = 50000.46
-$abcd
-while if return else null void $b
+<?php
+declare(strict_types=1);
+$b = 9;
+if (8.7 >= $b)
+{}
+else
+{}
+
+return 0;
