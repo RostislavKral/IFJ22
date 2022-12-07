@@ -522,6 +522,7 @@ TOKEN_T *get_next_token() {
                 //token->value.int_val = 0;
                 token->value.double_val = 0;
                 int isValid = 0;
+                bool e_read = false;
 
                 //printf("%c\n", *edge);
                 if (isdigit(*edge)) {
@@ -533,7 +534,7 @@ TOKEN_T *get_next_token() {
                     read = 0;
                 } else if (*edge == '.') {
                     *edge = lexer_fget();
-                    if (!isdigit(*edge))
+                    if (!isdigit(*edge) && *edge != 'e')
                     {
                         exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
                     }
@@ -544,11 +545,26 @@ TOKEN_T *get_next_token() {
                     int offset = 10;
                     *edge = lexer_fget();
 
+                    if (*edge == 'e' && !e_read)
+                    {
+                        e_read = true;
+                        *edge = lexer_fget();
+
+                        // TODO: read float properly
+                    }
+
                     while (isdigit(*edge)) {
                         tmp = (double) *edge - '0';
                         test += tmp / offset;
                         *edge = lexer_fget();
 
+                        if (*edge == 'e' && !e_read)
+                        {
+                            e_read = true;
+                            *edge = lexer_fget();
+
+                            // TODO: read float properly
+                        }
                         offset *= 10;
                     }
 
