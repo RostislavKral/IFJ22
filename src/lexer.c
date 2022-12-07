@@ -548,48 +548,16 @@ TOKEN_T *get_next_token() {
 
                     read = 0;
                 } else if (*edge == '.') {
-                    state = ST_DOUBLE_LITERAL;
-                    break;
-                } else {
-                    lexer_unget(*edge);
-                    token->type = LITERAL;
-
-                        token->value.type = 0;
-
-
-                    set_line_num(token);
-                    return token;
-                }
-
-                break;
-            case ST_DOUBLE_LITERAL:
-                *edge = lexer_fget();
-                if (!isdigit(*edge) && *edge != 'e' && *edge != 'E')
-                {
-                    exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
-                }
-                lexer_unget(*edge);
-
-                // char c;
-                double test, tmpD;
-                int offset = 10;
-                *edge = lexer_fget();
-
-                if ((*edge == 'e' || *edge == 'E') && !e_read)
-                {
-                    e_read = true;
                     *edge = lexer_fget();
-
-                    if (!isdigit(*edge) && *edge != '+' && *edge != '-')
+                    if (!isdigit(*edge) && *edge != 'e' && *edge != 'E')
                     {
-                        exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
+                        exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
                     }
-                    // TODO: read float properly
-                }
+                    lexer_unget(*edge);
 
-                while (isdigit(*edge)) {
-                    tmpD = (double) *edge - '0';
-                    test += tmpD / offset;
+                    // char c;
+                    double test, tmp;
+                    int offset = 10;
                     *edge = lexer_fget();
 
                     if ((*edge == 'e' || *edge == 'E') && !e_read)
@@ -601,20 +569,56 @@ TOKEN_T *get_next_token() {
                         {
                             exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
                         }
+                        // TODO: read float properly
                     }
-                    offset *= 10;
+
+                    while (isdigit(*edge)) {
+                        tmp = (double) *edge - '0';
+                        test += tmp / offset;
+                        *edge = lexer_fget();
+
+                        if ((*edge == 'e' || *edge == 'E') && !e_read)
+                        {
+                            e_read = true;
+                            *edge = lexer_fget();
+
+                            if (!isdigit(*edge) && *edge != '+' && *edge != '-')
+                            {
+                                exit_with_message(line_number, char_number, "Float not ended properly (ended with e)", LEXICAL_ERR);
+                            }
+                            // TODO: read float properly
+                        }
+                        offset *= 10;
+                    }
+
+                    token->value.double_val = test;
+                    isValid = 1;
+                    lexer_unget(*edge);
+                    token->type = LITERAL;
+                    token->value.type = 2;
+                    token->value.double_val += token->value.int_val;
+                    token->value.int_val = 0;
+
+                    set_line_num(token);
+                    return token;
+                } else {
+
+                    lexer_unget(*edge);
+                    token->type = LITERAL;
+                    if (isValid == 1) {
+                        token->value.type = 2;
+                        token->value.double_val += token->value.int_val;
+                        token->value.int_val = 0;
+                    } else {
+                        token->value.type = 0;
+                    }
+
+                    set_line_num(token);
+                    return token;
                 }
 
-                token->value.double_val = test;
-                isValid = 1;
-                lexer_unget(*edge);
-                token->type = LITERAL;
-                token->value.type = 2;
-                token->value.double_val += token->value.int_val;
-                token->value.int_val = 0;
+                break;
 
-                set_line_num(token);
-                return token;
             case ST_STRING_LITERAL:
 
                 if(*edge == EOF) exit(1);
