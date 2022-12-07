@@ -263,6 +263,7 @@ BSTnode* analyze_precedence(DLList* list)
         else if (table[get_row(stack)][get_column(iterator->token)] == ' ')
         {
             // return -1;
+            exit_with_message(iterator->token->lineNum, iterator->token->charNum, "Invalid expression", SYNTAX_ERR);
             return NULL;
         }
 
@@ -386,6 +387,7 @@ enum T_KEYWORD validate_expression(DLLItem* a, DLLItem* operator, DLLItem* b)
              operator->token->operators == GREATER_EQUAL
              )
     {
+        return KEY_INT;
         if (
                 (a->token->value.type == 0 || a->token->value.type == 2) &&
                 (b->token->value.type == 0 || b->token->value.type == 2)
