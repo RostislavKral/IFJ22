@@ -699,7 +699,7 @@ TOKEN_T *get_next_token() {
                     {
 
                         char* num = malloc(sizeof (char ) * 2);
-                        if(num == NULL) exit(99;
+                        if(num == NULL) exit(99);
                         sprintf(num, "%d", (int)*edge);
                         str_conc(&str, "\\0");
                         str_conc(&str, num);
