@@ -530,6 +530,11 @@ TOKEN_T *get_next_token() {
                     e_read = true;
                     *edge = lexer_fget();
 
+                    if (!isdigit(*edge))
+                    {
+                        exit_with_message(line_number, char_number, "Float not endedn properly (ended with e)", LEXICAL_ERR);
+                    }
+
                     // TODO: read int properly
                 }
                 if (isdigit(*edge)) {
@@ -557,6 +562,10 @@ TOKEN_T *get_next_token() {
                         e_read = true;
                         *edge = lexer_fget();
 
+                        if (!isdigit(*edge))
+                        {
+                            exit_with_message(line_number, char_number, "Float not endedn properly (ended with e)", LEXICAL_ERR);
+                        }
                         // TODO: read float properly
                     }
 
@@ -570,6 +579,10 @@ TOKEN_T *get_next_token() {
                             e_read = true;
                             *edge = lexer_fget();
 
+                            if (!isdigit(*edge))
+                            {
+                                exit_with_message(line_number, char_number, "Float not endedn properly (ended with e)", LEXICAL_ERR);
+                            }
                             // TODO: read float properly
                         }
                         offset *= 10;
