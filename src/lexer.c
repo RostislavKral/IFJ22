@@ -525,6 +525,13 @@ TOKEN_T *get_next_token() {
                 bool e_read = false;
 
                 //printf("%c\n", *edge);
+                if ((*edge == 'e' || *edge == 'E') && !e_read)
+                {
+                    e_read = true;
+                    *edge = lexer_fget();
+
+                    // TODO: read int properly
+                }
                 if (isdigit(*edge)) {
                     // TODO might be overflow if too big number
                     if(read != 1) {
@@ -534,7 +541,7 @@ TOKEN_T *get_next_token() {
                     read = 0;
                 } else if (*edge == '.') {
                     *edge = lexer_fget();
-                    if (!isdigit(*edge) && *edge != 'e')
+                    if (!isdigit(*edge) && *edge != 'e' && *edge != 'E')
                     {
                         exit_with_message(line_number, char_number, "Float not ended properly", LEXICAL_ERR);
                     }
@@ -545,7 +552,7 @@ TOKEN_T *get_next_token() {
                     int offset = 10;
                     *edge = lexer_fget();
 
-                    if (*edge == 'e' && !e_read)
+                    if ((*edge == 'e' || *edge == 'E') && !e_read)
                     {
                         e_read = true;
                         *edge = lexer_fget();
@@ -558,7 +565,7 @@ TOKEN_T *get_next_token() {
                         test += tmp / offset;
                         *edge = lexer_fget();
 
-                        if (*edge == 'e' && !e_read)
+                        if ((*edge == 'e' || *edge == 'E') && !e_read)
                         {
                             e_read = true;
                             *edge = lexer_fget();
