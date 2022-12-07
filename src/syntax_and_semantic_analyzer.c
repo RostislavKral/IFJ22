@@ -108,8 +108,8 @@ DLList *expression_list(TOKEN_T*tmpToken,htab_t* symtable, enum T_TOKEN_TYPE clo
                 htab_item_t *item = htab_find_var(symtable, tmpToken->name, scope.num);
                 if (item == NULL) exit_with_message(tmpToken->lineNum, tmpToken->charNum, "Undefined variable", SEM_UNDEF_VAR_ERR);
                 if (item->data.data_type[0] == KEY_FLOAT) tmpToken->value.type = 2;
-                else if (item->data.data_type[0] == KEY_INT) tmpToken->value.type = 0;
-                else tmpToken->type = 1;
+                if (item->data.data_type[0] == KEY_INT) tmpToken->value.type = 0;
+                if (item->data.data_type[0] == KEY_STRING) tmpToken->value.type = 1;
             }
             previousTmpToken = tmpToken;
             DLL_insert_last(precedenceList, tmpToken);
@@ -438,26 +438,40 @@ void builtin_write(htab_t* symtable){
 
 void checkReturnType(TOKEN_T* token, htab_t* symtable){
     TOKEN_T* returnValToken = get_next_token();
-    if (functionHelper.returnType == KEY_VOID && returnValToken->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
-    if (returnValToken->type == TOKEN_ID){
-        htab_item_t* varToken = htab_find_var(symtable, returnValToken->name,scope.num);
-        if (varToken == NULL) exit_with_message(returnValToken->lineNum, returnValToken->charNum, "Return var not found", SEM_UNDEF_VAR_ERR);
-        else {
-            if (varToken->data.data_type[0] != functionHelper.returnType){
-                exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
-            }
-        }
-    } else if (returnValToken->type == LITERAL){
-        if (returnValToken->value.type == 0 && functionHelper.returnType != KEY_INT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
-        if (returnValToken->value.type == 1 && functionHelper.returnType != KEY_STRING)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
-        if (returnValToken->value.type == 2 && functionHelper.returnType != KEY_FLOAT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
-    } else if(returnValToken->type == FUNC_CALL){
+    if(returnValToken->type == FUNC_CALL){
         htab_item_t* fCall = htab_find_func(symtable, returnValToken->name);
         if (fCall->data.data_type[0] != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
         else {
             function_call(returnValToken, symtable);
         }
+    } else {
+        DLList* condExpList = expression_list(returnValToken, symtable, SEMICOLON);
+        if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SYNTAX_ERR);
+        BSTnode* condExprBST = analyze_precedence(condExpList);
+        if (condExprBST->type != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
     }
+    if (token->type == SEMICOLON) return;
+//    if (functionHelper.returnType == KEY_VOID && returnValToken->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+//    if (returnValToken->type == TOKEN_ID){
+//        htab_item_t* varToken = htab_find_var(symtable, returnValToken->name,scope.num);
+//        if (varToken == NULL) exit_with_message(returnValToken->lineNum, returnValToken->charNum, "Return var not found", SEM_UNDEF_VAR_ERR);
+//        else {
+//            if (varToken->data.data_type[0] != functionHelper.returnType){
+//                exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+//            }
+//        }
+//    } else if (returnValToken->type == LITERAL){
+//        if (returnValToken->value.type == 0 && functionHelper.returnType != KEY_INT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+//        if (returnValToken->value.type == 1 && functionHelper.returnType != KEY_STRING)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+//        if (returnValToken->value.type == 2 && functionHelper.returnType != KEY_FLOAT)exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+//    }
+
+//    TOKEN_T *tmpToken = get_next_token();
+//    if (tmpToken->type == SEMICOLON) return;
+//    else if (tmpToken->type == OPERATOR) {
+//        tmpToken = get_next_token();
+//        checkReturnType(tmpToken, symtable);
+//    }
 
 }
 void open_brace_list(TOKEN_T *token){
