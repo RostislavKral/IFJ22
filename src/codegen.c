@@ -264,8 +264,8 @@ char* get_instruction(BSTnode* node)
         // if result is integer
         if (node->left->type == KEY_INT && node->right->type == KEY_INT)
         {
-//            return "IDIV";
-            return "DIV";
+            return "IDIV";
+//            return "DIV";
         }
         else
         {
