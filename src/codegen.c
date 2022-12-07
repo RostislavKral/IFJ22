@@ -264,8 +264,8 @@ char* get_instruction(BSTnode* node)
         // if result is integer
         if (node->left->type == KEY_INT && node->right->type == KEY_INT)
         {
-//            return "IDIV";
-            return "DIV";
+            return "IDIV";
+//            return "DIV";
         }
         else
         {
@@ -360,6 +360,22 @@ void print_expression(BSTnode* node, TOKEN_T* token, char* operation)
 
     if (node->left->token->type == OPERATOR && node->right->token->type == OPERATOR)
     {
+        if (node->left->type != node->right->type)
+        {
+            if (node->left->type == KEY_INT)
+            {
+                printf("INT2FLOAT TF@%s%d TF@%s%d\n", token->name, tmp_var - 1,
+                       token->name, tmp_var - 1
+                );
+            }
+            else if (node->right->type == KEY_INT)
+            {
+                printf("INT2FLOAT TF@%s%d TF@%s%d\n", token->name, tmp_var - 2,
+                       token->name, tmp_var - 2
+                );
+            }
+        }
+
         printf("%s TF@%s%d TF@%s%d TF@%s%d\n", operation, token->name, tmp_var,
                token->name, tmp_var - 1,
                token->name, tmp_var
