@@ -145,13 +145,13 @@ void set_line_num(TOKEN_T* token)
 TOKEN_T *get_next_token() {
     TOKEN_T *token;
     token = malloc(sizeof(TOKEN_T));
-    if(token == NULL) exit(60);
+    if(token == NULL) exit(99);
 
     token->value.int_val = 0;
     enum T_STATE state = ST_START;
 
     char *edge = malloc(sizeof(char));
-    if(edge == NULL) exit(60);
+    if(edge == NULL) exit(99);
     char escape;
     bool read = 1;
 
@@ -664,7 +664,7 @@ TOKEN_T *get_next_token() {
                 if (0 <= *edge && *edge <= 9)
                 {
                     char* num = malloc(sizeof (char ));
-                    if(num == NULL) exit(60);
+                    if(num == NULL) exit(99);
                     sprintf(num, "%d", (int)*edge);
                     str_conc(&str, "\\00");
                     str_conc(&str, num);
@@ -689,7 +689,7 @@ TOKEN_T *get_next_token() {
                         else
                         {
                             char* num = malloc(sizeof (char ) * 2);
-                            if(num == NULL) exit(60);
+                            if(num == NULL) exit(99);
                             sprintf(num, "%d", (int)*edge);
                             str_conc(&str, "\\0");
                             str_conc(&str, num);
@@ -699,7 +699,7 @@ TOKEN_T *get_next_token() {
                     {
 
                         char* num = malloc(sizeof (char ) * 2);
-                        if(num == NULL) exit(60);
+                        if(num == NULL) exit(99;
                         sprintf(num, "%d", (int)*edge);
                         str_conc(&str, "\\0");
                         str_conc(&str, num);
