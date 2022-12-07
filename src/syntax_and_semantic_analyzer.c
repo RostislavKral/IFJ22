@@ -322,6 +322,7 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                             //Err 2 keyword in row
                             exit_with_message(paramToken->lineNum, paramToken->charNum, "Invalid token 2 keywords in row", SEM_F_DECLARATION_ERR);
                         } else {
+                            if (paramName->type != TOKEN_ID) exit_with_message(paramToken->lineNum,paramToken->charNum,"Invalid var", SYNTAX_ERR);
                             if (functionHelper.paramsList == NULL) {
                                 functionHelper.paramsList = malloc(sizeof (struct DLList));
                                 functionHelper.paramsListNames = malloc(sizeof (struct DLList));;
@@ -344,6 +345,8 @@ void function_detected(TOKEN_T* initToken, htab_t* symtable){
                         functionHelper.fParamPass = true;
                         token = get_next_token();
                         break;
+                    } else {
+                        //exit_with_message(paramToken->lineNum, paramToken->charNum, "invalid token expecting $int,$string,$float", SYNTAX_ERR);
                     }
                 }
             } else {
@@ -452,10 +455,12 @@ void checkReturnType(TOKEN_T* token, htab_t* symtable){
             function_call(returnValToken, symtable);
         }
     } else {
-        DLList* condExpList = expression_list(returnValToken, symtable, SEMICOLON);
-        if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SEM_F_RETURN_VAL_ERR);
-        BSTnode* condExprBST = analyze_precedence(condExpList);
-        if (condExprBST->type != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+        if (returnValToken->type != SEMICOLON){
+            DLList* condExpList = expression_list(returnValToken, symtable, SEMICOLON);
+            if(condExpList->first == NULL) exit_with_message(token->lineNum,token->charNum,"Invalid expression in condition", SEM_F_RETURN_VAL_ERR);
+            BSTnode* condExprBST = analyze_precedence(condExpList);
+            if (condExprBST->type != functionHelper.returnType) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
+        }
     }
     if (token->type == SEMICOLON) return;
 //    if (functionHelper.returnType == KEY_VOID && returnValToken->type != SEMICOLON) exit_with_message(token->lineNum, token->charNum, "Mismatch in return type", SEM_F_CALL_PARAM_ERR);
@@ -625,6 +630,7 @@ void analyze_token(htab_t* symtable){
                 break;
             case ISEOF:
                 //TODO: EOF exit, check opened functions, params, attr, etc.
+                if (functionHelper.fParsing || scope.braceList->itemsCount != 0) exit_with_message(0,0,"syntax ERR", SYNTAX_ERR);
                 break;
             case PROG_START:
                 exit_with_message(token->lineNum,token->charNum,"Syntax err", SYNTAX_ERR);
